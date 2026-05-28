@@ -51,6 +51,16 @@ export function usePlots(initialSeedPlots) {
     return () => unsubscribe();
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
+  // Helper: wrap a promise with a timeout so Firestore calls don't hang forever
+  const withTimeout = (promise, ms = 10000) => {
+    return Promise.race([
+      promise,
+      new Promise((_, reject) =>
+        setTimeout(() => reject(new Error(`Firestore operation timed out after ${ms / 1000}s. Check your Firestore security rules and network connection.`)), ms)
+      )
+    ]);
+  };
+
   const addPlot = async (newPlotData) => {
     if (!isDbReady()) {
       console.warn("Firestore not ready — plot not saved.");
@@ -58,12 +68,14 @@ export function usePlots(initialSeedPlots) {
     }
     // Remove any undefined values (Firestore rejects them)
     const cleanData = JSON.parse(JSON.stringify(newPlotData));
+    const startTime = performance.now();
     try {
       const plotsRef = collection(db, 'plots');
-      const docRef = await addDoc(plotsRef, cleanData);
+      const docRef = await withTimeout(addDoc(plotsRef, cleanData));
+      console.log(`✅ Plot added in ${((performance.now() - startTime) / 1000).toFixed(2)}s — ID: ${docRef.id}`);
       return docRef.id;
     } catch (e) {
-      console.error("Error adding plot:", e);
+      console.error(`❌ Error adding plot after ${((performance.now() - startTime) / 1000).toFixed(2)}s:`, e);
       throw e;
     }
   };
@@ -74,14 +86,17 @@ export function usePlots(initialSeedPlots) {
       return;
     }
     const cleanData = JSON.parse(JSON.stringify(updateData));
+    const startTime = performance.now();
     try {
       const plotDocRef = doc(db, 'plots', plotId.toString());
-      await updateDoc(plotDocRef, cleanData);
+      await withTimeout(updateDoc(plotDocRef, cleanData));
+      console.log(`✅ Plot updated in ${((performance.now() - startTime) / 1000).toFixed(2)}s — ID: ${plotId}`);
     } catch (e) {
-      console.error("Error updating plot:", e);
+      console.error(`❌ Error updating plot after ${((performance.now() - startTime) / 1000).toFixed(2)}s:`, e);
       throw e;
     }
   };
 
   return { plots, loading, addPlot, updatePlot };
 }
+
