@@ -1,0 +1,18 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // Plots: anyone can read public listings, authenticated users can create/update
+    match /plots/{plotId} {
+      allow read: if true;
+      allow create: if request.auth != null;
+      allow update: if request.auth != null;
+      allow delete: if request.auth != null;
+    }
+
+    // Interests: users can only read/write their own interests
+    match /interests/{userId}/plots/{plotId} {
+      allow read, write: if request.auth != null && request.auth.uid == userId;
+    }
+  }
+}
