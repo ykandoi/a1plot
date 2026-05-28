@@ -6,13 +6,11 @@ import { db } from '../firebase';
 const isDbReady = () => db && db.type === 'firestore';
 
 export function usePlots(initialSeedPlots) {
-  const [plots, setPlots] = useState([]);
-  const [loading, setLoading] = useState(true);
+  const [plots, setPlots] = useState(() => isDbReady() ? [] : initialSeedPlots);
+  const [loading, setLoading] = useState(() => !isDbReady() ? false : true);
 
   useEffect(() => {
     if (!isDbReady()) {
-      setPlots(initialSeedPlots);
-      setLoading(false);
       return;
     }
 

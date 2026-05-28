@@ -179,7 +179,35 @@ const PORTFOLIO_CHART_DATA = [
   { month: 'Oct 25', value: 23689000 },
 ];
 
+const viewToPath = {
+  'home': '/',
+  'privacy': '/privacy_policy',
+  'terms': '/terms_of_service',
+  'buyer-map': '/buyer_map',
+  'seller-dashboard': '/dashboard',
+  'seller-list': '/list_property',
+  'seller-edit': '/edit_property',
+  'interested': '/interests',
+  'contact': '/contact',
+  'buy-request': '/buy_request',
+  'admin': '/admin',
+  'login': '/login'
+};
 
+const pathToView = {
+  '/': 'home',
+  '/privacy_policy': 'privacy',
+  '/terms_of_service': 'terms',
+  '/buyer_map': 'buyer-map',
+  '/dashboard': 'seller-dashboard',
+  '/list_property': 'seller-list',
+  '/edit_property': 'seller-edit',
+  '/interests': 'interested',
+  '/contact': 'contact',
+  '/buy_request': 'buy-request',
+  '/admin': 'admin',
+  '/login': 'login'
+};
 
 function App() {
   const [view, setView] = useState('home');
@@ -203,7 +231,7 @@ function App() {
 
   // Auth State
   const [user, setUser] = useState(null);
-  const { plots, loading: plotsLoading, addPlot, updatePlot } = usePlots(INITIAL_PLOTS);
+  const { plots, addPlot, updatePlot } = usePlots(INITIAL_PLOTS);
   const { interestedPlots, addInterest } = useInterests(user?.uid);
   const [authLoading, setAuthLoading] = useState(true);
   const [authMode, setAuthMode] = useState('login'); // 'login' or 'signup'
@@ -298,8 +326,6 @@ function App() {
     libraries: LIBRARIES
   });
 
-  const publicVerifiedPlots = plots.filter(p => p.visibility === 'public' && p.status !== 'Verification Pending' && p.status !== 'Rejected');
-
   const onMapLoad = useCallback((map) => {
     const visible = plots.filter(p => p.visibility === 'public' && p.status !== 'Verification Pending' && p.status !== 'Rejected');
     if (visible.length > 0) {
@@ -312,36 +338,6 @@ function App() {
       map.fitBounds(bounds, { padding: 60 });
     }
   }, [plots]);
-
-  const viewToPath = {
-    'home': '/',
-    'privacy': '/privacy_policy',
-    'terms': '/terms_of_service',
-    'buyer-map': '/buyer_map',
-    'seller-dashboard': '/dashboard',
-    'seller-list': '/list_property',
-    'seller-edit': '/edit_property',
-    'interested': '/interests',
-    'contact': '/contact',
-    'buy-request': '/buy_request',
-    'admin': '/admin',
-    'login': '/login'
-  };
-
-  const pathToView = {
-    '/': 'home',
-    '/privacy_policy': 'privacy',
-    '/terms_of_service': 'terms',
-    '/buyer_map': 'buyer-map',
-    '/dashboard': 'seller-dashboard',
-    '/list_property': 'seller-list',
-    '/edit_property': 'seller-edit',
-    '/interests': 'interested',
-    '/contact': 'contact',
-    '/buy_request': 'buy-request',
-    '/admin': 'admin',
-    '/login': 'login'
-  };
 
   useEffect(() => {
     window.scrollTo({ top: 0, behavior: 'smooth' });

@@ -9,7 +9,9 @@ export function useInterests(userId) {
 
   useEffect(() => {
     if (!isDbReady() || !userId) {
-      setInterestedPlots([]);
+      Promise.resolve().then(() => {
+        setInterestedPlots(prev => prev.length === 0 ? prev : []);
+      });
       return;
     }
 
