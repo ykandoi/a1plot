@@ -2306,10 +2306,10 @@ function App() {
           </div>
           <div className="nav-links">
             <a className={`nav-link ${view === 'home' ? 'active' : ''}`} onClick={() => navigate('home')}>Explore Plots</a>
-            <a className={`nav-link ${view === 'buyer-map' ? 'active' : ''}`} onClick={() => navigate('buyer-map')}>Buy Land</a>
             {user && (
               <a className={`nav-link ${view === 'seller-dashboard' || view === 'seller-list' || view === 'seller-edit' ? 'active' : ''}`} onClick={() => navigate('seller-dashboard')}>My Lands</a>
             )}
+            <a className={`nav-link ${view === 'buyer-map' ? 'active' : ''}`} onClick={() => navigate('buyer-map')}>Buy Land</a>
             <a className={`nav-link ${view === 'interested' || view === 'buy-request' ? 'active' : ''}`} onClick={() => navigate('interested')}>Interests</a>
             <a className={`nav-link ${view === 'contact' ? 'active' : ''}`} onClick={() => navigate('contact')}>Contact</a>
             <a className={`nav-link ${view === 'about' ? 'active' : ''}`} onClick={() => navigate('about')}>About Us</a>
@@ -2348,7 +2348,7 @@ function App() {
                       </div>
                       <div className="profile-dropdown-divider" />
                       <button className="profile-dropdown-item" onClick={() => { setProfileOpen(false); navigate('seller-dashboard'); }}>
-                        <Settings size={16} /> My Dashboard
+                        <Building size={16} /> My Lands
                       </button>
                       <button className="profile-dropdown-item" onClick={() => { setProfileOpen(false); navigate('interested'); }}>
                         <MapPin size={16} /> My Interests
@@ -2377,10 +2377,10 @@ function App() {
           <div className="mobile-menu">
             <div className="mobile-menu-links">
               <a className={`mobile-menu-link ${view === 'home' ? 'active' : ''}`} onClick={() => navigate('home')}>Explore Plots</a>
-              <a className={`mobile-menu-link ${view === 'buyer-map' ? 'active' : ''}`} onClick={() => navigate('buyer-map')}>Buy Land</a>
               {user && (
                 <a className={`mobile-menu-link ${view === 'seller-dashboard' || view === 'seller-list' || view === 'seller-edit' ? 'active' : ''}`} onClick={() => navigate('seller-dashboard')}>My Lands</a>
               )}
+              <a className={`mobile-menu-link ${view === 'buyer-map' ? 'active' : ''}`} onClick={() => navigate('buyer-map')}>Buy Land</a>
               <a className={`mobile-menu-link ${view === 'interested' || view === 'buy-request' ? 'active' : ''}`} onClick={() => navigate('interested')}>Interests</a>
               <a className={`mobile-menu-link ${view === 'contact' ? 'active' : ''}`} onClick={() => navigate('contact')}>Contact</a>
               <a className={`mobile-menu-link ${view === 'about' ? 'active' : ''}`} onClick={() => navigate('about')}>About Us</a>
