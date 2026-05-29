@@ -954,6 +954,25 @@ function App() {
                         }}
                       />
                     )}
+                    {isDrawingMode && polygonPath.map((point, index) => (
+                      <MarkerF
+                        key={index}
+                        position={point}
+                        label={{
+                          text: (index + 1).toString(),
+                          color: 'white',
+                          fontWeight: 'bold',
+                          fontSize: '10px'
+                        }}
+                        icon={{
+                          url: 'data:image/svg+xml;charset=UTF-8,' + encodeURIComponent(
+                            `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="%2310b981" stroke="white" stroke-width="2"><circle cx="12" cy="12" r="8"/></svg>`
+                          ),
+                          scaledSize: new window.google.maps.Size(20, 20),
+                          anchor: new window.google.maps.Point(10, 10)
+                        }}
+                      />
+                    ))}
                   </GoogleMap>
                   <div className="location-coords">
                     <span>📍 {plotLocation.lat.toFixed(5)}, {plotLocation.lng.toFixed(5)}</span>
