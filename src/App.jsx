@@ -1641,7 +1641,7 @@ function App() {
       <div className="auth-container">
         {/* Left panel - branding */}
         <div className="auth-branding">
-          <img src="/assets/logo.png" alt="A1Plot" style={{height: '56px', marginBottom: '2rem'}} />
+          <img src="/assets/logo.png" alt="A1Plot" style={{height: '72px', marginBottom: '2rem'}} />
           <h1 style={{fontSize: '2.5rem', fontWeight: 800, lineHeight: 1.1, marginBottom: '1.5rem'}}>Invest in Land.<br/><span style={{color: '#10b981'}}>Build Wealth.</span></h1>
           <p style={{color: '#94a3b8', fontSize: '1.1rem', lineHeight: 1.7, marginBottom: '2.5rem'}}>Join thousands of smart investors who trust A1Plot for verified, transparent land investments.</p>
           <div className="flex gap-8">
