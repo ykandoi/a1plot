@@ -1733,7 +1733,7 @@ function App() {
               </p>
               <div className="founder-socials">
                 <a
-                  href="https://www.linkedin.com/in/yash-kandoi/"
+                  href="https://www.linkedin.com/in/yash-kandoi-85b612184/"
                   target="_blank"
                   rel="noopener noreferrer"
                   className="founder-social"
@@ -2288,12 +2288,12 @@ function App() {
           <div className="nav-links">
             <a className={`nav-link ${view === 'home' ? 'active' : ''}`} onClick={() => navigate('home')}>Explore Plots</a>
             <a className={`nav-link ${view === 'buyer-map' ? 'active' : ''}`} onClick={() => navigate('buyer-map')}>Buy Land</a>
-            <a className={`nav-link ${view === 'about' ? 'active' : ''}`} onClick={() => navigate('about')}>Our Founders</a>
             {user && (
               <a className={`nav-link ${view === 'seller-dashboard' || view === 'seller-list' || view === 'seller-edit' ? 'active' : ''}`} onClick={() => navigate('seller-dashboard')}>My Lands</a>
             )}
             <a className={`nav-link ${view === 'interested' || view === 'buy-request' ? 'active' : ''}`} onClick={() => navigate('interested')}>Interests</a>
             <a className={`nav-link ${view === 'contact' ? 'active' : ''}`} onClick={() => navigate('contact')}>Contact</a>
+            <a className={`nav-link ${view === 'about' ? 'active' : ''}`} onClick={() => navigate('about')}>About Us</a>
             {isAdmin && (
               <a className={`nav-link ${view === 'admin' ? 'active' : ''}`} onClick={() => navigate('admin')} style={{color: view === 'admin' ? 'var(--primary)' : '#e11d48', fontWeight: 600}}>
                 <Shield size={14} style={{display: 'inline', verticalAlign: 'middle', marginRight: '0.2rem'}} />Admin
@@ -2359,12 +2359,12 @@ function App() {
             <div className="mobile-menu-links">
               <a className={`mobile-menu-link ${view === 'home' ? 'active' : ''}`} onClick={() => navigate('home')}>Explore Plots</a>
               <a className={`mobile-menu-link ${view === 'buyer-map' ? 'active' : ''}`} onClick={() => navigate('buyer-map')}>Buy Land</a>
-              <a className={`mobile-menu-link ${view === 'about' ? 'active' : ''}`} onClick={() => navigate('about')}>Our Founders</a>
               {user && (
                 <a className={`mobile-menu-link ${view === 'seller-dashboard' || view === 'seller-list' || view === 'seller-edit' ? 'active' : ''}`} onClick={() => navigate('seller-dashboard')}>My Lands</a>
               )}
               <a className={`mobile-menu-link ${view === 'interested' || view === 'buy-request' ? 'active' : ''}`} onClick={() => navigate('interested')}>Interests</a>
               <a className={`mobile-menu-link ${view === 'contact' ? 'active' : ''}`} onClick={() => navigate('contact')}>Contact</a>
+              <a className={`mobile-menu-link ${view === 'about' ? 'active' : ''}`} onClick={() => navigate('about')}>About Us</a>
               {isAdmin && (
                 <a className={`mobile-menu-link ${view === 'admin' ? 'active' : ''}`} onClick={() => navigate('admin')} style={{color: '#e11d48', fontWeight: 600}}>
                   <Shield size={14} style={{display: 'inline', verticalAlign: 'middle', marginRight: '0.2rem'}} />Admin Panel
