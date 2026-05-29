@@ -1732,6 +1732,24 @@ textarea.form-input {
   .buyer-map-layout { flex-direction: column-reverse; height: auto; min-height: unset; gap: 1.5rem; }
   .buyer-map-list { flex: none; overflow-y: visible; padding-right: 0; }
   .buyer-map-map { flex: none; height: 400px; min-height: 400px; }
+
+  /* Dashboard Preview Mockup responsive updates */
+  .dashboard-mockup {
+    transform: none !important;
+    padding: 1.25rem;
+  }
+  .mockup-value {
+    font-size: 1.5rem;
+  }
+  .dashboard-container {
+    gap: 2rem;
+  }
+  .dashboard-text h2 {
+    font-size: 1.8rem;
+  }
+  .dashboard-preview {
+    padding: 4rem 0;
+  }
 }
 
 @media (max-width: 480px) {
@@ -1761,6 +1779,16 @@ textarea.form-input {
     flex-direction: column;
     align-items: flex-start;
     gap: 0.5rem;
+  }
+
+  /* Mockup updates for mobile */
+  .mockup-value {
+    font-size: 1.25rem;
+  }
+  .mockup-portfolio .flex {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.25rem;
   }
 }
 
