@@ -5,7 +5,7 @@ import {
   Smartphone, Clock, CheckCircle2,
   ChevronRight, ChevronDown, Building, Upload,
   LogOut, User, Mail, Lock, Eye, EyeOff, Settings,
-  Shield, Check, X, Menu, Undo, Trash2, Edit3, Linkedin
+  Shield, Check, X, Menu, Undo, Trash2, Edit3
 } from 'lucide-react';
 import {
   LineChart, Line, XAxis, YAxis,
@@ -1739,7 +1739,22 @@ function App() {
                   className="founder-social"
                   title="Connect on LinkedIn"
                 >
-                  <Linkedin size={18} />
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    width="18"
+                    height="18"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    style={{ display: 'inline-block', verticalAlign: 'middle' }}
+                  >
+                    <path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6z" />
+                    <rect x="2" y="9" width="4" height="12" />
+                    <circle cx="4" cy="4" r="2" />
+                  </svg>
                 </a>
               </div>
             </div>
@@ -1762,7 +1777,22 @@ function App() {
                   className="founder-social"
                   title="Connect on LinkedIn"
                 >
-                  <Linkedin size={18} />
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    width="18"
+                    height="18"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    style={{ display: 'inline-block', verticalAlign: 'middle' }}
+                  >
+                    <path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6z" />
+                    <rect x="2" y="9" width="4" height="12" />
+                    <circle cx="4" cy="4" r="2" />
+                  </svg>
                 </a>
               </div>
             </div>
