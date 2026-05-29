@@ -40,6 +40,8 @@ const mapOptions = {
   mapTypeControl: true,
   streetViewControl: false,
   fullscreenControl: true,
+  gestureHandling: 'greedy',
+  disableDoubleClickZoom: true,
   styles: [
     { featureType: 'poi', stylers: [{ visibility: 'off' }] },
     { featureType: 'transit', stylers: [{ visibility: 'off' }] },
@@ -227,6 +229,7 @@ function App() {
   const [requestingDocsFor, setRequestingDocsFor] = useState(null);
   const [legalAgreed, setLegalAgreed] = useState(false);
   const [selectedMarker, setSelectedMarker] = useState(null);
+  const [droppedPin, setDroppedPin] = useState(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState('');
 
@@ -843,6 +846,8 @@ function App() {
                       mapTypeControl: true,
                       streetViewControl: false,
                       fullscreenControl: false,
+                      gestureHandling: 'greedy',
+                      disableDoubleClickZoom: true,
                       styles: mapOptions.styles
                     }}
                   >
@@ -1153,7 +1158,7 @@ function App() {
                       map.fitBounds(bounds, { padding: 40 });
                     }
                   }}
-                  options={{ mapTypeId: 'satellite', mapTypeControl: true, disableDefaultUI: true, zoomControl: true, styles: mapOptions.styles }}
+                  options={{ mapTypeId: 'satellite', mapTypeControl: true, disableDefaultUI: true, zoomControl: true, gestureHandling: 'greedy', disableDoubleClickZoom: true, styles: mapOptions.styles }}
                 >
                   {myHoldings.map(plot => plot.lat && plot.lng && (
                     <MarkerF
@@ -1333,14 +1338,18 @@ function App() {
           </div>
 
           {/* Right side: Map View */}
-          <div className="buyer-map-map">
+          <div className="buyer-map-map" style={{position: 'relative'}}>
             {isLoaded ? (
               <GoogleMap
                 mapContainerStyle={{width: '100%', height: '100%'}}
-                center={selectedMarker ? { lat: selectedMarker.lat, lng: selectedMarker.lng } : defaultCenter}
-                zoom={selectedMarker ? 14 : 6}
+                center={selectedMarker ? { lat: selectedMarker.lat, lng: selectedMarker.lng } : (droppedPin ? droppedPin : defaultCenter)}
+                zoom={selectedMarker || droppedPin ? 14 : 6}
                 onLoad={onMapLoad}
                 options={mapOptions}
+                onDblClick={(e) => {
+                  setDroppedPin({ lat: e.latLng.lat(), lng: e.latLng.lng() });
+                  setSelectedMarker(null);
+                }}
               >
                 {plots
                   .filter(p => p.visibility === 'public' && p.status !== 'Verification Pending' && p.status !== 'Rejected')
@@ -1359,6 +1368,18 @@ function App() {
                     />
                   )
                 ))}
+
+                {droppedPin && (
+                  <MarkerF
+                    position={droppedPin}
+                    icon={{
+                      url: 'data:image/svg+xml;charset=UTF-8,' + encodeURIComponent(
+                        `<svg xmlns="http://www.w3.org/2000/svg" width="36" height="36" viewBox="0 0 24 24" fill="%23e11d48" stroke="white" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3" fill="white"/></svg>`
+                      ),
+                      scaledSize: new window.google.maps.Size(40, 40)
+                    }}
+                  />
+                )}
 
                 {selectedMarker && (
                   <InfoWindowF
@@ -1385,6 +1406,56 @@ function App() {
                 <p className="text-muted">Loading map...</p>
               </div>
             )}
+            
+            {/* Instruction Banner at the bottom */}
+            <div style={{
+              position: 'absolute',
+              bottom: '20px',
+              left: '50%',
+              transform: 'translateX(-50%)',
+              backgroundColor: 'rgba(15, 23, 42, 0.95)',
+              color: 'white',
+              padding: '0.75rem 1.25rem',
+              borderRadius: '2rem',
+              fontSize: '0.85rem',
+              fontWeight: 600,
+              pointerEvents: droppedPin ? 'auto' : 'none',
+              boxShadow: '0 4px 12px rgba(0, 0, 0, 0.2)',
+              textAlign: 'center',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '0.5rem',
+              zIndex: 10,
+              width: 'max-content',
+              maxWidth: '90%'
+            }}>
+              {droppedPin ? (
+                <>
+                  <span>Location selected</span>
+                  <button 
+                    className="btn btn-primary" 
+                    style={{padding: '0.35rem 0.75rem', fontSize: '0.75rem', marginLeft: '0.5rem'}}
+                    onClick={() => {
+                      setPlotLocation(droppedPin);
+                      if (!user) { setAuthMode('login'); navigate('login'); return; }
+                      navigate('seller-list');
+                    }}
+                  >
+                    Make Property
+                  </button>
+                  <button 
+                    style={{background: 'none', border: 'none', color: '#94a3b8', cursor: 'pointer', padding: '0.25rem', display: 'flex', alignItems: 'center'}}
+                    onClick={() => setDroppedPin(null)}
+                  >
+                    <X size={16} />
+                  </button>
+                </>
+              ) : (
+                <>
+                  <MapPin size={16} color="#10b981" /> Double click to make property
+                </>
+              )}
+            </div>
           </div>
         </div>
       </div>
