@@ -1661,6 +1661,7 @@ textarea.form-input {
    RESPONSIVE
    ================================================ */
 @media (max-width: 768px) {
+  .container { padding: 0 1rem; }
   .nav-links { display: none; }
   .hero-title { font-size: 2.5rem; }
   .hero { padding: 5rem 0 4rem; }
@@ -1677,10 +1678,55 @@ textarea.form-input {
   .auth-branding { padding: 2.5rem; border-right: none; border-bottom: 1px solid rgba(255,255,255,0.05); }
   .auth-form-panel { padding: 2.5rem; }
   .user-name { display: none; }
-  .pf-summary-grid { grid-template-columns: 1fr 1fr; }
-  .pf-holding-card { flex-wrap: wrap; }
-  .pf-holding-sparkline { display: none; }
-  .pf-holding-right { min-width: auto; text-align: left; width: 100%; padding-left: 4.5rem; }
+  
+  /* Portfolio Summary Grid */
+  .pf-summary-grid {
+    grid-template-columns: 1fr;
+    gap: 1rem;
+  }
+  
+  /* Portfolio Holdings Card */
+  .pf-holding-card {
+    flex-wrap: nowrap;
+    justify-content: space-between;
+    gap: 0.75rem;
+    padding: 1rem;
+  }
+  .pf-holding-left {
+    flex: 1;
+  }
+  .pf-holding-thumb {
+    width: 48px;
+    height: 48px;
+    border-radius: 8px;
+  }
+  .pf-holding-name {
+    font-size: 0.88rem;
+  }
+  .pf-holding-loc {
+    font-size: 0.72rem;
+  }
+  .pf-holding-meta {
+    font-size: 0.68rem;
+  }
+  .pf-holding-sparkline {
+    display: none;
+  }
+  .pf-holding-right {
+    min-width: auto;
+    text-align: right;
+    width: auto;
+    padding-left: 0;
+  }
+  .pf-holding-current {
+    font-size: 0.95rem;
+  }
+  .pf-holding-return {
+    font-size: 0.75rem;
+  }
+  .pf-holding-invested {
+    font-size: 0.68rem;
+  }
   
   /* Buyer Map */
   .buyer-map-layout { flex-direction: column-reverse; height: auto; min-height: unset; gap: 1.5rem; }
@@ -1689,6 +1735,7 @@ textarea.form-input {
 }
 
 @media (max-width: 480px) {
+  .container { padding: 0 0.75rem; }
   .footer-grid { grid-template-columns: 1fr; }
   .listing-form { padding: 1.5rem; }
   .hero-title { font-size: 2rem; }
@@ -1699,6 +1746,22 @@ textarea.form-input {
   .pf-summary-value { font-size: 1.5rem; }
   .pf-page-title { font-size: 1.5rem; }
   .pf-chart-container { padding: 1rem; }
+  
+  .pf-header {
+    flex-direction: column;
+    align-items: stretch;
+    text-align: center;
+    gap: 0.75rem;
+  }
+  .pf-header .btn {
+    width: 100%;
+  }
+  
+  .pf-chart-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.5rem;
+  }
 }
 
 /* =============================================
