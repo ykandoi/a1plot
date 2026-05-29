@@ -1725,7 +1725,7 @@ function App() {
             <div className="founder-card">
               <div className="founder-avatar-wrapper">
                 <img
-                  src="https://github.com/ykandoi.png"
+                  src="/assets/yash_profile.jpg"
                   alt="Yash Kandoi"
                   className="founder-avatar-img"
                   onError={(e) => { e.target.style.display = 'none'; }}
