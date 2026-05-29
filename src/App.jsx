@@ -5,7 +5,7 @@ import {
   Smartphone, Clock, CheckCircle2,
   ChevronRight, ChevronDown, Building, Upload,
   LogOut, User, Mail, Lock, Eye, EyeOff, Settings,
-  Shield, Check, X, Menu, Undo, Trash2, Edit3
+  Shield, Check, X, Menu, Undo, Trash2, Edit3, Linkedin
 } from 'lucide-react';
 import {
   LineChart, Line, XAxis, YAxis,
@@ -26,6 +26,18 @@ const mapContainerStyle = {
   width: '100%',
   height: '550px',
   borderRadius: '1rem'
+};
+
+const getSortedPolygonPath = (points) => {
+  if (!points || points.length < 3) return points;
+  const center = points.reduce((acc, p) => ({ lat: acc.lat + p.lat, lng: acc.lng + p.lng }), { lat: 0, lng: 0 });
+  center.lat /= points.length;
+  center.lng /= points.length;
+  return [...points].sort((a, b) => {
+    const angleA = Math.atan2(a.lng - center.lng, a.lat - center.lat);
+    const angleB = Math.atan2(b.lng - center.lng, b.lat - center.lat);
+    return angleA - angleB;
+  });
 };
 
 const defaultCenter = {
@@ -203,7 +215,8 @@ const viewToPath = {
   'contact': '/contact',
   'buy-request': '/buy_request',
   'admin': '/admin',
-  'login': '/login'
+  'login': '/login',
+  'about': '/about_us'
 };
 
 const pathToView = {
@@ -218,7 +231,8 @@ const pathToView = {
   '/contact': 'contact',
   '/buy_request': 'buy-request',
   '/admin': 'admin',
-  '/login': 'login'
+  '/login': 'login',
+  '/about_us': 'about'
 };
 
 function App() {
@@ -239,6 +253,7 @@ function App() {
   const [plotLocation, setPlotLocation] = useState({ lat: 20.5937, lng: 78.9629 }); // India center
   const [polygonPath, setPolygonPath] = useState([]);
   const [isDrawingMode, setIsDrawingMode] = useState(false);
+  const sortedPolygonPath = useMemo(() => getSortedPolygonPath(polygonPath), [polygonPath]);
   const mediaInputRef = useRef(null);
   const docInputRef = useRef(null);
   const autocompleteRef = useRef(null);
@@ -473,8 +488,9 @@ function App() {
       setPolygonPath(updatedPath);
       
       // Calculate area if we have at least 3 points
-      if (updatedPath.length >= 3 && window.google?.maps?.geometry?.spherical) {
-        const areaSqMeters = window.google.maps.geometry.spherical.computeArea(updatedPath);
+      const sortedPath = getSortedPolygonPath(updatedPath);
+      if (sortedPath.length >= 3 && window.google?.maps?.geometry?.spherical) {
+        const areaSqMeters = window.google.maps.geometry.spherical.computeArea(sortedPath);
         const areaSqFt = areaSqMeters * 10.7639;
         let formattedSize = '';
         if (areaSqFt > 43560) {
@@ -508,8 +524,8 @@ function App() {
         setEditingPlot(null);
       } else {
         let staticMapUrl = 'https://images.unsplash.com/photo-1500382017468-9049fed747ef?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80';
-        if (polygonPath.length >= 3 && window.google?.maps?.geometry?.encoding) {
-          const encodedPath = window.google.maps.geometry.encoding.encodePath(polygonPath);
+        if (sortedPolygonPath.length >= 3 && window.google?.maps?.geometry?.encoding) {
+          const encodedPath = window.google.maps.geometry.encoding.encodePath(sortedPolygonPath);
           staticMapUrl = `https://maps.googleapis.com/maps/api/staticmap?size=600x400&maptype=satellite&path=color:0x10b981AA|weight:3|fillcolor:0x10b98144|enc:${encodeURIComponent(encodedPath)}&key=${GOOGLE_MAPS_API_KEY}`;
         }
         
@@ -527,7 +543,7 @@ function App() {
           documentsAvailable: docFiles.map(f => f.name),
           lat: plotLocation.lat,
           lng: plotLocation.lng,
-          polygonPath: polygonPath.length >= 3 ? polygonPath : null,
+          polygonPath: sortedPolygonPath.length >= 3 ? sortedPolygonPath : null,
           priceHistory: [],
           investedAmount: 0,
           currentValue: 0,
@@ -925,9 +941,9 @@ function App() {
                         onDragEnd={onMarkerDragEnd}
                       />
                     )}
-                    {polygonPath.length > 0 && (
+                    {sortedPolygonPath.length > 0 && (
                       <PolygonF
-                        paths={polygonPath}
+                        paths={sortedPolygonPath}
                         options={{
                           fillColor: '#10b981',
                           fillOpacity: 0.35,
@@ -1648,6 +1664,154 @@ function App() {
     </section>
   );
 
+  /* ============================================
+     COMPANY: ABOUT US & OUR FOUNDERS
+     ============================================ */
+  const renderAbout = () => (
+    <section className="section bg-white" style={{paddingBottom: '2rem'}}>
+      {/* Hero Header */}
+      <div className="about-hero">
+        <div className="container">
+          <h1 className="about-hero-title">About Us</h1>
+          <p className="about-hero-subtitle">
+            We are on a mission to democratize land investment in India, combining state-of-the-art satellite intelligence with ironclad legal assurance.
+          </p>
+        </div>
+      </div>
+
+      <div className="container">
+        {/* Intro Grid */}
+        <div className="about-intro-grid">
+          <div className="about-intro-text">
+            <h3>Revolutionizing Land Ownership</h3>
+            <p>
+              Founded with the goal of bringing stock-market velocity, liquidity, and absolute transparency to physical property acquisitions, <strong>A1Plot</strong> bridges the gap between ambitious land seekers and authenticated sellers.
+            </p>
+            <p>
+              We bypass traditional brokerages, eliminate asymmetric information, and secure transactions through rigorous 50-point due-diligence legal checks, digital layout mappings, and authenticated authority registries.
+            </p>
+          </div>
+          <div className="about-intro-stats">
+            <div className="about-intro-stat-card">
+              <div className="about-intro-stat-num">500+</div>
+              <div className="about-intro-stat-label">Verified Plots</div>
+            </div>
+            <div className="about-intro-stat-card">
+              <div className="about-intro-stat-num">₹500Cr+</div>
+              <div className="about-intro-stat-label">Asset Value Listed</div>
+            </div>
+            <div className="about-intro-stat-card">
+              <div className="about-intro-stat-num">0%</div>
+              <div className="about-intro-stat-label">Brokerage Fee</div>
+            </div>
+            <div className="about-intro-stat-card">
+              <div className="about-intro-stat-num">100%</div>
+              <div className="about-intro-stat-label">RERA Compliant</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Founders Section */}
+      <div className="founders-section">
+        <div className="container">
+          <div className="section-header" style={{ marginBottom: '3rem' }}>
+            <h2 className="section-title">Meet Our Founders</h2>
+            <p className="text-muted">The visionary minds and industry specialists behind A1Plot's growth and trust.</p>
+          </div>
+
+          <div className="founders-grid">
+            {/* Yash Kandoi */}
+            <div className="founder-card">
+              <div className="founder-avatar-wrapper">
+                <div className="founder-avatar">YK</div>
+              </div>
+              <h3 className="founder-name">Yash Kandoi</h3>
+              <div className="founder-role">Founder & CEO</div>
+              <p className="founder-bio">
+                An alumnus of the prestigious IIT Kharagpur, Yash is a technologist and product builder. He designed the high-velocity trade engine, satellite polygon mapping, and digital dashboard integrations that form the core of A1Plot's unique frictionless platform.
+              </p>
+              <div className="founder-socials">
+                <a
+                  href="https://www.linkedin.com/in/yash-kandoi/"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="founder-social"
+                  title="Connect on LinkedIn"
+                >
+                  <Linkedin size={18} />
+                </a>
+              </div>
+            </div>
+
+            {/* Ashok Kandoi */}
+            <div className="founder-card">
+              <div className="founder-avatar-wrapper">
+                <div className="founder-avatar">AK</div>
+              </div>
+              <h3 className="founder-name">Ashok Kandoi</h3>
+              <div className="founder-role">Co-Founder & Director</div>
+              <p className="founder-bio">
+                Ashok brings over three decades of unparalleled hands-on real estate expertise, land acquisitions foresight, and municipal regulatory knowledge. He spearheads A1Plot's strict 50-point land validation protocols and local registry compliance processes.
+              </p>
+              <div className="founder-socials">
+                <a
+                  href="https://www.linkedin.com/"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="founder-social"
+                  title="Connect on LinkedIn"
+                >
+                  <Linkedin size={18} />
+                </a>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Core Values Section */}
+      <div className="about-values-section">
+        <div className="container">
+          <div className="section-header" style={{ marginBottom: '3rem' }}>
+            <h2 className="section-title">Our Grounding Principles</h2>
+            <p className="text-muted">How we ensure every plot is as secure as a blue-chip stock.</p>
+          </div>
+
+          <div className="values-grid">
+            <div className="value-card">
+              <div className="value-icon">
+                <ShieldCheck size={24} />
+              </div>
+              <h4 className="value-title">Absolute Legal Security</h4>
+              <p className="value-desc">
+                We handle title deeds, EC check pipelines, and layout plans with absolute rigor so you invest with peace of mind.
+              </p>
+            </div>
+            <div className="value-card">
+              <div className="value-icon">
+                <TrendingUp size={24} />
+              </div>
+              <h4 className="value-title">Liquidity & Exit Strategy</h4>
+              <p className="value-desc">
+                By maintaining a digitized portfolio tracker and automated matching systems, we bring secondary market capabilities to land.
+              </p>
+            </div>
+            <div className="value-card">
+              <div className="value-icon">
+                <MapPin size={24} />
+              </div>
+              <h4 className="value-title">High-Growth Geospatial Focus</h4>
+              <p className="value-desc">
+                We prioritize high-appreciating corridors with SEZ access, highway proximity, and commercial authorizations.
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+  );
+
   const renderPrivacy = () => (
     <section className="section bg-white" style={{paddingTop: '6rem', paddingBottom: '6rem'}}>
       <div className="container" style={{maxWidth: '800px'}}>
@@ -2094,6 +2258,7 @@ function App() {
           <div className="nav-links">
             <a className={`nav-link ${view === 'home' ? 'active' : ''}`} onClick={() => navigate('home')}>Explore Plots</a>
             <a className={`nav-link ${view === 'buyer-map' ? 'active' : ''}`} onClick={() => navigate('buyer-map')}>Buy Land</a>
+            <a className={`nav-link ${view === 'about' ? 'active' : ''}`} onClick={() => navigate('about')}>Our Founders</a>
             {user && (
               <a className={`nav-link ${view === 'seller-dashboard' || view === 'seller-list' || view === 'seller-edit' ? 'active' : ''}`} onClick={() => navigate('seller-dashboard')}>My Lands</a>
             )}
@@ -2164,6 +2329,7 @@ function App() {
             <div className="mobile-menu-links">
               <a className={`mobile-menu-link ${view === 'home' ? 'active' : ''}`} onClick={() => navigate('home')}>Explore Plots</a>
               <a className={`mobile-menu-link ${view === 'buyer-map' ? 'active' : ''}`} onClick={() => navigate('buyer-map')}>Buy Land</a>
+              <a className={`mobile-menu-link ${view === 'about' ? 'active' : ''}`} onClick={() => navigate('about')}>Our Founders</a>
               {user && (
                 <a className={`mobile-menu-link ${view === 'seller-dashboard' || view === 'seller-list' || view === 'seller-edit' ? 'active' : ''}`} onClick={() => navigate('seller-dashboard')}>My Lands</a>
               )}
@@ -2191,6 +2357,7 @@ function App() {
         {view === 'admin' && (isAdmin ? renderAdminPanel() : renderAuth())}
         {view === 'privacy' && renderPrivacy()}
         {view === 'terms' && renderTerms()}
+        {view === 'about' && renderAbout()}
       </main>
 
       {/* Footer */}
@@ -2218,7 +2385,7 @@ function App() {
               <div className="footer-links">
                 <h4>Company</h4>
                 <ul>
-                  <li><a href="#about">About Us</a></li>
+                  <li><a onClick={() => navigate('about')}>About Us</a></li>
                   <li><a href="#careers">Careers</a></li>
                   <li><a href="#blog">Blog</a></li>
                   <li><a onClick={() => navigate('contact')}>Contact</a></li>
