@@ -1049,7 +1049,7 @@ function App() {
           </div>
           <div className="pf-summary-card">
             <div className="pf-summary-label">XIRR (Est.)</div>
-            <div className="pf-summary-value pf-summary-value--sm pf-positive">+16.2%</div>
+            <div className={`pf-summary-value pf-summary-value--sm ${isPositiveReturn ? 'pf-positive' : 'pf-negative'}`}>{isPositiveReturn ? '+' : ''}{totalReturnPct}%</div>
             <div className="pf-summary-sub">Annualized</div>
           </div>
         </div>
