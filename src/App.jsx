@@ -5,7 +5,7 @@ import {
   Smartphone, Clock, CheckCircle2,
   ChevronRight, ChevronDown, Building, Upload,
   LogOut, User, Mail, Lock, Eye, EyeOff, Settings,
-  Shield, Check, X
+  Shield, Check, X, Menu
 } from 'lucide-react';
 import {
   LineChart, Line, XAxis, YAxis,
@@ -221,6 +221,7 @@ const pathToView = {
 
 function App() {
   const [view, setView] = useState('home');
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [newPlot, setNewPlot] = useState({ title: '', location: '', price: '', size: '', features: '', visibility: 'private' });
   const [editingPlot, setEditingPlot] = useState(null);
   const [requestingDocsFor, setRequestingDocsFor] = useState(null);
@@ -374,6 +375,8 @@ function App() {
 
   const navigate = (v) => {
     setView(v);
+    setMobileMenuOpen(false);
+    setProfileOpen(false);
     const newPath = viewToPath[v] || '/';
     if (window.location.pathname !== newPath) {
       window.history.pushState({}, '', newPath);
@@ -1964,7 +1967,30 @@ function App() {
               <button className="btn btn-primary" onClick={() => { setAuthMode('login'); navigate('login'); }}>Log In</button>
             )}
           </div>
+          <button className="mobile-menu-toggle" onClick={() => setMobileMenuOpen(!mobileMenuOpen)}>
+            {mobileMenuOpen ? <X size={22} /> : <Menu size={22} />}
+          </button>
         </div>
+
+        {/* Mobile Navigation Dropdown */}
+        {mobileMenuOpen && (
+          <div className="mobile-menu">
+            <div className="mobile-menu-links">
+              <a className={`mobile-menu-link ${view === 'home' ? 'active' : ''}`} onClick={() => navigate('home')}>Explore Plots</a>
+              <a className={`mobile-menu-link ${view === 'buyer-map' ? 'active' : ''}`} onClick={() => navigate('buyer-map')}>Buy Land</a>
+              {user && (
+                <a className={`mobile-menu-link ${view === 'seller-dashboard' || view === 'seller-list' || view === 'seller-edit' ? 'active' : ''}`} onClick={() => navigate('seller-dashboard')}>My Lands</a>
+              )}
+              <a className={`mobile-menu-link ${view === 'interested' || view === 'buy-request' ? 'active' : ''}`} onClick={() => navigate('interested')}>Interests</a>
+              <a className={`mobile-menu-link ${view === 'contact' ? 'active' : ''}`} onClick={() => navigate('contact')}>Contact</a>
+              {isAdmin && (
+                <a className={`mobile-menu-link ${view === 'admin' ? 'active' : ''}`} onClick={() => navigate('admin')} style={{color: '#e11d48', fontWeight: 600}}>
+                  <Shield size={14} style={{display: 'inline', verticalAlign: 'middle', marginRight: '0.2rem'}} />Admin Panel
+                </a>
+              )}
+            </div>
+          </div>
+        )}
       </nav>
 
       <main>
