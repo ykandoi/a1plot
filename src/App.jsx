@@ -1966,10 +1966,10 @@ function App() {
             ) : (
               <button className="btn btn-primary" onClick={() => { setAuthMode('login'); navigate('login'); }}>Log In</button>
             )}
+            <button className="mobile-menu-toggle" onClick={() => setMobileMenuOpen(!mobileMenuOpen)} style={{ marginLeft: '0.25rem' }}>
+              {mobileMenuOpen ? <X size={22} /> : <Menu size={22} />}
+            </button>
           </div>
-          <button className="mobile-menu-toggle" onClick={() => setMobileMenuOpen(!mobileMenuOpen)}>
-            {mobileMenuOpen ? <X size={22} /> : <Menu size={22} />}
-          </button>
         </div>
 
         {/* Mobile Navigation Dropdown */}

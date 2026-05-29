@@ -1757,6 +1757,8 @@ textarea.form-input {
   .container { padding: 0 0.75rem; }
   .footer-grid { grid-template-columns: 1fr; }
   .listing-form { padding: 1.5rem; }
+  .nav-actions { gap: 0.5rem; }
+  .nav-actions .btn { padding: 0.4rem 0.85rem; font-size: 0.8rem; }
   .hero-title { font-size: 2rem; }
   .section-title { font-size: 1.75rem; }
   .auth-branding { display: none; }
