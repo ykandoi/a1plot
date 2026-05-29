@@ -1768,6 +1768,12 @@ function App() {
             {/* Ashok Kandoi */}
             <div className="founder-card">
               <div className="founder-avatar-wrapper">
+                <img
+                  src="/assets/ashok_profile.png"
+                  alt="Ashok Kandoi"
+                  className="founder-avatar-img"
+                  onError={(e) => { e.target.style.display = 'none'; }}
+                />
                 <div className="founder-avatar">AK</div>
               </div>
               <h3 className="founder-name">Ashok Kandoi</h3>
