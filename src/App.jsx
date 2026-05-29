@@ -1239,90 +1239,119 @@ function App() {
      BUYER: MAP VIEW
      ============================================ */
   const renderBuyerMap = () => (
-    <section className="section bg-white" style={{paddingTop: '6rem'}}>
-      <div className="container">
-        <div className="section-header">
-          <h2 className="section-title">Find Your Perfect Plot</h2>
-          <p className="text-muted">Click on markers to see verified land parcels. Save the ones you like.</p>
+    <section className="section bg-light" style={{paddingTop: '6rem', paddingBottom: '2rem', minHeight: '100vh', display: 'flex', flexDirection: 'column'}}>
+      <div className="container" style={{maxWidth: '100%', padding: '0 2rem'}}>
+        <div className="section-header" style={{textAlign: 'left', marginBottom: '1.5rem', marginTop: '1rem'}}>
+          <h2 className="section-title" style={{fontSize: '2.25rem', marginBottom: '0.5rem'}}>Buy Land</h2>
+          <p className="text-muted">Browse our verified listings and find your perfect plot. Select a property to view on the map.</p>
         </div>
-        <div style={{borderRadius: '1rem', overflow: 'hidden', border: '1px solid var(--border-color)', boxShadow: 'var(--shadow-lg)'}}>
-          {isLoaded ? (
-            <GoogleMap
-              mapContainerStyle={mapContainerStyle}
-              center={defaultCenter}
-              zoom={6}
-              onLoad={onMapLoad}
-              options={mapOptions}
-            >
+        <div style={{display: 'flex', gap: '2rem', height: 'calc(100vh - 200px)', minHeight: '600px'}}>
+          
+          {/* Left side: Property Cards */}
+          <div style={{flex: '1', overflowY: 'auto', paddingRight: '1rem'}}>
+            <div className="plots-grid" style={{gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: '1.5rem'}}>
               {plots
                 .filter(p => p.visibility === 'public' && p.status !== 'Verification Pending' && p.status !== 'Rejected')
                 .map(plot => (
-                plot.lat && plot.lng && (
-                  <MarkerF
-                    key={plot.id}
-                    position={{ lat: plot.lat, lng: plot.lng }}
-                    onClick={() => setSelectedMarker(plot)}
-                    icon={{
-                      url: 'data:image/svg+xml;charset=UTF-8,' + encodeURIComponent(
-                        '<svg xmlns="http://www.w3.org/2000/svg" width="36" height="36" viewBox="0 0 24 24" fill="%233b7a76" stroke="white" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3" fill="white"/></svg>'
-                      ),
-                      scaledSize: new window.google.maps.Size(40, 40)
-                    }}
-                  />
-                )
-              ))}
-
-              {selectedMarker && (
-                <InfoWindowF
-                  position={{ lat: selectedMarker.lat, lng: selectedMarker.lng }}
-                  onCloseClick={() => setSelectedMarker(null)}
+                <div 
+                  key={plot.id} 
+                  className="plot-card" 
+                  onClick={() => setSelectedMarker(plot)} 
+                  style={{
+                    cursor: 'pointer', 
+                    border: selectedMarker?.id === plot.id ? '2px solid var(--primary)' : '1px solid var(--border-color)',
+                    transform: selectedMarker?.id === plot.id ? 'translateY(-2px)' : 'none',
+                    boxShadow: selectedMarker?.id === plot.id ? 'var(--shadow-lg)' : 'none'
+                  }}
                 >
-                  <div style={{width: '240px', fontFamily: 'Inter, sans-serif'}}>
-                    <img
-                      src={selectedMarker.image}
-                      alt={selectedMarker.title}
-                      style={{width: '100%', height: '100px', objectFit: 'cover', borderRadius: '6px', marginBottom: '0.5rem'}}
-                    />
-                    <h4 style={{fontSize: '0.95rem', fontWeight: 700, marginBottom: '0.25rem', color: '#0f172a'}}>{selectedMarker.title}</h4>
-                    <p style={{fontSize: '0.8rem', color: '#64748b', marginBottom: '0.25rem', display: 'flex', alignItems: 'center', gap: '4px'}}>
-                      <span>📍</span> {selectedMarker.location}
-                    </p>
-                    <p style={{fontSize: '1.1rem', fontWeight: 700, color: '#3b7a76', marginBottom: '0.5rem'}}>{selectedMarker.price}</p>
-
-                    <div style={{fontSize: '0.75rem', color: '#64748b', marginBottom: '0.25rem'}}>
-                      <strong style={{color: '#0f172a'}}>Seller:</strong>{' '}
-                      {selectedMarker.ownerUid === 'demo' ? selectedMarker.developer : 'A1Plot Verified Seller'}
+                  <div className="plot-image" style={{height: '160px'}}>
+                    <div className="plot-badge">{plot.badge || 'Listed'}</div>
+                    <img src={plot.image} alt={plot.title} />
+                  </div>
+                  <div className="plot-content" style={{padding: '1.25rem'}}>
+                    <div className="plot-location" style={{fontSize: '0.8rem', marginBottom: '0.35rem'}}>
+                      <MapPin size={12} /> {plot.location}
                     </div>
-                    <div style={{fontSize: '0.75rem', color: '#64748b', marginBottom: '0.75rem', lineHeight: '1.5'}}>
-                      <strong style={{color: '#0f172a'}}>Documents:</strong><br/>
-                      {selectedMarker.documentsAvailable?.join(', ') || 'Title Deed, EC'}
+                    <h3 className="plot-title" style={{fontSize: '1.1rem', marginBottom: '0.75rem'}}>{plot.title}</h3>
+                    
+                    <div className="plot-metrics" style={{marginBottom: '1rem', paddingBottom: '1rem', gap: '0.5rem'}}>
+                      <div className="metric">
+                        <h5 style={{fontSize: '0.65rem'}}>Price</h5>
+                        <p style={{fontSize: '0.95rem'}}>{plot.price}</p>
+                      </div>
+                      <div className="metric">
+                        <h5 style={{fontSize: '0.65rem'}}>Size</h5>
+                        <p style={{fontSize: '0.95rem'}}>{plot.size}</p>
+                      </div>
                     </div>
-
-                    <button
-                      onClick={() => handleInterest(selectedMarker)}
-                      style={{
-                        width: '100%',
-                        padding: '0.5rem',
-                        backgroundColor: '#3b7a76',
-                        color: 'white',
-                        border: 'none',
-                        borderRadius: '6px',
-                        fontWeight: 600,
-                        fontSize: '0.85rem',
-                        cursor: 'pointer'
-                      }}
+                    
+                    <button 
+                      className="btn btn-primary" 
+                      style={{width: '100%', padding: '0.5rem', fontSize: '0.85rem'}} 
+                      onClick={(e) => { e.stopPropagation(); handleInterest(plot); }}
                     >
-                      I'm Interested
+                      Interested
                     </button>
                   </div>
-                </InfoWindowF>
-              )}
-            </GoogleMap>
-          ) : (
-            <div style={{height: '550px', display: 'flex', alignItems: 'center', justifyContent: 'center', backgroundColor: '#f1f5f9', borderRadius: '1rem'}}>
-              <p className="text-muted">Loading map...</p>
+                </div>
+              ))}
             </div>
-          )}
+          </div>
+
+          {/* Right side: Map View */}
+          <div style={{flex: '1.2', borderRadius: '1rem', overflow: 'hidden', border: '1px solid var(--border-color)', boxShadow: 'var(--shadow-lg)'}}>
+            {isLoaded ? (
+              <GoogleMap
+                mapContainerStyle={{width: '100%', height: '100%'}}
+                center={selectedMarker ? { lat: selectedMarker.lat, lng: selectedMarker.lng } : defaultCenter}
+                zoom={selectedMarker ? 14 : 6}
+                onLoad={onMapLoad}
+                options={mapOptions}
+              >
+                {plots
+                  .filter(p => p.visibility === 'public' && p.status !== 'Verification Pending' && p.status !== 'Rejected')
+                  .map(plot => (
+                  plot.lat && plot.lng && (
+                    <MarkerF
+                      key={plot.id}
+                      position={{ lat: plot.lat, lng: plot.lng }}
+                      onClick={() => setSelectedMarker(plot)}
+                      icon={{
+                        url: 'data:image/svg+xml;charset=UTF-8,' + encodeURIComponent(
+                          `<svg xmlns="http://www.w3.org/2000/svg" width="36" height="36" viewBox="0 0 24 24" fill="${selectedMarker?.id === plot.id ? '%23f59e0b' : '%233b7a76'}" stroke="white" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3" fill="white"/></svg>`
+                        ),
+                        scaledSize: new window.google.maps.Size(40, 40)
+                      }}
+                    />
+                  )
+                ))}
+
+                {selectedMarker && (
+                  <InfoWindowF
+                    position={{ lat: selectedMarker.lat, lng: selectedMarker.lng }}
+                    onCloseClick={() => setSelectedMarker(null)}
+                  >
+                    <div style={{width: '240px', fontFamily: 'Inter, sans-serif', padding: '0.25rem'}}>
+                      <h4 style={{fontSize: '0.95rem', fontWeight: 700, marginBottom: '0.25rem', color: '#0f172a'}}>{selectedMarker.title}</h4>
+                      <p style={{fontSize: '1.1rem', fontWeight: 700, color: '#3b7a76', marginBottom: '0.5rem'}}>{selectedMarker.price}</p>
+                      
+                      <div style={{fontSize: '0.75rem', color: '#64748b', marginBottom: '0.25rem'}}>
+                        <strong style={{color: '#0f172a'}}>Size:</strong> {selectedMarker.size}
+                      </div>
+                      <div style={{fontSize: '0.75rem', color: '#64748b', marginBottom: '0.75rem', lineHeight: '1.5'}}>
+                        <strong style={{color: '#0f172a'}}>Documents:</strong><br/>
+                        {selectedMarker.documentsAvailable?.join(', ') || 'Title Deed, EC'}
+                      </div>
+                    </div>
+                  </InfoWindowF>
+                )}
+              </GoogleMap>
+            ) : (
+              <div style={{height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', backgroundColor: '#f1f5f9'}}>
+                <p className="text-muted">Loading map...</p>
+              </div>
+            )}
+          </div>
         </div>
       </div>
     </section>
@@ -1841,7 +1870,7 @@ function App() {
           </div>
           <div className="nav-links">
             <a className={`nav-link ${view === 'home' ? 'active' : ''}`} onClick={() => navigate('home')}>Explore Plots</a>
-            <a className={`nav-link ${view === 'buyer-map' ? 'active' : ''}`} onClick={() => navigate('buyer-map')}>Map View</a>
+            <a className={`nav-link ${view === 'buyer-map' ? 'active' : ''}`} onClick={() => navigate('buyer-map')}>Buy Land</a>
             {user && (
               <a className={`nav-link ${view === 'seller-dashboard' || view === 'seller-list' || view === 'seller-edit' ? 'active' : ''}`} onClick={() => navigate('seller-dashboard')}>My Lands</a>
             )}
