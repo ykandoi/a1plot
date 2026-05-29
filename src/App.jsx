@@ -29,15 +29,7 @@ const mapContainerStyle = {
 };
 
 const getSortedPolygonPath = (points) => {
-  if (!points || points.length < 3) return points;
-  const center = points.reduce((acc, p) => ({ lat: acc.lat + p.lat, lng: acc.lng + p.lng }), { lat: 0, lng: 0 });
-  center.lat /= points.length;
-  center.lng /= points.length;
-  return [...points].sort((a, b) => {
-    const angleA = Math.atan2(a.lng - center.lng, a.lat - center.lat);
-    const angleB = Math.atan2(b.lng - center.lng, b.lat - center.lat);
-    return angleA - angleB;
-  });
+  return points;
 };
 
 const defaultCenter = {
