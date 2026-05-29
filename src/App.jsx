@@ -1239,8 +1239,8 @@ function App() {
      BUYER: MAP VIEW
      ============================================ */
   const renderBuyerMap = () => (
-    <section className="section bg-light" style={{paddingTop: '6rem', paddingBottom: '2rem', minHeight: '100vh', display: 'flex', flexDirection: 'column'}}>
-      <div className="container" style={{maxWidth: '100%', padding: '0 2rem'}}>
+    <section className="section bg-light" style={{paddingTop: '5rem', paddingBottom: '0', minHeight: '100vh', display: 'flex', flexDirection: 'column'}}>
+      <div style={{width: '100%', padding: '0 2rem', maxWidth: '1800px', margin: '0 auto'}}>
         <div className="section-header" style={{textAlign: 'left', marginBottom: '1.5rem', marginTop: '1rem'}}>
           <h2 className="section-title" style={{fontSize: '2.25rem', marginBottom: '0.5rem'}}>Buy Land</h2>
           <p className="text-muted">Browse our verified listings and find your perfect plot. Select a property to view on the map.</p>
