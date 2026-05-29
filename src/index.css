@@ -1831,7 +1831,7 @@ textarea.form-input {
   .footer-grid { grid-template-columns: 1fr; }
   .listing-form { padding: 1.5rem; }
   .nav-actions { gap: 0.5rem; }
-  .nav-actions .btn { padding: 0.4rem 0.85rem; font-size: 0.8rem; }
+  .nav-actions .btn { padding: 0.5rem 1rem; font-size: 0.9rem; }
   .hero-title { font-size: 2rem; }
   .section-title { font-size: 1.75rem; }
   .auth-branding { display: none; }
