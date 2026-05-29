@@ -988,7 +988,7 @@ function App() {
     return '₹' + val.toLocaleString('en-IN');
   };
 
-  const myHoldings = plots.filter(p => p.investedAmount && p.ownerUid === user?.uid);
+  const myHoldings = plots.filter(p => p.investedAmount && (p.ownerUid === user?.uid || p.ownerEmail === user?.email));
   const totalInvested = myHoldings.reduce((sum, p) => sum + (p.investedAmount || 0), 0);
   const totalCurrent = myHoldings.reduce((sum, p) => sum + (p.currentValue || 0), 0);
   const totalReturn = totalCurrent - totalInvested;
