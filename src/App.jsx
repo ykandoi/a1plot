@@ -653,21 +653,19 @@ function App() {
         </div>
       </section>
 
-      {/* Featured Opportunities */}
+      {/* All Opportunities */}
       <section id="explore" className="section bg-light">
         <div className="container">
           <div className="flex items-center justify-between mb-12" style={{flexWrap: 'wrap', gap: '1rem'}}>
             <div>
-              <h2 className="section-title" style={{marginBottom: '0.5rem', textAlign: 'left'}}>Featured Investment Opportunities</h2>
-              <p className="text-muted">High-growth corridors with verified developers.</p>
+              <h2 className="section-title" style={{marginBottom: '0.5rem', textAlign: 'left'}}>All Properties</h2>
+              <p className="text-muted">Explore our complete portfolio of high-growth land investments.</p>
             </div>
-            <button className="btn btn-outline" onClick={() => navigate('buyer-map')}>View All Assets</button>
           </div>
 
           <div className="plots-grid">
             {plots
               .filter(p => p.visibility === 'public' && p.status !== 'Verification Pending' && p.status !== 'Rejected')
-              .slice(0, 3)
               .map((plot) => (
               <div key={plot.id} className="plot-card">
                 <div className="plot-image">
