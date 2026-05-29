@@ -2306,11 +2306,8 @@ function App() {
           </div>
           <div className="nav-links">
             <a className={`nav-link ${view === 'home' ? 'active' : ''}`} onClick={() => navigate('home')}>Explore Plots</a>
-            {user && (
-              <a className={`nav-link ${view === 'seller-dashboard' || view === 'seller-list' || view === 'seller-edit' ? 'active' : ''}`} onClick={() => navigate('seller-dashboard')}>My Lands</a>
-            )}
+            <a className={`nav-link ${view === 'seller-list' || view === 'seller-edit' ? 'active' : ''}`} onClick={() => requireAuth('seller-list')}>Sell Your Land</a>
             <a className={`nav-link ${view === 'buyer-map' ? 'active' : ''}`} onClick={() => navigate('buyer-map')}>Buy Land</a>
-            <a className={`nav-link ${view === 'interested' || view === 'buy-request' ? 'active' : ''}`} onClick={() => navigate('interested')}>Interests</a>
             <a className={`nav-link ${view === 'contact' ? 'active' : ''}`} onClick={() => navigate('contact')}>Contact</a>
             <a className={`nav-link ${view === 'about' ? 'active' : ''}`} onClick={() => navigate('about')}>About Us</a>
             {isAdmin && (
@@ -2377,11 +2374,8 @@ function App() {
           <div className="mobile-menu">
             <div className="mobile-menu-links">
               <a className={`mobile-menu-link ${view === 'home' ? 'active' : ''}`} onClick={() => navigate('home')}>Explore Plots</a>
-              {user && (
-                <a className={`mobile-menu-link ${view === 'seller-dashboard' || view === 'seller-list' || view === 'seller-edit' ? 'active' : ''}`} onClick={() => navigate('seller-dashboard')}>My Lands</a>
-              )}
+              <a className={`mobile-menu-link ${view === 'seller-list' || view === 'seller-edit' ? 'active' : ''}`} onClick={() => requireAuth('seller-list')}>Sell Your Land</a>
               <a className={`mobile-menu-link ${view === 'buyer-map' ? 'active' : ''}`} onClick={() => navigate('buyer-map')}>Buy Land</a>
-              <a className={`mobile-menu-link ${view === 'interested' || view === 'buy-request' ? 'active' : ''}`} onClick={() => navigate('interested')}>Interests</a>
               <a className={`mobile-menu-link ${view === 'contact' ? 'active' : ''}`} onClick={() => navigate('contact')}>Contact</a>
               <a className={`mobile-menu-link ${view === 'about' ? 'active' : ''}`} onClick={() => navigate('about')}>About Us</a>
               {isAdmin && (
