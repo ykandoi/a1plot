@@ -1636,6 +1636,28 @@ textarea.form-input {
 }
 
 /* ================================================
+   BUYER MAP LAYOUT
+   ================================================ */
+.buyer-map-layout {
+  display: flex;
+  gap: 2rem;
+  height: calc(100vh - 200px);
+  min-height: 600px;
+}
+.buyer-map-list {
+  flex: 1;
+  overflow-y: auto;
+  padding-right: 1rem;
+}
+.buyer-map-map {
+  flex: 1.2;
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  border: 1px solid var(--border-color);
+  box-shadow: var(--shadow-lg);
+}
+
+/* ================================================
    RESPONSIVE
    ================================================ */
 @media (max-width: 768px) {
@@ -1659,6 +1681,11 @@ textarea.form-input {
   .pf-holding-card { flex-wrap: wrap; }
   .pf-holding-sparkline { display: none; }
   .pf-holding-right { min-width: auto; text-align: left; width: 100%; padding-left: 4.5rem; }
+  
+  /* Buyer Map */
+  .buyer-map-layout { flex-direction: column-reverse; height: auto; min-height: unset; gap: 1.5rem; }
+  .buyer-map-list { flex: none; overflow-y: visible; padding-right: 0; }
+  .buyer-map-map { flex: none; height: 400px; min-height: 400px; }
 }
 
 @media (max-width: 480px) {

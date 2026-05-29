@@ -1245,10 +1245,10 @@ function App() {
           <h2 className="section-title" style={{fontSize: '2.25rem', marginBottom: '0.5rem'}}>Buy Land</h2>
           <p className="text-muted">Browse our verified listings and find your perfect plot. Select a property to view on the map.</p>
         </div>
-        <div style={{display: 'flex', gap: '2rem', height: 'calc(100vh - 200px)', minHeight: '600px'}}>
+        <div className="buyer-map-layout">
           
           {/* Left side: Property Cards */}
-          <div style={{flex: '1', overflowY: 'auto', paddingRight: '1rem'}}>
+          <div className="buyer-map-list">
             <div className="plots-grid" style={{gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: '1.5rem'}}>
               {plots
                 .filter(p => p.visibility === 'public' && p.status !== 'Verification Pending' && p.status !== 'Rejected')
@@ -1299,7 +1299,7 @@ function App() {
           </div>
 
           {/* Right side: Map View */}
-          <div style={{flex: '1.2', borderRadius: '1rem', overflow: 'hidden', border: '1px solid var(--border-color)', boxShadow: 'var(--shadow-lg)'}}>
+          <div className="buyer-map-map">
             {isLoaded ? (
               <GoogleMap
                 mapContainerStyle={{width: '100%', height: '100%'}}
