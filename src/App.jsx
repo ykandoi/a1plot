@@ -1900,8 +1900,13 @@ function App() {
       {/* Navbar */}
       <nav className="navbar">
         <div className="container flex items-center justify-between">
-          <div className="navbar-brand" onClick={() => navigate('home')} style={{cursor: 'pointer'}}>
-            <img src="/assets/logo.png" alt="A1Plot Logo" className="logo-img" />
+          <div style={{display: 'flex', alignItems: 'center'}}>
+            <button type="button" className="mobile-menu-toggle" onClick={() => setMobileMenuOpen(!mobileMenuOpen)} style={{ marginRight: '0.5rem' }}>
+              {mobileMenuOpen ? <X size={22} /> : <Menu size={22} />}
+            </button>
+            <div className="navbar-brand" onClick={() => navigate('home')} style={{cursor: 'pointer'}}>
+              <img src="/assets/logo.png" alt="A1Plot Logo" className="logo-img" />
+            </div>
           </div>
           <div className="nav-links">
             <a className={`nav-link ${view === 'home' ? 'active' : ''}`} onClick={() => navigate('home')}>Explore Plots</a>
@@ -1967,9 +1972,6 @@ function App() {
             ) : (
               <button className="btn btn-primary" onClick={() => { setAuthMode('login'); navigate('login'); }}>Log In</button>
             )}
-            <button className="mobile-menu-toggle" onClick={() => setMobileMenuOpen(!mobileMenuOpen)} style={{ marginLeft: '0.25rem' }}>
-              {mobileMenuOpen ? <X size={22} /> : <Menu size={22} />}
-            </button>
           </div>
         </div>
 
