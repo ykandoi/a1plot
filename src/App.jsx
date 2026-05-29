@@ -483,14 +483,11 @@ function App() {
       const sortedPath = getSortedPolygonPath(updatedPath);
       if (sortedPath.length >= 3 && window.google?.maps?.geometry?.spherical) {
         const areaSqMeters = window.google.maps.geometry.spherical.computeArea(sortedPath);
-        const areaSqFt = areaSqMeters * 10.7639;
         let formattedSize = '';
-        if (areaSqFt > 43560) {
-          formattedSize = (areaSqFt / 43560).toFixed(2) + ' Acres';
-        } else if (areaSqFt > 1089) {
-          formattedSize = (areaSqFt / 1089).toFixed(2) + ' Guntas';
+        if (areaSqMeters >= 1000000) {
+          formattedSize = (areaSqMeters / 1000000).toFixed(3) + ' km²';
         } else {
-          formattedSize = Math.round(areaSqFt).toLocaleString() + ' Sq Ft';
+          formattedSize = Math.round(areaSqMeters).toLocaleString() + ' m²';
         }
         setNewPlot(prev => ({ ...prev, size: formattedSize }));
       }
@@ -822,29 +819,16 @@ function App() {
               onChange={(e) => setNewPlot({...newPlot, title: e.target.value})}
             />
           </div>
-          <div className="form-grid mb-8">
-            <div className="form-group">
-              <label>Expected Price (Quotation)</label>
-              <input
-                type="text"
-                placeholder="₹ e.g. 45 L or 1.2 Cr"
-                className="form-input"
-                required
-                value={newPlot.price}
-                onChange={(e) => setNewPlot({...newPlot, price: e.target.value})}
-              />
-            </div>
-            <div className="form-group">
-              <label>Plot Size</label>
-              <input
-                type="text"
-                placeholder="e.g. 1200 sq.ft"
-                className="form-input"
-                required
-                value={newPlot.size}
-                onChange={(e) => setNewPlot({...newPlot, size: e.target.value})}
-              />
-            </div>
+          <div className="form-group mb-8">
+            <label>Expected Price (Quotation)</label>
+            <input
+              type="text"
+              placeholder="₹ e.g. 45 L or 1.2 Cr"
+              className="form-input"
+              required
+              value={newPlot.price}
+              onChange={(e) => setNewPlot({...newPlot, price: e.target.value})}
+            />
           </div>
           <div className="form-group mb-8">
             <label>Key Features</label>
@@ -976,6 +960,18 @@ function App() {
                 <p className="text-muted">Loading map...</p>
               </div>
             )}
+          </div>
+
+          <div className="form-group mb-8">
+            <label>Plot Size <span style={{fontWeight: 'normal', fontSize: '0.85rem', color: 'var(--text-muted)'}}>(Calculated based on satellite imagery of the location)</span></label>
+            <input
+              type="text"
+              placeholder="e.g. 1,200 m² (Click on the map above in 'Draw Boundary' mode to automatically calculate)"
+              className="form-input"
+              required
+              value={newPlot.size}
+              onChange={(e) => setNewPlot({...newPlot, size: e.target.value})}
+            />
           </div>
 
           {/* ── Upload Images / Videos ── */}
