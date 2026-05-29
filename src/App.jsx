@@ -4,7 +4,6 @@ import {
   Search, ArrowRight,
   Smartphone, Clock, CheckCircle2,
   ChevronRight, ChevronDown, Building, Upload,
-  ChevronRight, ChevronDown, Building, Upload,
   LogOut, User, Mail, Lock, Eye, EyeOff, Settings,
   Shield, Check, X, Menu, Undo, Trash2, Edit3
 } from 'lucide-react';
