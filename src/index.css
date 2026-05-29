@@ -2104,6 +2104,26 @@ textarea.form-input {
   color: var(--primary);
   border: 3px solid white;
   box-shadow: 0 4px 10px rgba(0,0,0,0.08);
+  position: absolute;
+  top: 0;
+  left: 0;
+  z-index: 1;
+}
+.founder-avatar-img {
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 3px solid white;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.08);
+  position: absolute;
+  top: 0;
+  left: 0;
+  z-index: 2;
+  transition: var(--transition);
+}
+.founder-card:hover .founder-avatar-img {
+  transform: scale(1.05);
 }
 .founder-name {
   font-size: 1.5rem;
