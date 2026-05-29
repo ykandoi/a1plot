@@ -34,6 +34,7 @@ const defaultCenter = {
 };
 
 const mapOptions = {
+  mapTypeId: 'satellite',
   disableDefaultUI: false,
   zoomControl: true,
   mapTypeControl: true,
@@ -833,6 +834,7 @@ function App() {
                     center={plotLocation}
                     zoom={14}
                     options={{
+                      mapTypeId: 'satellite',
                       disableDefaultUI: true,
                       zoomControl: true,
                       mapTypeControl: true,
@@ -1148,7 +1150,7 @@ function App() {
                       map.fitBounds(bounds, { padding: 40 });
                     }
                   }}
-                  options={{ disableDefaultUI: true, zoomControl: true, styles: mapOptions.styles }}
+                  options={{ mapTypeId: 'satellite', mapTypeControl: true, disableDefaultUI: true, zoomControl: true, styles: mapOptions.styles }}
                 >
                   {myHoldings.map(plot => plot.lat && plot.lng && (
                     <MarkerF
