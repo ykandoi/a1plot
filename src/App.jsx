@@ -4,15 +4,16 @@ import {
   Search, ArrowRight,
   Smartphone, Clock, CheckCircle2,
   ChevronRight, ChevronDown, Building, Upload,
+  ChevronRight, ChevronDown, Building, Upload,
   LogOut, User, Mail, Lock, Eye, EyeOff, Settings,
-  Shield, Check, X, Menu
+  Shield, Check, X, Menu, Undo, Trash2, Edit3
 } from 'lucide-react';
 import {
   LineChart, Line, XAxis, YAxis,
   CartesianGrid, Tooltip, ResponsiveContainer,
   AreaChart, Area, ReferenceLine
 } from 'recharts';
-import { GoogleMap, useJsApiLoader, MarkerF, InfoWindowF, Autocomplete } from '@react-google-maps/api';
+import { GoogleMap, useJsApiLoader, MarkerF, InfoWindowF, Autocomplete, PolygonF } from '@react-google-maps/api';
 
 const LIBRARIES = ['places', 'geometry'];
 import { auth, googleProvider } from './firebase';
@@ -237,6 +238,8 @@ function App() {
   const [mediaFiles, setMediaFiles] = useState([]);
   const [docFiles, setDocFiles] = useState([]);
   const [plotLocation, setPlotLocation] = useState({ lat: 20.5937, lng: 78.9629 }); // India center
+  const [polygonPath, setPolygonPath] = useState([]);
+  const [isDrawingMode, setIsDrawingMode] = useState(false);
   const mediaInputRef = useRef(null);
   const docInputRef = useRef(null);
   const autocompleteRef = useRef(null);
@@ -464,6 +467,29 @@ function App() {
     setPlotLocation({ lat: e.latLng.lat(), lng: e.latLng.lng() });
   };
 
+  const handleMapClickForDrawing = (e) => {
+    if (isDrawingMode) {
+      const newPoint = { lat: e.latLng.lat(), lng: e.latLng.lng() };
+      const updatedPath = [...polygonPath, newPoint];
+      setPolygonPath(updatedPath);
+      
+      // Calculate area if we have at least 3 points
+      if (updatedPath.length >= 3 && window.google?.maps?.geometry?.spherical) {
+        const areaSqMeters = window.google.maps.geometry.spherical.computeArea(updatedPath);
+        const areaSqFt = areaSqMeters * 10.7639;
+        let formattedSize = '';
+        if (areaSqFt > 43560) {
+          formattedSize = (areaSqFt / 43560).toFixed(2) + ' Acres';
+        } else if (areaSqFt > 1089) {
+          formattedSize = (areaSqFt / 1089).toFixed(2) + ' Guntas';
+        } else {
+          formattedSize = Math.round(areaSqFt).toLocaleString() + ' Sq Ft';
+        }
+        setNewPlot(prev => ({ ...prev, size: formattedSize }));
+      }
+    }
+  };
+
   // Admin actions
   const handleVerifyPlot = async (plotId) => {
     await updatePlot(plotId, { status: 'Verified', badge: 'Verified' });
@@ -482,6 +508,12 @@ function App() {
         await updatePlot(editingPlot.id, { ...newPlot, lat: plotLocation.lat, lng: plotLocation.lng });
         setEditingPlot(null);
       } else {
+        let staticMapUrl = 'https://images.unsplash.com/photo-1500382017468-9049fed747ef?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80';
+        if (polygonPath.length >= 3 && window.google?.maps?.geometry?.encoding) {
+          const encodedPath = window.google.maps.geometry.encoding.encodePath(polygonPath);
+          staticMapUrl = `https://maps.googleapis.com/maps/api/staticmap?size=600x400&maptype=satellite&path=color:0x10b981AA|weight:3|fillcolor:0x10b98144|enc:${encodeURIComponent(encodedPath)}&key=${GOOGLE_MAPS_API_KEY}`;
+        }
+        
         // Use a default image — blob URLs are session-only and can't be stored in DB
         const plot = {
           ...newPlot,
@@ -492,10 +524,11 @@ function App() {
           cagr: 'TBD',
           developer: 'Self Listed',
           badge: 'New',
-          image: 'https://images.unsplash.com/photo-1500382017468-9049fed747ef?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80',
+          image: staticMapUrl,
           documentsAvailable: docFiles.map(f => f.name),
           lat: plotLocation.lat,
           lng: plotLocation.lng,
+          polygonPath: polygonPath.length >= 3 ? polygonPath : null,
           priceHistory: [],
           investedAmount: 0,
           currentValue: 0,
@@ -506,6 +539,8 @@ function App() {
       setNewPlot({ title: '', location: '', price: '', size: '', features: '', visibility: 'private' });
       setMediaFiles([]);
       setDocFiles([]);
+      setPolygonPath([]);
+      setIsDrawingMode(false);
       setPlotLocation({ lat: 20.5937, lng: 78.9629 });
       navigate('seller-dashboard');
     } catch (err) {
@@ -526,6 +561,12 @@ function App() {
       features: plot.features || '',
       visibility: plot.visibility || 'private'
     });
+    setPlotLocation({ lat: plot.lat, lng: plot.lng });
+    if (plot.polygonPath) {
+      setPolygonPath(plot.polygonPath);
+    } else {
+      setPolygonPath([]);
+    }
     navigate('seller-edit');
   };
 
@@ -834,11 +875,37 @@ function App() {
                     style={{marginBottom: '0.75rem'}}
                   />
                 </Autocomplete>
-                <div className="location-map-container">
+                <div className="location-map-container" style={{ position: 'relative' }}>
+                  <div style={{ position: 'absolute', top: '10px', right: '10px', zIndex: 10, display: 'flex', gap: '0.5rem', background: 'rgba(255,255,255,0.9)', padding: '0.5rem', borderRadius: '0.5rem', boxShadow: '0 2px 4px rgba(0,0,0,0.1)' }}>
+                    <button 
+                      type="button"
+                      className={`btn ${isDrawingMode ? 'btn-primary' : 'btn-outline'}`}
+                      style={{ padding: '0.4rem 0.75rem', fontSize: '0.8rem' }}
+                      onClick={() => setIsDrawingMode(!isDrawingMode)}
+                    >
+                      <Edit3 size={14} /> {isDrawingMode ? 'Stop Drawing' : 'Draw Boundary'}
+                    </button>
+                    {polygonPath.length > 0 && (
+                      <>
+                        <button type="button" className="btn btn-outline" style={{ padding: '0.4rem 0.75rem', fontSize: '0.8rem' }} onClick={() => setPolygonPath(polygonPath.slice(0, -1))}>
+                          <Undo size={14} /> Undo
+                        </button>
+                        <button type="button" className="btn btn-outline" style={{ padding: '0.4rem 0.75rem', fontSize: '0.8rem', color: '#ef4444', borderColor: '#ef4444' }} onClick={() => { setPolygonPath([]); setNewPlot(prev => ({...prev, size: ''})); }}>
+                          <Trash2 size={14} /> Clear
+                        </button>
+                      </>
+                    )}
+                  </div>
+                  {isDrawingMode && (
+                    <div style={{ position: 'absolute', bottom: '20px', left: '50%', transform: 'translateX(-50%)', background: 'rgba(15,23,42,0.9)', color: 'white', padding: '0.5rem 1rem', borderRadius: '2rem', fontSize: '0.85rem', zIndex: 10, pointerEvents: 'none' }}>
+                      Click on the map to draw your land boundaries
+                    </div>
+                  )}
                   <GoogleMap
-                    mapContainerStyle={{width: '100%', height: '320px', borderRadius: '0.75rem'}}
+                    mapContainerStyle={{width: '100%', height: '320px', borderRadius: '0.75rem', cursor: isDrawingMode ? 'crosshair' : 'grab'}}
                     center={plotLocation}
                     zoom={14}
+                    onClick={handleMapClickForDrawing}
                     options={{
                       mapTypeId: 'satellite',
                       disableDefaultUI: true,
@@ -848,14 +915,30 @@ function App() {
                       fullscreenControl: false,
                       gestureHandling: 'greedy',
                       disableDoubleClickZoom: true,
+                      draggableCursor: isDrawingMode ? 'crosshair' : 'grab',
                       styles: mapOptions.styles
                     }}
                   >
-                    <MarkerF
-                      position={plotLocation}
-                      draggable
-                      onDragEnd={onMarkerDragEnd}
-                    />
+                    {!isDrawingMode && (
+                      <MarkerF
+                        position={plotLocation}
+                        draggable={true}
+                        onDragEnd={onMarkerDragEnd}
+                      />
+                    )}
+                    {polygonPath.length > 0 && (
+                      <PolygonF
+                        paths={polygonPath}
+                        options={{
+                          fillColor: '#10b981',
+                          fillOpacity: 0.35,
+                          strokeColor: '#10b981',
+                          strokeOpacity: 1,
+                          strokeWeight: 2,
+                          clickable: false
+                        }}
+                      />
+                    )}
                   </GoogleMap>
                   <div className="location-coords">
                     <span>📍 {plotLocation.lat.toFixed(5)}, {plotLocation.lng.toFixed(5)}</span>
@@ -1161,17 +1244,32 @@ function App() {
                   options={{ mapTypeId: 'satellite', mapTypeControl: true, disableDefaultUI: true, zoomControl: true, gestureHandling: 'greedy', disableDoubleClickZoom: true, styles: mapOptions.styles }}
                 >
                   {myHoldings.map(plot => plot.lat && plot.lng && (
-                    <MarkerF
-                      key={plot.id}
-                      position={{ lat: plot.lat, lng: plot.lng }}
-                      icon={{
-                        url: 'data:image/svg+xml;charset=UTF-8,' + encodeURIComponent(
-                          `<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="${selectedPropertyChart === plot.id ? '#f59e0b' : '#3b7a76'}" stroke="white" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3" fill="white"/></svg>`
-                        ),
-                        scaledSize: new window.google.maps.Size(36, 36)
-                      }}
-                      onClick={() => setSelectedPropertyChart(selectedPropertyChart === plot.id ? null : plot.id)}
-                    />
+                    <React.Fragment key={plot.id}>
+                      <MarkerF
+                        position={{ lat: plot.lat, lng: plot.lng }}
+                        icon={{
+                          url: 'data:image/svg+xml;charset=UTF-8,' + encodeURIComponent(
+                            `<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="${selectedPropertyChart === plot.id ? '#f59e0b' : '#3b7a76'}" stroke="white" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3" fill="white"/></svg>`
+                          ),
+                          scaledSize: new window.google.maps.Size(36, 36)
+                        }}
+                        onClick={() => setSelectedPropertyChart(selectedPropertyChart === plot.id ? null : plot.id)}
+                      />
+                      {plot.polygonPath && plot.polygonPath.length >= 3 && (
+                        <PolygonF
+                          paths={plot.polygonPath}
+                          options={{
+                            fillColor: selectedPropertyChart === plot.id ? '#f59e0b' : '#3b7a76',
+                            fillOpacity: 0.35,
+                            strokeColor: selectedPropertyChart === plot.id ? '#f59e0b' : '#3b7a76',
+                            strokeOpacity: 1,
+                            strokeWeight: 2,
+                            clickable: true
+                          }}
+                          onClick={() => setSelectedPropertyChart(selectedPropertyChart === plot.id ? null : plot.id)}
+                        />
+                      )}
+                    </React.Fragment>
                   ))}
                 </GoogleMap>
               ) : (
@@ -1355,17 +1453,32 @@ function App() {
                   .filter(p => p.visibility === 'public' && p.status !== 'Verification Pending' && p.status !== 'Rejected')
                   .map(plot => (
                   plot.lat && plot.lng && (
-                    <MarkerF
-                      key={plot.id}
-                      position={{ lat: plot.lat, lng: plot.lng }}
-                      onClick={() => setSelectedMarker(plot)}
-                      icon={{
-                        url: 'data:image/svg+xml;charset=UTF-8,' + encodeURIComponent(
-                          `<svg xmlns="http://www.w3.org/2000/svg" width="36" height="36" viewBox="0 0 24 24" fill="${selectedMarker?.id === plot.id ? '%23f59e0b' : '%233b7a76'}" stroke="white" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3" fill="white"/></svg>`
-                        ),
-                        scaledSize: new window.google.maps.Size(40, 40)
-                      }}
-                    />
+                    <React.Fragment key={plot.id}>
+                      <MarkerF
+                        position={{ lat: plot.lat, lng: plot.lng }}
+                        onClick={() => setSelectedMarker(plot)}
+                        icon={{
+                          url: 'data:image/svg+xml;charset=UTF-8,' + encodeURIComponent(
+                            `<svg xmlns="http://www.w3.org/2000/svg" width="36" height="36" viewBox="0 0 24 24" fill="${selectedMarker?.id === plot.id ? '%23f59e0b' : '%233b7a76'}" stroke="white" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3" fill="white"/></svg>`
+                          ),
+                          scaledSize: new window.google.maps.Size(40, 40)
+                        }}
+                      />
+                      {plot.polygonPath && plot.polygonPath.length >= 3 && (
+                        <PolygonF
+                          paths={plot.polygonPath}
+                          options={{
+                            fillColor: selectedMarker?.id === plot.id ? '#f59e0b' : '#3b7a76',
+                            fillOpacity: 0.35,
+                            strokeColor: selectedMarker?.id === plot.id ? '#f59e0b' : '#3b7a76',
+                            strokeOpacity: 1,
+                            strokeWeight: 2,
+                            clickable: true
+                          }}
+                          onClick={() => setSelectedMarker(plot)}
+                        />
+                      )}
+                    </React.Fragment>
                   )
                 ))}
 
