@@ -1821,15 +1821,11 @@ function App() {
             {isLoaded ? (
               <GoogleMap
                 mapContainerStyle={{width: '100%', height: '100%'}}
-                center={mapFocusPlot ? { lat: mapFocusPlot.lat, lng: mapFocusPlot.lng } : (droppedPin ? droppedPin : defaultCenter)}
-                zoom={mapFocusPlot || droppedPin ? 16 : 6}
+                center={mapFocusPlot ? { lat: mapFocusPlot.lat, lng: mapFocusPlot.lng } : defaultCenter}
+                zoom={mapFocusPlot ? 16 : 6}
                 onLoad={onMapLoad}
                 options={mapOptions}
                 onClick={() => { setBuyerMapSelectedPlotId(null); setSelectedMarker(null); }}
-                onDblClick={(e) => {
-                  setDroppedPin({ lat: e.latLng.lat(), lng: e.latLng.lng() });
-                  setSelectedMarker(null);
-                }}
               >
                 {plots
                   .filter(p => p.visibility !== 'private' && p.status !== 'Verification Pending' && p.status !== 'Rejected')
@@ -1864,18 +1860,6 @@ function App() {
                   )
                 ))}
 
-                {droppedPin && (
-                  <MarkerF
-                    position={droppedPin}
-                    icon={{
-                      url: 'data:image/svg+xml;charset=UTF-8,' + encodeURIComponent(
-                        `<svg xmlns="http://www.w3.org/2000/svg" width="36" height="36" viewBox="0 0 24 24" fill="%23e11d48" stroke="white" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3" fill="white"/></svg>`
-                      ),
-                      scaledSize: new window.google.maps.Size(40, 40)
-                    }}
-                  />
-                )}
-
                 {selectedMarker && (
                   <InfoWindowF
                     position={{ lat: selectedMarker.lat, lng: selectedMarker.lng }}
@@ -1904,56 +1888,6 @@ function App() {
                 <p className="text-muted">Loading map...</p>
               </div>
             )}
-            
-            {/* Instruction Banner at the bottom */}
-            <div style={{
-              position: 'absolute',
-              bottom: '20px',
-              left: '50%',
-              transform: 'translateX(-50%)',
-              backgroundColor: 'rgba(15, 23, 42, 0.95)',
-              color: 'white',
-              padding: '0.75rem 1.25rem',
-              borderRadius: '2rem',
-              fontSize: '0.85rem',
-              fontWeight: 600,
-              pointerEvents: droppedPin ? 'auto' : 'none',
-              boxShadow: '0 4px 12px rgba(0, 0, 0, 0.2)',
-              textAlign: 'center',
-              display: 'flex',
-              alignItems: 'center',
-              gap: '0.5rem',
-              zIndex: 10,
-              width: 'max-content',
-              maxWidth: '90%'
-            }}>
-              {droppedPin ? (
-                <>
-                  <span>Location selected</span>
-                  <button 
-                    className="btn btn-primary" 
-                    style={{padding: '0.35rem 0.75rem', fontSize: '0.75rem', marginLeft: '0.5rem'}}
-                    onClick={() => {
-                      setPlotLocation(droppedPin);
-                      if (!user) { setAuthMode('login'); navigate('login'); return; }
-                      navigate('seller-list');
-                    }}
-                  >
-                    Make Property
-                  </button>
-                  <button 
-                    style={{background: 'none', border: 'none', color: '#94a3b8', cursor: 'pointer', padding: '0.25rem', display: 'flex', alignItems: 'center'}}
-                    onClick={() => setDroppedPin(null)}
-                  >
-                    <X size={16} />
-                  </button>
-                </>
-              ) : (
-                <>
-                  <MapPin size={16} color="#10b981" /> Double click to make property
-                </>
-              )}
-            </div>
           </div>
         </div>
       </div>
