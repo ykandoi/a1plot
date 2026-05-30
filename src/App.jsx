@@ -2883,6 +2883,7 @@ export default function App() {
                     <th>Price</th>
                     <th>Size</th>
                     <th>Documents</th>
+                    <th>Visibility</th>
                     <th>Status</th>
                     <th>Actions</th>
                   </tr>
@@ -2907,9 +2908,26 @@ export default function App() {
                         </div>
                       </td>
                       <td>
-                        <span className={`admin-status admin-status-${plot.status.toLowerCase().replace(/\s+/g,'-')}`}>
-                          {plot.status}
+                        <span style={{
+                          padding: '0.2rem 0.5rem', 
+                          borderRadius: '4px', 
+                          fontSize: '0.75rem', 
+                          fontWeight: 600, 
+                          backgroundColor: plot.visibility === 'private' ? '#fee2e2' : '#dcfce7',
+                          color: plot.visibility === 'private' ? '#991b1b' : '#166534'
+                        }}>
+                          {plot.visibility === 'private' ? 'Private' : 'Public'}
                         </span>
+                      </td>
+                      <td>
+                        {(() => {
+                          const displayStatus = ['Verification Pending', 'Rejected'].includes(plot.status) ? plot.status : 'Verified';
+                          return (
+                            <span className={`admin-status admin-status-${displayStatus.toLowerCase().replace(/\s+/g,'-')}`}>
+                              {displayStatus}
+                            </span>
+                          );
+                        })()}
                       </td>
                       <td onClick={(e) => e.stopPropagation()}>
                         <div className="admin-actions">
