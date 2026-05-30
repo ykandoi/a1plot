@@ -1879,6 +1879,29 @@ function App() {
                           ? selectedMarker.documentsAvailable.filter(d => d && d.trim() !== '').join(', ')
                           : 'No documents uploaded'}
                       </div>
+                      <div style={{marginTop: '0.5rem', display: 'flex', gap: '0.5rem'}}>
+                        <button 
+                          className="btn btn-primary" 
+                          style={{flex: 1, padding: '0.5rem', fontSize: '0.85rem'}}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleViewProperty(selectedMarker);
+                          }}
+                        >
+                          Visit Property
+                        </button>
+                        <button 
+                          className="btn btn-outline" 
+                          style={{padding: '0.5rem', fontSize: '0.85rem'}}
+                          title="Zoom to location"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setMapFocusPlot(selectedMarker);
+                          }}
+                        >
+                          🔍 Zoom
+                        </button>
+                      </div>
                     </div>
                   </InfoWindowF>
                 )}
