@@ -5,7 +5,7 @@ import {
   Smartphone, Clock, CheckCircle2,
   ChevronRight, ChevronDown, Building, Upload,
   LogOut, User, Mail, Lock, Eye, EyeOff, Settings,
-  Shield, Check, X, Menu, Undo, Trash2, Edit3, Heart
+  Shield, Check, X, Menu, Undo, Trash2, Edit3, Heart, Navigation
 } from 'lucide-react';
 import {
   LineChart, Line, XAxis, YAxis,
@@ -290,6 +290,7 @@ export default function App() {
   const [mediaFiles, setMediaFiles] = useState([]);
   const [docFiles, setDocFiles] = useState([]);
   const [plotLocation, setPlotLocation] = useState({ lat: 20.5937, lng: 78.9629 }); // India center
+  const [buyerMapCenter, setBuyerMapCenter] = useState(defaultCenter);
   const [polygonPath, setPolygonPath] = useState([]);
   const [isDrawingMode, setIsDrawingMode] = useState(false);
   const [mapType, setMapType] = useState('hybrid');
@@ -452,6 +453,30 @@ export default function App() {
       await signOut(auth);
     }
     navigate('home');
+  };
+
+  const handleLogout = () => {
+    setIsLoggedIn(false);
+    setUserRole(null);
+    setSearchQuery('');
+  };
+
+  const handleLocateMe = (setCenter) => {
+    if (navigator.geolocation) {
+      navigator.geolocation.getCurrentPosition(
+        (position) => {
+          setCenter({
+            lat: position.coords.latitude,
+            lng: position.coords.longitude
+          });
+        },
+        () => {
+          alert("Could not get your location. Please check browser permissions.");
+        }
+      );
+    } else {
+      alert("Geolocation is not supported by your browser.");
+    }
   };
 
   // Gate seller features behind auth
@@ -1962,12 +1987,15 @@ export default function App() {
             {isLoaded ? (
               <GoogleMap
                 mapContainerStyle={{width: '100%', height: '100%'}}
-                center={mapFocusPlot ? { lat: mapFocusPlot.lat, lng: mapFocusPlot.lng } : defaultCenter}
+                center={mapFocusPlot ? { lat: mapFocusPlot.lat, lng: mapFocusPlot.lng } : buyerMapCenter}
                 zoom={mapFocusPlot ? 16 : 6}
                 onLoad={onMapLoad}
                 options={mapOptions}
                 onClick={() => { setBuyerMapSelectedPlotId(null); setSelectedMarker(null); }}
               >
+                <button type="button" className="btn btn-primary" style={{ position: 'absolute', bottom: '20px', right: '10px', zIndex: 10, padding: '0.6rem', borderRadius: '50%', width: '45px', height: '45px', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 4px 6px rgba(0,0,0,0.3)' }} onClick={() => { setMapFocusPlot(null); handleLocateMe(setBuyerMapCenter); }} title="Locate Me">
+                  <Navigation size={20} />
+                </button>
                 {plots
                   .filter(p => p.visibility !== 'private' && p.status !== 'Verification Pending' && p.status !== 'Rejected')
                   .map(plot => (
@@ -3048,7 +3076,7 @@ export default function App() {
                     <button 
                       onClick={() => handleToggleInterest(plot)}
                       style={{
-                        display: 'flex', alignItems: 'center', gap: '0.5rem', 
+                        display: 'flex items-center gap-0.5rem', 
                         padding: '0.5rem 1rem', borderRadius: '2rem', 
                         border: `1px solid ${interestedPlots.some(p => p.id === plot.id) ? '#ef4444' : '#e2e8f0'}`,
                         background: interestedPlots.some(p => p.id === plot.id) ? '#fef2f2' : 'white',
