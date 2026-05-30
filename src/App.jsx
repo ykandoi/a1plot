@@ -15,7 +15,8 @@ import {
 import { GoogleMap, useJsApiLoader, MarkerF, InfoWindowF, Autocomplete, PolygonF } from '@react-google-maps/api';
 
 const LIBRARIES = ['places', 'geometry'];
-import { auth, googleProvider } from './firebase';
+import { auth, googleProvider, storage } from './firebase';
+import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 import { signInWithPopup, signInWithEmailAndPassword, createUserWithEmailAndPassword, onAuthStateChanged, signOut } from 'firebase/auth';
 import { usePlots } from './hooks/usePlots';
 import { useInterests } from './hooks/useInterests';
@@ -590,6 +591,17 @@ function App() {
     if (docInputRef.current) docInputRef.current.value = '';
   };
 
+  // Upload a document file to Firebase Storage and return its download URL
+  const uploadDocToStorage = async (fileObj) => {
+    if (!storage) {
+      // If Firebase Storage isn't configured, return a local object URL as fallback
+      return URL.createObjectURL(fileObj.file);
+    }
+    const storageRef = ref(storage, `documents/${Date.now()}_${fileObj.name}`);
+    await uploadBytes(storageRef, fileObj.file);
+    return await getDownloadURL(storageRef);
+  };
+
   const removeMediaFile = (id) => {
     setMediaFiles(prev => {
       const toRemove = prev.find(f => f.id === id);
@@ -690,7 +702,7 @@ function App() {
           developer: 'Self Listed',
           badge: 'New',
           image: staticMapUrl,
-          documentsAvailable: docFiles.map(f => f.name),
+          documentsAvailable: await Promise.all(docFiles.map(f => uploadDocToStorage(f))),
           lat: plotLocation.lat,
           lng: plotLocation.lng,
           polygonPath: sortedPolygonPath.length >= 3 ? sortedPolygonPath : null,
@@ -776,7 +788,8 @@ function App() {
       }
       let finalDocs = adminNewPlot.documentsAvailable || [];
       if (docFiles.length > 0) {
-        finalDocs = [...finalDocs, ...docFiles.map(f => f.name)];
+        const uploadedUrls = await Promise.all(docFiles.map(f => uploadDocToStorage(f)));
+        finalDocs = [...finalDocs, ...uploadedUrls];
       }
 
       await updatePlot(adminEditingPlot.id, {
@@ -2843,13 +2856,15 @@ function App() {
                   {docs.length > 0 ? (
                     <div className="doc-file-list">
                       {docs.map((doc, i) => (
-                        <div key={i} className="doc-file-item" style={{background: '#f8fafc', padding: '0.75rem 1rem', borderRadius: '0.5rem', marginBottom: '0.5rem', display: 'flex', alignItems: 'center', gap: '0.75rem', border: '1px solid #e2e8f0'}}>
-                          <div className="doc-file-icon" style={{fontSize: '1.5rem'}}>📄</div>
-                          <div className="doc-file-info">
-                            <div className="doc-file-name" style={{fontWeight: 600, color: '#334155'}}>{doc}</div>
-                            <div style={{fontSize: '0.75rem', color: '#94a3b8'}}>View Only</div>
+                        <a key={i} href={doc} target="_blank" rel="noopener noreferrer" style={{textDecoration: 'none'}} title="Click to open document">
+                          <div className="doc-file-item" style={{background: '#f8fafc', padding: '0.75rem 1rem', borderRadius: '0.5rem', marginBottom: '0.5rem', display: 'flex', alignItems: 'center', gap: '0.75rem', border: '1px solid #e2e8f0', cursor: 'pointer', transition: 'background 0.2s'}} onMouseEnter={e => e.currentTarget.style.background='#eff6ff'} onMouseLeave={e => e.currentTarget.style.background='#f8fafc'}>
+                            <div className="doc-file-icon" style={{fontSize: '1.5rem'}}>📄</div>
+                            <div className="doc-file-info" style={{flex: 1}}>
+                              <div className="doc-file-name" style={{fontWeight: 600, color: '#334155'}}>{doc.split('/').pop().split('_').slice(1).join('_') || doc.split('/').pop()}</div>
+                              <div style={{fontSize: '0.75rem', color: '#3b82f6'}}>Click to Open ↗</div>
+                            </div>
                           </div>
-                        </div>
+                        </a>
                       ))}
                     </div>
                   ) : (

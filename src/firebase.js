@@ -1,6 +1,7 @@
 import { initializeApp } from 'firebase/app';
 import { getAuth, GoogleAuthProvider } from 'firebase/auth';
 import { getFirestore } from 'firebase/firestore';
+import { getStorage } from 'firebase/storage';
 
 const cleanEnv = (val) => val ? String(val).replace(/\\r|\\n|\r|\n|\s/g, '') : undefined;
 
@@ -13,12 +14,13 @@ const firebaseConfig = {
   appId: cleanEnv(import.meta.env.VITE_FIREBASE_APP_ID)
 };
 
-let app, auth, googleProvider, db;
+let app, auth, googleProvider, db, storage;
 
 if (firebaseConfig.apiKey && firebaseConfig.apiKey !== 'YOUR_FIREBASE_API_KEY') {
   app = initializeApp(firebaseConfig);
   auth = getAuth(app);
   db = getFirestore(app, 'default');
+  storage = getStorage(app);
   googleProvider = new GoogleAuthProvider();
   googleProvider.setCustomParameters({
     prompt: 'select_account'
@@ -28,6 +30,7 @@ if (firebaseConfig.apiKey && firebaseConfig.apiKey !== 'YOUR_FIREBASE_API_KEY') 
   auth = {};
   googleProvider = {};
   db = {};
+  storage = null;
 }
 
-export { auth, googleProvider, db };
+export { auth, googleProvider, db, storage };
