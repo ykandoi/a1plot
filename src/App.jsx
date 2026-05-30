@@ -207,6 +207,7 @@ const viewToPath = {
   'contact': '/contact',
   'buy-request': '/buy_request',
   'admin': '/admin',
+  'admin-edit': '/admin_edit',
   'login': '/login',
   'about': '/about_us'
 };
@@ -223,6 +224,7 @@ const pathToView = {
   '/contact': 'contact',
   '/buy_request': 'buy-request',
   '/admin': 'admin',
+  '/admin_edit': 'admin-edit',
   '/login': 'login',
   '/about_us': 'about'
 };
@@ -230,8 +232,10 @@ const pathToView = {
 function App() {
   const [view, setView] = useState('home');
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-  const [newPlot, setNewPlot] = useState({ title: '', location: '', price: '', size: '', features: '', visibility: 'private' });
+  const [newPlot, setNewPlot] = useState({ title: '', location: '', price: '', size: '', features: '', visibility: 'public' });
   const [editingPlot, setEditingPlot] = useState(null);
+  const [adminNewPlot, setAdminNewPlot] = useState({ title: '', location: '', price: '', size: '', features: '', visibility: 'public', status: 'Verification Pending' });
+  const [adminEditingPlot, setAdminEditingPlot] = useState(null);
   const [requestingDocsFor, setRequestingDocsFor] = useState(null);
   const [legalAgreed, setLegalAgreed] = useState(false);
   const [selectedMarker, setSelectedMarker] = useState(null);
@@ -496,7 +500,7 @@ function App() {
 
   // Admin actions
   const handleVerifyPlot = async (plotId) => {
-    await updatePlot(plotId, { status: 'Verified', badge: 'Verified' });
+    await updatePlot(plotId, { status: 'Verified', badge: 'Verified', visibility: 'public' });
   };
 
   const handleRejectPlot = async (plotId) => {
@@ -540,7 +544,7 @@ function App() {
         };
         await addPlot(plot);
       }
-      setNewPlot({ title: '', location: '', price: '', size: '', features: '', visibility: 'private' });
+      setNewPlot({ title: '', location: '', price: '', size: '', features: '', visibility: 'public' });
       setMediaFiles([]);
       setDocFiles([]);
       setPolygonPath([]);
@@ -572,6 +576,72 @@ function App() {
       setPolygonPath([]);
     }
     navigate('seller-edit');
+  };
+
+  const handleAdminEditClick = (plot) => {
+    setAdminEditingPlot(plot);
+    setAdminNewPlot({
+      title: plot.title,
+      location: plot.location,
+      price: plot.price,
+      size: plot.size,
+      features: plot.features || '',
+      visibility: plot.visibility || 'public',
+      status: plot.status || 'Verification Pending'
+    });
+    setPlotLocation({ lat: plot.lat, lng: plot.lng });
+    if (plot.polygonPath) {
+      setPolygonPath(plot.polygonPath);
+    } else {
+      setPolygonPath([]);
+    }
+    navigate('admin-edit');
+  };
+
+  const handleAdminUpdateProperty = async (e) => {
+    e.preventDefault();
+    if (!adminEditingPlot) return;
+    setIsSubmitting(true);
+    setSubmitError('');
+    try {
+      let finalMedia = adminEditingPlot.media || [];
+      if (mediaFiles.length > 0) {
+        const newUrls = mediaFiles.map(f => f.preview || 'https://via.placeholder.com/600');
+        finalMedia = [...finalMedia, ...newUrls];
+      }
+      let finalDocs = adminEditingPlot.documentsAvailable || [];
+      if (docFiles.length > 0) {
+        finalDocs = [...finalDocs, ...docFiles.map(f => f.name)];
+      }
+
+      await updatePlot(adminEditingPlot.id, {
+        title: adminNewPlot.title,
+        location: adminNewPlot.location,
+        price: adminNewPlot.price,
+        size: adminNewPlot.size,
+        features: adminNewPlot.features,
+        visibility: adminNewPlot.visibility,
+        status: adminNewPlot.status,
+        lat: plotLocation.lat,
+        lng: plotLocation.lng,
+        polygonPath: sortedPolygonPath.length > 0 ? sortedPolygonPath : null,
+        media: finalMedia,
+        documentsAvailable: finalDocs
+      });
+
+      setAdminEditingPlot(null);
+      setAdminNewPlot({ title: '', location: '', price: '', size: '', features: '', visibility: 'public', status: 'Verification Pending' });
+      setMediaFiles([]);
+      setDocFiles([]);
+      setPolygonPath([]);
+      setIsDrawingMode(false);
+      navigate('admin');
+    } catch (err) {
+      console.error('Admin submit failed:', err);
+      setSubmitError(err?.message || 'Failed to update property.');
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   /* ============================================
@@ -717,7 +787,7 @@ function App() {
 
           <div className="plots-grid">
             {plots
-              .filter(p => p.visibility === 'public' && p.status !== 'Verification Pending' && p.status !== 'Rejected')
+              .filter(p => p.visibility !== 'private' && p.status !== 'Verification Pending' && p.status !== 'Rejected')
               .map((plot) => (
               <div key={plot.id} className="plot-card">
                 <div className="plot-image">
@@ -1079,7 +1149,7 @@ function App() {
             {editingPlot && (
               <button type="button" className="btn btn-outline" style={{padding: '1rem 2rem'}} onClick={() => {
                 setEditingPlot(null);
-                setNewPlot({ title: '', location: '', price: '', size: '', features: '', visibility: 'private' });
+                setNewPlot({ title: '', location: '', price: '', size: '', features: '', visibility: 'public' });
                 setMediaFiles([]);
                 setDocFiles([]);
                 navigate('seller-dashboard');
@@ -1410,7 +1480,7 @@ function App() {
           <div className="buyer-map-list">
             <div className="plots-grid" style={{gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: '1.5rem'}}>
               {plots
-                .filter(p => p.visibility === 'public' && p.status !== 'Verification Pending' && p.status !== 'Rejected')
+                .filter(p => p.visibility !== 'private' && p.status !== 'Verification Pending' && p.status !== 'Rejected')
                 .map(plot => (
                 <div 
                   key={plot.id} 
@@ -1472,7 +1542,7 @@ function App() {
                 }}
               >
                 {plots
-                  .filter(p => p.visibility === 'public' && p.status !== 'Verification Pending' && p.status !== 'Rejected')
+                  .filter(p => p.visibility !== 'private' && p.status !== 'Verification Pending' && p.status !== 'Rejected')
                   .map(plot => (
                   plot.lat && plot.lng && (
                     <React.Fragment key={plot.id}>
@@ -2170,6 +2240,115 @@ function App() {
   );
 
   /* ============================================
+     ADMIN EDIT FORM
+     ============================================ */
+  const renderAdminEditForm = () => (
+    <section className="section bg-white" style={{paddingTop: '6rem'}}>
+      <div className="container" style={{maxWidth: '800px'}}>
+        <div className="section-header">
+          <h2 className="section-title">Admin Property Details & Edit</h2>
+          <p className="text-muted">Review and update details for "{adminEditingPlot?.title}"</p>
+        </div>
+        <form className="listing-form" onSubmit={handleAdminUpdateProperty}>
+          <div className="form-group mb-8">
+            <label>Plot Title</label>
+            <input type="text" className="form-input" required value={adminNewPlot.title} onChange={(e) => setAdminNewPlot({...adminNewPlot, title: e.target.value})} />
+          </div>
+          <div className="form-group mb-8">
+            <label>Expected Price</label>
+            <input type="text" className="form-input" required value={adminNewPlot.price} onChange={(e) => setAdminNewPlot({...adminNewPlot, price: e.target.value})} />
+          </div>
+          <div className="form-group mb-8">
+            <label>Size</label>
+            <input type="text" className="form-input" required value={adminNewPlot.size} onChange={(e) => setAdminNewPlot({...adminNewPlot, size: e.target.value})} />
+          </div>
+          <div className="form-group mb-8">
+            <label>Key Features</label>
+            <input type="text" className="form-input" value={adminNewPlot.features} onChange={(e) => setAdminNewPlot({...adminNewPlot, features: e.target.value})} />
+          </div>
+          <div className="form-group mb-8">
+            <label>Location (Text)</label>
+            <input type="text" className="form-input" required value={adminNewPlot.location} onChange={(e) => setAdminNewPlot({...adminNewPlot, location: e.target.value})} />
+          </div>
+
+          {/* ── Property Location on Map ── */}
+          <div className="form-group mb-8">
+            <label><MapPin size={16} style={{display: 'inline', verticalAlign: 'middle', marginRight: '0.35rem'}} />Property Location Map</label>
+            {isLoaded ? (
+              <>
+                <div className="location-map-container" style={{ position: 'relative' }}>
+                  <div style={{ position: 'absolute', top: '10px', right: '10px', zIndex: 10, display: 'flex', gap: '0.5rem', background: 'rgba(255,255,255,0.9)', padding: '0.5rem', borderRadius: '0.5rem', boxShadow: '0 2px 4px rgba(0,0,0,0.1)' }}>
+                    <button type="button" className={`btn ${isDrawingMode ? 'btn-primary' : 'btn-outline'}`} style={{ padding: '0.4rem 0.75rem', fontSize: '0.8rem' }} onClick={() => setIsDrawingMode(!isDrawingMode)}>
+                      <Edit3 size={14} /> {isDrawingMode ? 'Stop Drawing' : 'Draw Boundary'}
+                    </button>
+                    {polygonPath.length > 0 && (
+                      <>
+                        <button type="button" className="btn btn-outline" style={{ padding: '0.4rem 0.75rem', fontSize: '0.8rem' }} onClick={() => setPolygonPath(polygonPath.slice(0, -1))}><Undo size={14} /> Undo</button>
+                        <button type="button" className="btn btn-outline" style={{ padding: '0.4rem 0.75rem', fontSize: '0.8rem', color: '#ef4444', borderColor: '#ef4444' }} onClick={() => { setPolygonPath([]); }}><Trash2 size={14} /> Clear</button>
+                      </>
+                    )}
+                  </div>
+                  <GoogleMap
+                    mapContainerStyle={{width: '100%', height: '320px', borderRadius: '0.75rem', cursor: isDrawingMode ? 'crosshair' : 'grab'}}
+                    center={plotLocation}
+                    zoom={14}
+                    onClick={handleMapClickForDrawing}
+                    options={{ mapTypeId: 'satellite', disableDefaultUI: true, zoomControl: true, mapTypeControl: true, draggableCursor: isDrawingMode ? 'crosshair' : 'grab', styles: mapOptions.styles }}
+                  >
+                    {!isDrawingMode && <MarkerF position={plotLocation} draggable={true} onDragEnd={onMarkerDragEnd} />}
+                    {sortedPolygonPath.length > 0 && <PolygonF paths={sortedPolygonPath} options={{ fillColor: '#10b981', fillOpacity: 0.35, strokeColor: '#10b981', strokeOpacity: 1, strokeWeight: 2, clickable: false }} />}
+                    {isDrawingMode && polygonPath.map((point, index) => (
+                      <MarkerF key={index} position={point} label={{ text: (index + 1).toString(), color: 'white', fontWeight: 'bold', fontSize: '10px' }} icon={{ url: 'data:image/svg+xml;charset=UTF-8,' + encodeURIComponent(`<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="%2310b981" stroke="white" stroke-width="2"><circle cx="12" cy="12" r="8"/></svg>`), scaledSize: new window.google.maps.Size(20, 20), anchor: new window.google.maps.Point(10, 10) }} />
+                    ))}
+                  </GoogleMap>
+                  <div className="location-coords">
+                    <span>📍 {plotLocation.lat.toFixed(5)}, {plotLocation.lng.toFixed(5)}</span>
+                  </div>
+                </div>
+              </>
+            ) : (
+              <div style={{height: '320px', display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#f1f5f9', borderRadius: '0.75rem'}}>
+                <p className="text-muted">Loading map...</p>
+              </div>
+            )}
+          </div>
+
+          <div className="form-group mb-8">
+            <label>Status</label>
+            <select className="form-input" value={adminNewPlot.status} onChange={(e) => setAdminNewPlot({...adminNewPlot, status: e.target.value})}>
+              <option value="Verification Pending">Verification Pending</option>
+              <option value="Verified">Verified</option>
+              <option value="Rejected">Rejected</option>
+            </select>
+          </div>
+          <div className="form-group mb-8">
+            <label>Visibility</label>
+            <select className="form-input" value={adminNewPlot.visibility} onChange={(e) => setAdminNewPlot({...adminNewPlot, visibility: e.target.value})}>
+              <option value="public">Public</option>
+              <option value="private">Private</option>
+            </select>
+          </div>
+
+          {submitError && (
+            <div style={{background: '#fee2e2', border: '1px solid #fca5a5', borderRadius: '0.5rem', padding: '0.75rem 1rem', marginBottom: '1rem', color: '#b91c1c', fontSize: '0.9rem'}}>
+              ⚠️ {submitError}
+            </div>
+          )}
+          <div className="flex justify-center gap-4">
+            <button type="submit" className="btn btn-primary" style={{padding: '1rem 3rem', opacity: isSubmitting ? 0.7 : 1}} disabled={isSubmitting}>
+              {isSubmitting ? 'Updating...' : 'Update Details'}
+            </button>
+            <button type="button" className="btn btn-outline" style={{padding: '1rem 2rem'}} onClick={() => {
+              setAdminEditingPlot(null);
+              navigate('admin');
+            }}>Cancel</button>
+          </div>
+        </form>
+      </div>
+    </section>
+  );
+
+  /* ============================================
      ADMIN PANEL
      ============================================ */
   const renderAdminPanel = () => {
@@ -2249,6 +2428,9 @@ function App() {
                       </td>
                       <td>
                         <div className="admin-actions">
+                          <button className="admin-btn" style={{backgroundColor: '#e2e8f0', color: '#1e293b', border: '1px solid #cbd5e1'}} onClick={() => handleAdminEditClick(plot)}>
+                            <Edit3 size={14} /> Edit
+                          </button>
                           {plot.status === 'Verification Pending' ? (
                             <>
                               <button className="admin-btn admin-btn-verify" onClick={() => handleVerifyPlot(plot.id)}>
@@ -2398,6 +2580,7 @@ function App() {
         {view === 'contact' && renderContact()}
         {view === 'buy-request' && renderBuyRequest()}
         {view === 'admin' && (isAdmin ? renderAdminPanel() : renderAuth())}
+        {view === 'admin-edit' && (isAdmin ? renderAdminEditForm() : renderAuth())}
         {view === 'privacy' && renderPrivacy()}
         {view === 'terms' && renderTerms()}
         {view === 'about' && renderAbout()}
