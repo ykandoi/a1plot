@@ -1298,14 +1298,14 @@ function App() {
                       style={{ padding: '0.4rem 0.75rem', fontSize: '0.8rem', whiteSpace: 'nowrap' }}
                       onClick={handleToggleDrawingMode}
                     >
-                      <Edit3 size={14} style={{display: 'inline', marginRight: '4px'}} /> {isDrawingMode ? 'Stop' : 'Draw Boundary'}
+                      <Edit3 size={14} style={{display: 'inline', marginRight: '4px'}} /> {isDrawingMode ? 'Stop' : (polygonPath.length > 0 ? 'Change boundary' : 'Draw Boundary')}
                     </button>
                     {polygonPath.length > 0 && (
                       <>
                         <button type="button" className="btn btn-outline" style={{ padding: '0.4rem 0.75rem', fontSize: '0.8rem', whiteSpace: 'nowrap' }} onClick={() => setPolygonPath(polygonPath.slice(0, -1))}>
                           <Undo size={14} style={{display: 'inline', marginRight: '4px'}} /> Undo
                         </button>
-                        <button type="button" className="btn btn-outline" style={{ padding: '0.4rem 0.75rem', fontSize: '0.8rem', color: '#ef4444', borderColor: '#ef4444', whiteSpace: 'nowrap' }} onClick={() => { setPolygonPath([]); setNewPlot(prev => ({...prev, size: ''})); setMediaFiles(prev => prev.filter(f => !f.isStaticMap)); }}>
+                        <button type="button" className="btn" style={{ padding: '0.4rem 0.75rem', fontSize: '0.8rem', background: '#ef4444', color: 'white', border: 'none', whiteSpace: 'nowrap' }} onClick={() => { setPolygonPath([]); setNewPlot(prev => ({...prev, size: ''})); setMediaFiles(prev => prev.filter(f => !f.isStaticMap)); }}>
                           <Trash2 size={14} style={{display: 'inline', marginRight: '4px'}} /> Clear
                         </button>
                       </>
@@ -2616,14 +2616,14 @@ function App() {
                       style={{ padding: '0.4rem 0.75rem', fontSize: '0.8rem', whiteSpace: 'nowrap' }}
                       onClick={handleToggleDrawingMode}
                     >
-                      <Edit3 size={14} style={{display: 'inline', marginRight: '4px'}} /> {isDrawingMode ? 'Stop' : 'Draw Boundary'}
+                      <Edit3 size={14} style={{display: 'inline', marginRight: '4px'}} /> {isDrawingMode ? 'Stop' : (polygonPath.length > 0 ? 'Change boundary' : 'Draw Boundary')}
                     </button>
                     {polygonPath.length > 0 && (
                       <>
                         <button type="button" className="btn btn-outline" style={{ padding: '0.4rem 0.75rem', fontSize: '0.8rem', whiteSpace: 'nowrap' }} onClick={() => setPolygonPath(polygonPath.slice(0, -1))}>
                           <Undo size={14} style={{display: 'inline', marginRight: '4px'}} /> Undo
                         </button>
-                        <button type="button" className="btn btn-outline" style={{ padding: '0.4rem 0.75rem', fontSize: '0.8rem', color: '#ef4444', borderColor: '#ef4444', whiteSpace: 'nowrap' }} onClick={() => { setPolygonPath([]); setMediaFiles(prev => prev.filter(f => !f.isStaticMap)); }}>
+                        <button type="button" className="btn" style={{ padding: '0.4rem 0.75rem', fontSize: '0.8rem', background: '#ef4444', color: 'white', border: 'none', whiteSpace: 'nowrap' }} onClick={() => { setPolygonPath([]); setMediaFiles(prev => prev.filter(f => !f.isStaticMap)); }}>
                           <Trash2 size={14} style={{display: 'inline', marginRight: '4px'}} /> Clear
                         </button>
                       </>
