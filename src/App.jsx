@@ -650,7 +650,7 @@ function App() {
     }
   };
 
-  const fetchAddressFromCoords = (lat, lng) => {
+  function fetchAddressFromCoords(lat, lng) {
     if (!window.google?.maps?.Geocoder) return;
     const geocoder = new window.google.maps.Geocoder();
     geocoder.geocode({ location: { lat, lng } }, (results, status) => {
