@@ -865,7 +865,9 @@ textarea.form-input {
   font-size: 0.72rem;
   font-weight: 500;
   color: var(--text-muted);
-  white-space: nowrap;
+  white-space: normal;
+  word-break: break-all;
+  max-width: 250px;
 }
 .admin-status {
   display: inline-block;
