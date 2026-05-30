@@ -232,7 +232,28 @@ const pathToView = {
 };
 
 function App() {
-  const [view, setView] = useState('home');
+  // Initialize view directly from URL path so reloads land on the correct page
+  const getInitialView = () => {
+    const pathToViewMap = {
+      '/': 'home',
+      '/privacy_policy': 'privacy',
+      '/terms_of_service': 'terms',
+      '/buyer_map': 'buyer-map',
+      '/dashboard': 'seller-dashboard',
+      '/list_property': 'seller-list',
+      '/edit_property': 'seller-edit',
+      '/interests': 'interested',
+      '/contact': 'contact',
+      '/buy_request': 'buy-request',
+      '/admin': 'admin',
+      '/admin_edit': 'admin-edit',
+      '/property': 'property-detail',
+      '/login': 'login',
+      '/about_us': 'about'
+    };
+    return pathToViewMap[window.location.pathname] || 'home';
+  };
+  const [view, setView] = useState(getInitialView);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [newPlot, setNewPlot] = useState({ title: '', location: '', price: '', size: '', features: '', visibility: 'public' });
   const [editingPlot, setEditingPlot] = useState(null);
@@ -2725,7 +2746,11 @@ function App() {
      PROPERTY DETAIL VIEW (Public)
      ============================================ */
   const renderPropertyDetail = () => {
-    if (!selectedPropertyDetail) return null;
+    if (!selectedPropertyDetail) {
+      // Safety: if we're on /property but have no data (e.g. cleared localStorage), go home
+      setTimeout(() => navigate('home'), 0);
+      return null;
+    }
     const plot = selectedPropertyDetail;
     const images = plot.media && plot.media.length > 0 ? plot.media : (plot.image ? [plot.image] : []);
     const docs = (plot.documentsAvailable || []).filter(d => d && d.trim() !== '');
