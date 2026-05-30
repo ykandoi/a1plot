@@ -1289,31 +1289,33 @@ function App() {
                   <div className="location-coords">
                     <span>📍 {plotLocation.lat.toFixed(5)}, {plotLocation.lng.toFixed(5)}</span>
                   </div>
-                </div>
-                {/* Mobile-optimized Map Controls */}
-                <div className="map-drawing-controls" style={{ marginTop: '0.75rem', display: 'flex', flexWrap: 'wrap', gap: '0.5rem', width: '100%', justifyContent: 'space-between', alignItems: 'center', background: '#f8fafc', padding: '0.75rem', borderRadius: '0.75rem', border: '1px solid #e2e8f0' }}>
-                  <div style={{ fontSize: '0.85rem', fontWeight: 600, color: isDrawingMode ? '#3b82f6' : '#475569' }}>
-                    {isDrawingMode ? '👉 Click map to draw boundary' : 'Boundary Tools'}
-                  </div>
-                  <div style={{ display: 'flex', gap: '0.5rem', flex: '1 1 auto', justifyContent: 'flex-end' }}>
-                    <button 
-                      type="button"
-                      className={`btn ${isDrawingMode ? 'btn-primary' : 'btn-outline'}`}
-                      style={{ padding: '0.5rem 0.75rem', fontSize: '0.85rem', whiteSpace: 'nowrap', flex: '1 1 auto', maxWidth: '120px' }}
-                      onClick={handleToggleDrawingMode}
-                    >
-                      <Edit3 size={14} style={{display: 'inline', marginRight: '4px'}} /> {isDrawingMode ? 'Stop' : 'Draw'}
-                    </button>
-                    {polygonPath.length > 0 && (
-                      <>
-                        <button type="button" className="btn btn-outline" style={{ padding: '0.5rem 0.75rem', fontSize: '0.85rem', whiteSpace: 'nowrap', flex: '1 1 auto', maxWidth: '120px' }} onClick={() => setPolygonPath(polygonPath.slice(0, -1))}>
-                          <Undo size={14} style={{display: 'inline', marginRight: '4px'}} /> Undo
-                        </button>
-                        <button type="button" className="btn btn-outline" style={{ padding: '0.5rem 0.75rem', fontSize: '0.85rem', color: '#ef4444', borderColor: '#ef4444', whiteSpace: 'nowrap', flex: '1 1 auto', maxWidth: '120px' }} onClick={() => { setPolygonPath([]); setNewPlot(prev => ({...prev, size: ''})); setMediaFiles(prev => prev.filter(f => !f.isStaticMap)); }}>
-                          <Trash2 size={14} style={{display: 'inline', marginRight: '4px'}} /> Clear
-                        </button>
-                      </>
+                  {/* Floating Map Controls Inside Map */}
+                  <div className="map-drawing-controls" style={{ position: 'absolute', bottom: '15px', left: '50%', transform: 'translateX(-50%)', zIndex: 10, display: 'flex', flexDirection: 'column', gap: '0.35rem', width: 'max-content', maxWidth: '95%', alignItems: 'center', background: 'rgba(255,255,255,0.95)', padding: '0.5rem', borderRadius: '1rem', boxShadow: '0 4px 12px rgba(0,0,0,0.15)' }}>
+                    {isDrawingMode && (
+                      <div style={{ fontSize: '0.75rem', fontWeight: 600, color: '#3b82f6', textAlign: 'center', width: '100%' }}>
+                        👉 Click map to draw boundary
+                      </div>
                     )}
+                    <div style={{ display: 'flex', gap: '0.5rem', justifyContent: 'center', flexWrap: 'wrap' }}>
+                      <button 
+                        type="button"
+                        className={`btn ${isDrawingMode ? 'btn-primary' : 'btn-outline'}`}
+                        style={{ padding: '0.4rem 0.8rem', fontSize: '0.8rem', whiteSpace: 'nowrap', borderRadius: '2rem' }}
+                        onClick={handleToggleDrawingMode}
+                      >
+                        <Edit3 size={14} style={{display: 'inline', marginRight: '4px'}} /> {isDrawingMode ? 'Stop' : 'Draw'}
+                      </button>
+                      {polygonPath.length > 0 && (
+                        <>
+                          <button type="button" className="btn btn-outline" style={{ padding: '0.4rem 0.8rem', fontSize: '0.8rem', whiteSpace: 'nowrap', borderRadius: '2rem' }} onClick={() => setPolygonPath(polygonPath.slice(0, -1))}>
+                            <Undo size={14} style={{display: 'inline', marginRight: '4px'}} /> Undo
+                          </button>
+                          <button type="button" className="btn btn-outline" style={{ padding: '0.4rem 0.8rem', fontSize: '0.8rem', color: '#ef4444', borderColor: '#ef4444', whiteSpace: 'nowrap', borderRadius: '2rem' }} onClick={() => { setPolygonPath([]); setNewPlot(prev => ({...prev, size: ''})); setMediaFiles(prev => prev.filter(f => !f.isStaticMap)); }}>
+                            <Trash2 size={14} style={{display: 'inline', marginRight: '4px'}} /> Clear
+                          </button>
+                        </>
+                      )}
+                    </div>
                   </div>
                 </div>
               </>
@@ -2599,32 +2601,33 @@ function App() {
                   <div className="location-coords">
                     <span>📍 {plotLocation.lat.toFixed(5)}, {plotLocation.lng.toFixed(5)}</span>
                   </div>
-                </div>
-                
-                {/* Mobile-optimized Map Controls */}
-                <div className="map-drawing-controls" style={{ marginTop: '0.75rem', display: 'flex', flexWrap: 'wrap', gap: '0.5rem', width: '100%', justifyContent: 'space-between', alignItems: 'center', background: '#f8fafc', padding: '0.75rem', borderRadius: '0.75rem', border: '1px solid #e2e8f0' }}>
-                  <div style={{ fontSize: '0.85rem', fontWeight: 600, color: isDrawingMode ? '#3b82f6' : '#475569' }}>
-                    {isDrawingMode ? '👉 Click map to draw boundary' : 'Boundary Tools'}
-                  </div>
-                  <div style={{ display: 'flex', gap: '0.5rem', flex: '1 1 auto', justifyContent: 'flex-end' }}>
-                    <button 
-                      type="button"
-                      className={`btn ${isDrawingMode ? 'btn-primary' : 'btn-outline'}`}
-                      style={{ padding: '0.5rem 0.75rem', fontSize: '0.85rem', whiteSpace: 'nowrap', flex: '1 1 auto', maxWidth: '120px' }}
-                      onClick={handleToggleDrawingMode}
-                    >
-                      <Edit3 size={14} style={{display: 'inline', marginRight: '4px'}} /> {isDrawingMode ? 'Stop' : 'Draw'}
-                    </button>
-                    {polygonPath.length > 0 && (
-                      <>
-                        <button type="button" className="btn btn-outline" style={{ padding: '0.5rem 0.75rem', fontSize: '0.85rem', whiteSpace: 'nowrap', flex: '1 1 auto', maxWidth: '120px' }} onClick={() => setPolygonPath(polygonPath.slice(0, -1))}>
-                          <Undo size={14} style={{display: 'inline', marginRight: '4px'}} /> Undo
-                        </button>
-                        <button type="button" className="btn btn-outline" style={{ padding: '0.5rem 0.75rem', fontSize: '0.85rem', color: '#ef4444', borderColor: '#ef4444', whiteSpace: 'nowrap', flex: '1 1 auto', maxWidth: '120px' }} onClick={() => { setPolygonPath([]); setMediaFiles(prev => prev.filter(f => !f.isStaticMap)); }}>
-                          <Trash2 size={14} style={{display: 'inline', marginRight: '4px'}} /> Clear
-                        </button>
-                      </>
+                  {/* Floating Map Controls Inside Map */}
+                  <div className="map-drawing-controls" style={{ position: 'absolute', bottom: '15px', left: '50%', transform: 'translateX(-50%)', zIndex: 10, display: 'flex', flexDirection: 'column', gap: '0.35rem', width: 'max-content', maxWidth: '95%', alignItems: 'center', background: 'rgba(255,255,255,0.95)', padding: '0.5rem', borderRadius: '1rem', boxShadow: '0 4px 12px rgba(0,0,0,0.15)' }}>
+                    {isDrawingMode && (
+                      <div style={{ fontSize: '0.75rem', fontWeight: 600, color: '#3b82f6', textAlign: 'center', width: '100%' }}>
+                        👉 Click map to draw boundary
+                      </div>
                     )}
+                    <div style={{ display: 'flex', gap: '0.5rem', justifyContent: 'center', flexWrap: 'wrap' }}>
+                      <button 
+                        type="button"
+                        className={`btn ${isDrawingMode ? 'btn-primary' : 'btn-outline'}`}
+                        style={{ padding: '0.4rem 0.8rem', fontSize: '0.8rem', whiteSpace: 'nowrap', borderRadius: '2rem' }}
+                        onClick={handleToggleDrawingMode}
+                      >
+                        <Edit3 size={14} style={{display: 'inline', marginRight: '4px'}} /> {isDrawingMode ? 'Stop' : 'Draw'}
+                      </button>
+                      {polygonPath.length > 0 && (
+                        <>
+                          <button type="button" className="btn btn-outline" style={{ padding: '0.4rem 0.8rem', fontSize: '0.8rem', whiteSpace: 'nowrap', borderRadius: '2rem' }} onClick={() => setPolygonPath(polygonPath.slice(0, -1))}>
+                            <Undo size={14} style={{display: 'inline', marginRight: '4px'}} /> Undo
+                          </button>
+                          <button type="button" className="btn btn-outline" style={{ padding: '0.4rem 0.8rem', fontSize: '0.8rem', color: '#ef4444', borderColor: '#ef4444', whiteSpace: 'nowrap', borderRadius: '2rem' }} onClick={() => { setPolygonPath([]); setMediaFiles(prev => prev.filter(f => !f.isStaticMap)); }}>
+                            <Trash2 size={14} style={{display: 'inline', marginRight: '4px'}} /> Clear
+                          </button>
+                        </>
+                      )}
+                    </div>
                   </div>
                 </div>
               </>
