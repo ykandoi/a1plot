@@ -705,8 +705,11 @@ function App() {
       if (sorted.length >= 3 && window.google?.maps?.geometry?.encoding) {
         const latLngs = sorted.map(p => new window.google.maps.LatLng(p.lat, p.lng));
         const encodedPath = window.google.maps.geometry.encoding.encodePath(latLngs);
+        const avgLat = sorted.reduce((sum, p) => sum + p.lat, 0) / sorted.length;
+        const avgLng = sorted.reduce((sum, p) => sum + p.lng, 0) / sorted.length;
+        const markersParam = encodeURIComponent(`color:red|${avgLat},${avgLng}`);
         const pathParam = encodeURIComponent(`color:0x10b981AA|weight:3|fillcolor:0x10b98144|enc:${encodedPath}`);
-        const url = `https://maps.googleapis.com/maps/api/staticmap?size=600x400&maptype=hybrid&path=${pathParam}&key=${GOOGLE_MAPS_API_KEY}`;
+        const url = `https://maps.googleapis.com/maps/api/staticmap?size=600x400&maptype=hybrid&zoom=19&markers=${markersParam}&path=${pathParam}&key=${GOOGLE_MAPS_API_KEY}`;
         
         setMediaFiles(prev => {
           const filtered = prev.filter(f => !f.isStaticMap);
@@ -762,8 +765,11 @@ function App() {
       if (sortedPolygonPath.length >= 3 && window.google?.maps?.geometry?.encoding) {
         const latLngs = sortedPolygonPath.map(p => new window.google.maps.LatLng(p.lat, p.lng));
         const encodedPath = window.google.maps.geometry.encoding.encodePath(latLngs);
+        const avgLat = sortedPolygonPath.reduce((sum, p) => sum + p.lat, 0) / sortedPolygonPath.length;
+        const avgLng = sortedPolygonPath.reduce((sum, p) => sum + p.lng, 0) / sortedPolygonPath.length;
+        const markersParam = encodeURIComponent(`color:red|${avgLat},${avgLng}`);
         const pathParam = encodeURIComponent(`color:0x10b981AA|weight:3|fillcolor:0x10b98144|enc:${encodedPath}`);
-        staticMapUrl = `https://maps.googleapis.com/maps/api/staticmap?size=600x400&maptype=hybrid&path=${pathParam}&key=${GOOGLE_MAPS_API_KEY}`;
+        staticMapUrl = `https://maps.googleapis.com/maps/api/staticmap?size=600x400&maptype=hybrid&zoom=19&markers=${markersParam}&path=${pathParam}&key=${GOOGLE_MAPS_API_KEY}`;
       }
 
       if (editingPlot) {
@@ -875,8 +881,11 @@ function App() {
       if (sortedPolygonPath.length >= 3 && window.google?.maps?.geometry?.encoding) {
         const latLngs = sortedPolygonPath.map(p => new window.google.maps.LatLng(p.lat, p.lng));
         const encodedPath = window.google.maps.geometry.encoding.encodePath(latLngs);
+        const avgLat = sortedPolygonPath.reduce((sum, p) => sum + p.lat, 0) / sortedPolygonPath.length;
+        const avgLng = sortedPolygonPath.reduce((sum, p) => sum + p.lng, 0) / sortedPolygonPath.length;
+        const markersParam = encodeURIComponent(`color:red|${avgLat},${avgLng}`);
         const pathParam = encodeURIComponent(`color:0x10b981AA|weight:3|fillcolor:0x10b98144|enc:${encodedPath}`);
-        staticMapUrl = `https://maps.googleapis.com/maps/api/staticmap?size=600x400&maptype=hybrid&path=${pathParam}&key=${GOOGLE_MAPS_API_KEY}`;
+        staticMapUrl = `https://maps.googleapis.com/maps/api/staticmap?size=600x400&maptype=hybrid&zoom=19&markers=${markersParam}&path=${pathParam}&key=${GOOGLE_MAPS_API_KEY}`;
       }
       
       let finalMedia = adminNewPlot.media || [];
