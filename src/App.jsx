@@ -232,6 +232,9 @@ const pathToView = {
 };
 
 function App() {
+  // Clear any stale localStorage keys from old code versions
+  try { localStorage.removeItem('selected_property_detail'); } catch(e) {}
+
   // Initialize view directly from URL path so reloads land on the correct page
   const getInitialView = () => {
     const pathToViewMap = {
@@ -2768,7 +2771,9 @@ function App() {
     }
     const plot = selectedPropertyDetail;
     const images = plot.media && plot.media.length > 0 ? plot.media : (plot.image ? [plot.image] : []);
-    const docs = (plot.documentsAvailable || []).filter(d => d && d.trim() !== '');
+    // Only show documents that were actually uploaded as files (they have a file extension).
+    // Legacy placeholder strings like 'Title Deed', 'Patta' have no extension — skip them.
+    const docs = (plot.documentsAvailable || []).filter(d => d && d.trim() !== '' && d.includes('.'));
 
     return (
       <section className="section bg-light" style={{paddingTop: '6rem', minHeight: '100vh'}}>
