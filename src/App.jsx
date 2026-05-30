@@ -259,7 +259,7 @@ function App() {
   };
   const [view, setView] = useState(getInitialView);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-  const [newPlot, setNewPlot] = useState({ title: '', location: '', price: '', size: '', features: '', visibility: 'public' });
+  const [newPlot, setNewPlot] = useState({ title: '', location: '', price: '', size: '', features: '', visibility: 'public', khasraNumber: '', district: '', tehsil: '', village: '' });
   const [editingPlot, setEditingPlot] = useState(null);
   const [adminNewPlot, setAdminNewPlot] = useState({ title: '', location: '', price: '', size: '', features: '', visibility: 'public', status: 'Verification Pending', media: [], documentsAvailable: [] });
   const [adminEditingPlot, setAdminEditingPlot] = useState(null);
@@ -633,6 +633,7 @@ function App() {
       setPlotLocation({ lat, lng });
       setNewPlot(prev => ({ ...prev, location: addr }));
       if (locationInputRef.current) locationInputRef.current.value = addr;
+      fetchAddressFromCoords(lat, lng);
     } else if (addr) {
       // Fallback: use Geocoder when geometry is missing (Places API (New) quirk)
       const geocoder = new window.google.maps.Geocoder();
@@ -643,13 +644,46 @@ function App() {
           const formattedAddr = results[0].formatted_address || addr;
           setNewPlot(prev => ({ ...prev, location: formattedAddr }));
           if (locationInputRef.current) locationInputRef.current.value = formattedAddr;
+          fetchAddressFromCoords(loc.lat(), loc.lng());
         }
       });
     }
   };
 
+  const fetchAddressFromCoords = (lat, lng) => {
+    if (!window.google?.maps?.Geocoder) return;
+    const geocoder = new window.google.maps.Geocoder();
+    geocoder.geocode({ location: { lat, lng } }, (results, status) => {
+      if (status === 'OK' && results[0]) {
+        let district = '';
+        let tehsil = '';
+        let village = '';
+        results[0].address_components.forEach(comp => {
+          const types = comp.types;
+          if (types.includes('administrative_area_level_3')) tehsil = comp.long_name;
+          if (types.includes('administrative_area_level_2')) district = comp.long_name;
+          if (types.includes('sublocality') || types.includes('locality') || types.includes('neighborhood')) {
+            if (!village) village = comp.long_name;
+          }
+        });
+        if (!village && results[0].address_components[0]) village = results[0].address_components[0].long_name;
+        
+        setNewPlot(prev => ({
+          ...prev,
+          district: district || prev.district,
+          tehsil: tehsil || prev.tehsil,
+          village: village || prev.village,
+          location: results[0].formatted_address
+        }));
+      }
+    });
+  };
+
   const onMarkerDragEnd = (e) => {
-    setPlotLocation({ lat: e.latLng.lat(), lng: e.latLng.lng() });
+    const lat = e.latLng.lat();
+    const lng = e.latLng.lng();
+    setPlotLocation({ lat, lng });
+    fetchAddressFromCoords(lat, lng);
   };
 
   const handleToggleDrawingMode = () => {
@@ -669,6 +703,9 @@ function App() {
           const filtered = prev.filter(f => !f.isStaticMap);
           return [{ id: 'static-map-' + Date.now(), preview: url, name: 'Boundary Map Preview', isStaticMap: true }, ...filtered];
         });
+      }
+      if (sorted.length > 0) {
+        fetchAddressFromCoords(sorted[0].lat, sorted[0].lng);
       }
     } else {
       // Starting drawing
@@ -759,7 +796,7 @@ function App() {
         };
         await addPlot(plot);
       }
-      setNewPlot({ title: '', location: '', price: '', size: '', features: '', visibility: 'public' });
+      setNewPlot({ title: '', location: '', price: '', size: '', features: '', visibility: 'public', khasraNumber: '', district: '', tehsil: '', village: '' });
       setMediaFiles([]);
       setDocFiles([]);
       setPolygonPath([]);
@@ -1345,6 +1382,30 @@ function App() {
             />
           </div>
 
+          <div className="form-group mb-8">
+            <label>District ➔ Tehsil ➔ Village</label>
+            <p className="text-muted" style={{fontSize: '0.85rem', marginBottom: '0.5rem'}}>Automatically fetched when you mark the plot on the map.</p>
+            <div style={{ display: 'flex', gap: '0.5rem' }}>
+              <input type="text" placeholder="District" className="form-input" style={{flex: 1}} value={newPlot.district || ''} onChange={e => setNewPlot({...newPlot, district: e.target.value})} />
+              <input type="text" placeholder="Tehsil" className="form-input" style={{flex: 1}} value={newPlot.tehsil || ''} onChange={e => setNewPlot({...newPlot, tehsil: e.target.value})} />
+              <input type="text" placeholder="Village" className="form-input" style={{flex: 1}} value={newPlot.village || ''} onChange={e => setNewPlot({...newPlot, village: e.target.value})} />
+            </div>
+          </div>
+
+          <div className="form-group mb-8">
+            <label>Khasra / Khatauni Number <span style={{fontWeight: 'normal', fontSize: '0.85rem', color: '#10b981'}}>(Optional)</span></label>
+            <p className="text-muted" style={{fontSize: '0.85rem', marginBottom: '0.5rem'}}>
+              <strong>Note:</strong> People who provide the Khasra number of their land have a <strong style={{color: '#3b82f6'}}>20x higher chance of selling</strong> as it builds immediate trust!
+            </p>
+            <input
+              type="text"
+              placeholder="e.g. 142/5"
+              className="form-input"
+              value={newPlot.khasraNumber || ''}
+              onChange={(e) => setNewPlot({...newPlot, khasraNumber: e.target.value})}
+            />
+          </div>
+
           {/* ── Upload Images / Videos ── */}
           <div className="form-group mb-8">
             <label>Upload Images / Videos</label>
@@ -1450,7 +1511,7 @@ function App() {
             {editingPlot && (
               <button type="button" className="btn btn-outline" style={{padding: '1rem 2rem'}} onClick={() => {
                 setEditingPlot(null);
-                setNewPlot({ title: '', location: '', price: '', size: '', features: '', visibility: 'public' });
+                setNewPlot({ title: '', location: '', price: '', size: '', features: '', visibility: 'public', khasraNumber: '', district: '', tehsil: '', village: '' });
                 setMediaFiles([]);
                 setDocFiles([]);
                 navigate('seller-dashboard');
