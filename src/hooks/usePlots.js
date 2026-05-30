@@ -34,6 +34,38 @@ export function usePlots(initialSeedPlots) {
     };
     seedIfEmpty();
 
+    // One-time migration: clear any fake/placeholder document names from existing Firestore records
+    const clearFakeDocuments = async () => {
+      const FAKE_DOCS = new Set([
+        'Title Deed', 'Patta', 'Layout Plan',
+        'Khata Certificate', 'Commercial Approval', 'Tax Receipt'
+      ]);
+      try {
+        const snapshot = await getDocs(plotsRef);
+        const batch = writeBatch(db);
+        let needsWrite = false;
+        snapshot.docs.forEach((docSnap) => {
+          const data = docSnap.data();
+          const docs = data.documentsAvailable || [];
+          // Check if the plot still has ONLY fake placeholder names (not real uploaded files)
+          // A real uploaded file would have an extension like .pdf .jpg etc.
+          const hasOnlyFakeDocs = docs.length > 0 && docs.every(d => FAKE_DOCS.has(d));
+          if (hasOnlyFakeDocs) {
+            batch.update(docSnap.ref, { documentsAvailable: [] });
+            needsWrite = true;
+            console.log('Migrating plot:', docSnap.id, '— clearing fake docs:', docs);
+          }
+        });
+        if (needsWrite) {
+          await batch.commit();
+          console.log('✅ Migration complete: fake document names cleared from Firestore.');
+        }
+      } catch (e) {
+        console.error("Migration error (non-critical):", e);
+      }
+    };
+    clearFakeDocuments();
+
     // Listen for real-time updates
     const unsubscribe = onSnapshot(plotsRef, (snapshot) => {
       const fetchedPlots = snapshot.docs.map(d => ({
