@@ -621,63 +621,74 @@ function App() {
   };
 
   function fetchAddressFromCoords(lat, lng) {
-    if (!window.google?.maps?.Geocoder) return;
-    const geocoder = new window.google.maps.Geocoder();
-    geocoder.geocode({ location: { lat, lng } }, (results, status) => {
-      if (status === 'OK' && results[0]) {
-        let district = '';
-        let tehsil = '';
-        let village = '';
-        results[0].address_components.forEach(comp => {
-          const types = comp.types;
-          if (types.includes('administrative_area_level_3')) tehsil = comp.long_name;
-          if (types.includes('administrative_area_level_2')) district = comp.long_name;
-          if (types.includes('sublocality') || types.includes('locality') || types.includes('neighborhood')) {
-            if (!village) village = comp.long_name;
-          }
-        });
-        if (!village && results[0].address_components[0]) village = results[0].address_components[0].long_name;
-        
-        setNewPlot(prev => ({
-          ...prev,
-          district: district || prev.district,
-          tehsil: tehsil || prev.tehsil,
-          village: village || prev.village,
-          location: results[0].formatted_address
-        }));
-      }
-    });
+    try {
+      if (!window.google?.maps?.Geocoder) return;
+      const geocoder = new window.google.maps.Geocoder();
+      geocoder.geocode({ location: { lat: Number(lat), lng: Number(lng) } }, (results, status) => {
+        if (status === 'OK' && results && results[0] && results[0].address_components) {
+          let district = '';
+          let tehsil = '';
+          let village = '';
+          results[0].address_components.forEach(comp => {
+            const types = comp.types || [];
+            if (types.includes('administrative_area_level_3')) tehsil = comp.long_name;
+            if (types.includes('administrative_area_level_2')) district = comp.long_name;
+            if (types.includes('sublocality') || types.includes('locality') || types.includes('neighborhood')) {
+              if (!village) village = comp.long_name;
+            }
+          });
+          if (!village && results[0].address_components[0]) village = results[0].address_components[0].long_name;
+          
+          setNewPlot(prev => ({
+            ...prev,
+            district: district || prev.district,
+            tehsil: tehsil || prev.tehsil,
+            village: village || prev.village,
+            location: results[0].formatted_address || prev.location
+          }));
+        }
+      });
+    } catch (err) {
+      console.error("fetchAddressFromCoords error:", err);
+    }
   }
 
   // Places autocomplete handler
   const onPlaceSelected = () => {
-    if (!autocompleteRef.current) return;
-    const place = autocompleteRef.current.getPlace();
-    const addr = place.formatted_address || place.name || '';
+    try {
+      if (!autocompleteRef.current) return;
+      const place = autocompleteRef.current.getPlace();
+      if (!place) return;
+      const addr = place.formatted_address || place.name || '';
 
-    if (place.geometry && place.geometry.location) {
-      // Normal path — geometry returned
-      const lat = place.geometry.location.lat();
-      const lng = place.geometry.location.lng();
-      setPlotLocation({ lat, lng });
-      setNewPlot(prev => ({ ...prev, location: addr }));
-      if (locationInputRef.current) locationInputRef.current.value = addr;
-      fetchAddressFromCoords(lat, lng);
-    } else if (addr) {
-      // Fallback: use Geocoder when geometry is missing (Places API (New) quirk)
-      const geocoder = new window.google.maps.Geocoder();
-      geocoder.geocode({ address: addr }, (results, status) => {
-        if (status === 'OK' && results[0]) {
-          const loc = results[0].geometry.location;
-          setPlotLocation({ lat: loc.lat(), lng: loc.lng() });
-          const formattedAddr = results[0].formatted_address || addr;
-          setNewPlot(prev => ({ ...prev, location: formattedAddr }));
-          if (locationInputRef.current) locationInputRef.current.value = formattedAddr;
-          fetchAddressFromCoords(loc.lat(), loc.lng());
-        }
-      });
+      if (place.geometry && place.geometry.location) {
+        // Normal path — geometry returned
+        const lat = typeof place.geometry.location.lat === 'function' ? place.geometry.location.lat() : place.geometry.location.lat;
+        const lng = typeof place.geometry.location.lng === 'function' ? place.geometry.location.lng() : place.geometry.location.lng;
+        setPlotLocation({ lat, lng });
+        setNewPlot(prev => ({ ...prev, location: addr }));
+        if (locationInputRef.current) locationInputRef.current.value = addr;
+        fetchAddressFromCoords(lat, lng);
+      } else if (addr) {
+        // Fallback: use Geocoder when geometry is missing (Places API (New) quirk)
+        const geocoder = new window.google.maps.Geocoder();
+        geocoder.geocode({ address: addr }, (results, status) => {
+          if (status === 'OK' && results && results[0]) {
+            const loc = results[0].geometry.location;
+            const fallbackLat = typeof loc.lat === 'function' ? loc.lat() : loc.lat;
+            const fallbackLng = typeof loc.lng === 'function' ? loc.lng() : loc.lng;
+            setPlotLocation({ lat: fallbackLat, lng: fallbackLng });
+            const formattedAddr = results[0].formatted_address || addr;
+            setNewPlot(prev => ({ ...prev, location: formattedAddr }));
+            if (locationInputRef.current) locationInputRef.current.value = formattedAddr;
+            fetchAddressFromCoords(fallbackLat, fallbackLng);
+          }
+        });
+      }
+    } catch (err) {
+      console.error("onPlaceSelected error:", err);
     }
-  };;
+  };
 
   const onMarkerDragEnd = (e) => {
     const lat = e.latLng.lat();
