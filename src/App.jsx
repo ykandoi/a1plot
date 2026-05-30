@@ -651,6 +651,28 @@ function App() {
     setPlotLocation({ lat: e.latLng.lat(), lng: e.latLng.lng() });
   };
 
+  const handleToggleDrawingMode = () => {
+    if (isDrawingMode) {
+      // Stopping drawing
+      setIsDrawingMode(false);
+      const sorted = getSortedPolygonPath(polygonPath);
+      if (sorted.length >= 3 && window.google?.maps?.geometry?.encoding) {
+        const latLngs = sorted.map(p => new window.google.maps.LatLng(p.lat, p.lng));
+        const encodedPath = window.google.maps.geometry.encoding.encodePath(latLngs);
+        const url = `https://maps.googleapis.com/maps/api/staticmap?size=600x400&maptype=satellite&path=color:0x10b981AA|weight:3|fillcolor:0x10b98144|enc:${encodeURIComponent(encodedPath)}&key=${GOOGLE_MAPS_API_KEY}`;
+        
+        setMediaFiles(prev => {
+          const filtered = prev.filter(f => !f.isStaticMap);
+          return [{ id: 'static-map-' + Date.now(), preview: url, name: 'Boundary Map Preview', isStaticMap: true }, ...filtered];
+        });
+      }
+    } else {
+      // Starting drawing
+      setIsDrawingMode(true);
+      setMediaFiles(prev => prev.filter(f => !f.isStaticMap));
+    }
+  };
+
   const handleMapClickForDrawing = (e) => {
     if (isDrawingMode) {
       const newPoint = { lat: e.latLng.lat(), lng: e.latLng.lng() };
@@ -809,8 +831,9 @@ function App() {
       if (staticMapUrl && !finalMedia.includes(staticMapUrl)) {
         finalMedia = [staticMapUrl, ...finalMedia];
       }
-      if (mediaFiles.length > 0) {
-        const newUrls = mediaFiles.map(f => f.preview || 'https://via.placeholder.com/600');
+      const uploadableMedia = mediaFiles.filter(f => !f.isStaticMap);
+      if (uploadableMedia.length > 0) {
+        const newUrls = uploadableMedia.map(f => f.preview || 'https://via.placeholder.com/600');
         finalMedia = [...finalMedia, ...newUrls];
       }
       let finalDocs = adminNewPlot.documentsAvailable || [];
@@ -1200,19 +1223,19 @@ function App() {
                       type="button"
                       className={`btn ${isDrawingMode ? 'btn-primary' : 'btn-outline'}`}
                       style={{ padding: '0.4rem 0.75rem', fontSize: '0.8rem' }}
-                      onClick={() => setIsDrawingMode(!isDrawingMode)}
+                      onClick={handleToggleDrawingMode}
                     >
                       <Edit3 size={14} /> {isDrawingMode ? 'Stop Drawing' : 'Draw Boundary'}
                     </button>
                     {polygonPath.length > 0 && (
-                      <>
+                      <div className="flex gap-2 w-full mt-2" style={{justifyContent: 'flex-start'}}>
                         <button type="button" className="btn btn-outline" style={{ padding: '0.4rem 0.75rem', fontSize: '0.8rem' }} onClick={() => setPolygonPath(polygonPath.slice(0, -1))}>
-                          <Undo size={14} /> Undo
+                          <Undo size={14} /> Undo Point
                         </button>
-                        <button type="button" className="btn btn-outline" style={{ padding: '0.4rem 0.75rem', fontSize: '0.8rem', color: '#ef4444', borderColor: '#ef4444' }} onClick={() => { setPolygonPath([]); setNewPlot(prev => ({...prev, size: ''})); }}>
-                          <Trash2 size={14} /> Clear
+                        <button type="button" className="btn btn-outline" style={{ padding: '0.4rem 0.75rem', fontSize: '0.8rem', color: '#ef4444', borderColor: '#ef4444' }} onClick={() => { setPolygonPath([]); setNewPlot(prev => ({...prev, size: ''})); setMediaFiles(prev => prev.filter(f => !f.isStaticMap)); }}>
+                          <Trash2 size={14} /> Clear Boundary
                         </button>
-                      </>
+                      </div>
                     )}
                   </div>
                   {isDrawingMode && (
@@ -2549,13 +2572,13 @@ function App() {
               <>
                 <div className="location-map-container" style={{ position: 'relative' }}>
                   <div style={{ position: 'absolute', top: '10px', right: '10px', zIndex: 10, display: 'flex', gap: '0.5rem', background: 'rgba(255,255,255,0.9)', padding: '0.5rem', borderRadius: '0.5rem', boxShadow: '0 2px 4px rgba(0,0,0,0.1)' }}>
-                    <button type="button" className={`btn ${isDrawingMode ? 'btn-primary' : 'btn-outline'}`} style={{ padding: '0.4rem 0.75rem', fontSize: '0.8rem' }} onClick={() => setIsDrawingMode(!isDrawingMode)}>
+                    <button type="button" className={`btn ${isDrawingMode ? 'btn-primary' : 'btn-outline'}`} style={{ padding: '0.4rem 0.75rem', fontSize: '0.8rem' }} onClick={handleToggleDrawingMode}>
                       <Edit3 size={14} /> {isDrawingMode ? 'Stop Drawing' : 'Draw Boundary'}
                     </button>
                     {polygonPath.length > 0 && (
                       <>
                         <button type="button" className="btn btn-outline" style={{ padding: '0.4rem 0.75rem', fontSize: '0.8rem' }} onClick={() => setPolygonPath(polygonPath.slice(0, -1))}><Undo size={14} /> Undo</button>
-                        <button type="button" className="btn btn-outline" style={{ padding: '0.4rem 0.75rem', fontSize: '0.8rem', color: '#ef4444', borderColor: '#ef4444' }} onClick={() => { setPolygonPath([]); }}><Trash2 size={14} /> Clear</button>
+                        <button type="button" className="btn btn-outline" style={{ padding: '0.4rem 0.75rem', fontSize: '0.8rem', color: '#ef4444', borderColor: '#ef4444' }} onClick={() => { setPolygonPath([]); setMediaFiles(prev => prev.filter(f => !f.isStaticMap)); }}><Trash2 size={14} /> Clear</button>
                       </>
                     )}
                   </div>
