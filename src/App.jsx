@@ -274,6 +274,27 @@ function App() {
 
   const showToast = (msg) => setToastMessage(msg);
 
+  const [viewerOpen, setViewerOpen] = useState(false);
+  const [viewerIndex, setViewerIndex] = useState(0);
+
+  useEffect(() => {
+    const handleKeyDown = (e) => {
+      if (!viewerOpen) return;
+      if (e.key === 'Escape') setViewerOpen(false);
+      const images = selectedPropertyDetail?.media && selectedPropertyDetail.media.length > 0 
+        ? selectedPropertyDetail.media 
+        : (selectedPropertyDetail?.image ? [selectedPropertyDetail.image] : []);
+      if (e.key === 'ArrowLeft' && images.length > 1) {
+        setViewerIndex((prev) => (prev === 0 ? images.length - 1 : prev - 1));
+      }
+      if (e.key === 'ArrowRight' && images.length > 1) {
+        setViewerIndex((prev) => (prev === images.length - 1 ? 0 : prev + 1));
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [viewerOpen, selectedPropertyDetail]);
+
   const [contactedPlots, setContactedPlots] = useState(() => {
     try {
       const saved = localStorage.getItem('contacted_plots');
@@ -776,6 +797,40 @@ function App() {
               </div>
             </div>
           </div>
+          {viewerOpen && images.length > 0 && (
+            <div className="image-viewer-overlay" onClick={() => setViewerOpen(false)}>
+              <button className="viewer-close" onClick={() => setViewerOpen(false)}>✕</button>
+              
+              {images.length > 1 && (
+                <button 
+                  className="viewer-arrow viewer-arrow-left" 
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setViewerIndex((prev) => (prev === 0 ? images.length - 1 : prev - 1));
+                  }}
+                >
+                  ‹
+                </button>
+              )}
+              
+              <div className="viewer-img-container" onClick={(e) => e.stopPropagation()}>
+                <img src={images[viewerIndex]} alt="" className="viewer-img" />
+                <div className="viewer-counter">{viewerIndex + 1} / {images.length}</div>
+              </div>
+              
+              {images.length > 1 && (
+                <button 
+                  className="viewer-arrow viewer-arrow-right" 
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setViewerIndex((prev) => (prev === images.length - 1 ? 0 : prev + 1));
+                  }}
+                >
+                  ›
+                </button>
+              )}
+            </div>
+          )}
         </div>
       </section>
 
@@ -1713,7 +1768,9 @@ function App() {
                       </div>
                       <div style={{fontSize: '0.75rem', color: '#64748b', marginBottom: '0.75rem', lineHeight: '1.5'}}>
                         <strong style={{color: '#0f172a'}}>Documents:</strong><br/>
-                        {selectedMarker.documentsAvailable?.join(', ') || 'Title Deed, EC'}
+                        {selectedMarker.documentsAvailable && selectedMarker.documentsAvailable.filter(d => d && d.trim() !== '').length > 0
+                          ? selectedMarker.documentsAvailable.filter(d => d && d.trim() !== '').join(', ')
+                          : 'No documents uploaded'}
                       </div>
                     </div>
                   </InfoWindowF>
@@ -2652,7 +2709,7 @@ function App() {
     if (!selectedPropertyDetail) return null;
     const plot = selectedPropertyDetail;
     const images = plot.media && plot.media.length > 0 ? plot.media : (plot.image ? [plot.image] : []);
-    const docs = plot.documentsAvailable || [];
+    const docs = (plot.documentsAvailable || []).filter(d => d && d.trim() !== '');
 
     return (
       <section className="section bg-light" style={{paddingTop: '6rem', minHeight: '100vh'}}>
@@ -2666,7 +2723,13 @@ function App() {
             {images.length > 0 && (
               <div style={{height: '400px', width: '100%', overflowX: 'auto', display: 'flex', gap: '2px', background: '#0f172a'}}>
                 {images.map((img, i) => (
-                  <img key={i} src={img} alt="" style={{height: '100%', minWidth: images.length === 1 ? '100%' : '60%', objectFit: 'cover'}} />
+                  <img 
+                    key={i} 
+                    src={img} 
+                    alt="" 
+                    style={{height: '100%', minWidth: images.length === 1 ? '100%' : '60%', objectFit: 'cover', cursor: 'pointer'}} 
+                    onClick={() => { setViewerIndex(i); setViewerOpen(true); }}
+                  />
                 ))}
               </div>
             )}
