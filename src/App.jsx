@@ -275,6 +275,7 @@ function App() {
   const [requestingDocsFor, setRequestingDocsFor] = useState(null);
   const [legalAgreed, setLegalAgreed] = useState(false);
   const [selectedMarker, setSelectedMarker] = useState(null);
+  const [buyerMapSelectedPlotId, setBuyerMapSelectedPlotId] = useState(null);
   const [droppedPin, setDroppedPin] = useState(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState('');
@@ -1687,6 +1688,20 @@ function App() {
                         <p>{plot.size}</p>
                       </div>
                     </div>
+                    {buyerMapSelectedPlotId && (
+                      <div style={{marginTop: '1rem'}}>
+                        <button 
+                          className="btn btn-primary" 
+                          style={{width: '100%', padding: '0.6rem'}}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleViewProperty(plot);
+                          }}
+                        >
+                          View Property
+                        </button>
+                      </div>
+                    )}
                   </div>
                 </div>
               ))}
@@ -1715,6 +1730,7 @@ function App() {
             <div className="plots-grid" style={{gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: '1.5rem'}}>
               {plots
                 .filter(p => p.visibility !== 'private' && p.status !== 'Verification Pending' && p.status !== 'Rejected')
+                .filter(p => buyerMapSelectedPlotId ? p.id === buyerMapSelectedPlotId : true)
                 .map(plot => (
                 <div 
                   key={plot.id} 
@@ -1778,6 +1794,7 @@ function App() {
                 zoom={selectedMarker || droppedPin ? 14 : 6}
                 onLoad={onMapLoad}
                 options={mapOptions}
+                onClick={() => { setBuyerMapSelectedPlotId(null); setSelectedMarker(null); }}
                 onDblClick={(e) => {
                   setDroppedPin({ lat: e.latLng.lat(), lng: e.latLng.lng() });
                   setSelectedMarker(null);
@@ -1790,7 +1807,7 @@ function App() {
                     <React.Fragment key={plot.id}>
                       <MarkerF
                         position={{ lat: plot.lat, lng: plot.lng }}
-                        onClick={() => handleViewProperty(plot)}
+                        onClick={() => { setBuyerMapSelectedPlotId(plot.id); setSelectedMarker(plot); }}
                         icon={{
                           url: 'data:image/svg+xml;charset=UTF-8,' + encodeURIComponent(
                             `<svg xmlns="http://www.w3.org/2000/svg" width="36" height="36" viewBox="0 0 24 24" fill="%233b7a76" stroke="white" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3" fill="white"/></svg>`
@@ -1809,7 +1826,7 @@ function App() {
                             strokeWeight: 2,
                             clickable: true
                           }}
-                          onClick={() => handleViewProperty(plot)}
+                          onClick={() => { setBuyerMapSelectedPlotId(plot.id); setSelectedMarker(plot); }}
                         />
                       )}
                     </React.Fragment>
