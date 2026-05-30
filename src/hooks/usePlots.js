@@ -68,10 +68,17 @@ export function usePlots(initialSeedPlots) {
 
     // Listen for real-time updates
     const unsubscribe = onSnapshot(plotsRef, (snapshot) => {
-      const fetchedPlots = snapshot.docs.map(d => ({
-        ...d.data(),
-        id: d.id
-      }));
+      const fetchedPlots = snapshot.docs.map(d => {
+        const data = d.data();
+        // Scrub fake document names (those without file extensions) as data comes in
+        if (data.documentsAvailable && Array.isArray(data.documentsAvailable)) {
+          data.documentsAvailable = data.documentsAvailable.filter(doc => doc && typeof doc === 'string' && doc.includes('.'));
+        }
+        return {
+          ...data,
+          id: d.id
+        };
+      });
       setPlots(fetchedPlots);
       setLoading(false);
     }, (error) => {
