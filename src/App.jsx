@@ -620,6 +620,35 @@ function App() {
     setDocFiles(prev => prev.filter(f => f.id !== id));
   };
 
+  function fetchAddressFromCoords(lat, lng) {
+    if (!window.google?.maps?.Geocoder) return;
+    const geocoder = new window.google.maps.Geocoder();
+    geocoder.geocode({ location: { lat, lng } }, (results, status) => {
+      if (status === 'OK' && results[0]) {
+        let district = '';
+        let tehsil = '';
+        let village = '';
+        results[0].address_components.forEach(comp => {
+          const types = comp.types;
+          if (types.includes('administrative_area_level_3')) tehsil = comp.long_name;
+          if (types.includes('administrative_area_level_2')) district = comp.long_name;
+          if (types.includes('sublocality') || types.includes('locality') || types.includes('neighborhood')) {
+            if (!village) village = comp.long_name;
+          }
+        });
+        if (!village && results[0].address_components[0]) village = results[0].address_components[0].long_name;
+        
+        setNewPlot(prev => ({
+          ...prev,
+          district: district || prev.district,
+          tehsil: tehsil || prev.tehsil,
+          village: village || prev.village,
+          location: results[0].formatted_address
+        }));
+      }
+    });
+  }
+
   // Places autocomplete handler
   const onPlaceSelected = () => {
     if (!autocompleteRef.current) return;
@@ -648,36 +677,7 @@ function App() {
         }
       });
     }
-  };
-
-  function fetchAddressFromCoords(lat, lng) {
-    if (!window.google?.maps?.Geocoder) return;
-    const geocoder = new window.google.maps.Geocoder();
-    geocoder.geocode({ location: { lat, lng } }, (results, status) => {
-      if (status === 'OK' && results[0]) {
-        let district = '';
-        let tehsil = '';
-        let village = '';
-        results[0].address_components.forEach(comp => {
-          const types = comp.types;
-          if (types.includes('administrative_area_level_3')) tehsil = comp.long_name;
-          if (types.includes('administrative_area_level_2')) district = comp.long_name;
-          if (types.includes('sublocality') || types.includes('locality') || types.includes('neighborhood')) {
-            if (!village) village = comp.long_name;
-          }
-        });
-        if (!village && results[0].address_components[0]) village = results[0].address_components[0].long_name;
-        
-        setNewPlot(prev => ({
-          ...prev,
-          district: district || prev.district,
-          tehsil: tehsil || prev.tehsil,
-          village: village || prev.village,
-          location: results[0].formatted_address
-        }));
-      }
-    });
-  };
+  };;
 
   const onMarkerDragEnd = (e) => {
     const lat = e.latLng.lat();
