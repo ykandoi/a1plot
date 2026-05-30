@@ -232,7 +232,12 @@ const pathToView = {
   '/about_us': 'about'
 };
 
-function App() {
+const autocompleteOptions = {
+  componentRestrictions: { country: 'in' },
+  types: ['geocode', 'establishment']
+};
+
+export default function App() {
   // Clear any stale localStorage keys from old code versions
   try { localStorage.removeItem('selected_property_detail'); } catch(e) {}
 
@@ -1263,10 +1268,7 @@ function App() {
                   onLoad={(ac) => (autocompleteRef.current = ac)}
                   onPlaceChanged={onPlaceSelected}
                   fields={['formatted_address', 'geometry', 'name']}
-                  options={{
-                    componentRestrictions: { country: 'in' },
-                    types: ['geocode', 'establishment']
-                  }}
+                  options={autocompleteOptions}
                 >
                   <input
                     ref={locationInputRef}
