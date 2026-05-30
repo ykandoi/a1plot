@@ -259,14 +259,15 @@ function App() {
   const [editingPlot, setEditingPlot] = useState(null);
   const [adminNewPlot, setAdminNewPlot] = useState({ title: '', location: '', price: '', size: '', features: '', visibility: 'public', status: 'Verification Pending', media: [], documentsAvailable: [] });
   const [adminEditingPlot, setAdminEditingPlot] = useState(null);
-  const [selectedPropertyDetail, setSelectedPropertyDetail] = useState(() => {
+  // Store only the plot ID in localStorage to avoid stale cached data
+  const [selectedPropertyDetailId, setSelectedPropertyDetailId] = useState(() => {
     try {
-      const saved = localStorage.getItem('selected_property_detail');
-      return saved ? JSON.parse(saved) : null;
+      return localStorage.getItem('selected_property_detail_id') || null;
     } catch (e) {
       return null;
     }
   });
+  const [selectedPropertyDetail, setSelectedPropertyDetail] = useState(null);
   const [requestingDocsFor, setRequestingDocsFor] = useState(null);
   const [legalAgreed, setLegalAgreed] = useState(false);
   const [selectedMarker, setSelectedMarker] = useState(null);
@@ -300,17 +301,30 @@ function App() {
     }
   }, [toastMessage]);
 
+  // Persist only the selected plot ID so reloads can resolve fresh data from Firestore
   useEffect(() => {
     try {
       if (selectedPropertyDetail) {
-        localStorage.setItem('selected_property_detail', JSON.stringify(selectedPropertyDetail));
+        localStorage.setItem('selected_property_detail_id', String(selectedPropertyDetail.id));
       } else {
-        localStorage.removeItem('selected_property_detail');
+        localStorage.removeItem('selected_property_detail_id');
       }
-    } catch (e) {
-      console.error("Error saving property detail to localStorage:", e);
-    }
+    } catch (e) {}
   }, [selectedPropertyDetail]);
+
+  // When plots finish loading from Firestore, resolve the saved ID to the fresh plot object
+  useEffect(() => {
+    if (selectedPropertyDetailId && plots && plots.length > 0 && !selectedPropertyDetail) {
+      const match = plots.find(p => String(p.id) === String(selectedPropertyDetailId));
+      if (match) {
+        setSelectedPropertyDetail(match);
+      } else {
+        // ID not found in current plots — clear stale reference
+        setSelectedPropertyDetailId(null);
+        localStorage.removeItem('selected_property_detail_id');
+      }
+    }
+  }, [plots, selectedPropertyDetailId]);
 
   const showToast = (msg) => setToastMessage(msg);
 
@@ -720,6 +734,7 @@ function App() {
 
   const handleViewProperty = (plot) => {
     setSelectedPropertyDetail(plot);
+    setSelectedPropertyDetailId(String(plot.id));
     navigate('property-detail');
   };
 
