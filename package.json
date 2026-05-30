@@ -11,10 +11,12 @@
   },
   "dependencies": {
     "@react-google-maps/api": "^2.20.8",
+    "@rolldown/binding-win32-x64-msvc": "^0.15.1",
     "@vercel/analytics": "^2.0.1",
     "@vercel/speed-insights": "^2.0.0",
     "firebase": "^12.11.0",
     "lucide-react": "^1.7.0",
+    "nodemailer": "^8.0.10",
     "puppeteer": "^24.43.1",
     "react": "^19.2.4",
     "react-dom": "^19.2.4",

@@ -5,7 +5,7 @@ import {
   Smartphone, Clock, CheckCircle2,
   ChevronRight, ChevronDown, Building, Upload,
   LogOut, User, Mail, Lock, Eye, EyeOff, Settings,
-  Shield, Check, X, Menu, Undo, Trash2, Edit3
+  Shield, Check, X, Menu, Undo, Trash2, Edit3, Heart
 } from 'lucide-react';
 import {
   LineChart, Line, XAxis, YAxis,
@@ -261,7 +261,33 @@ function App() {
 
   // Auth State
   const [user, setUser] = useState(null);
-  const { plots, addPlot, updatePlot } = usePlots(INITIAL_PLOTS);
+  const { plots, loading: plotsLoading, addPlot, updatePlot } = usePlots(INITIAL_PLOTS);
+
+  const [toastMessage, setToastMessage] = useState(null);
+  
+  useEffect(() => {
+    if (toastMessage) {
+      const timer = setTimeout(() => setToastMessage(null), 4000);
+      return () => clearTimeout(timer);
+    }
+  }, [toastMessage]);
+
+  const showToast = (msg) => setToastMessage(msg);
+
+  const [contactedPlots, setContactedPlots] = useState(() => {
+    try {
+      const saved = localStorage.getItem('contacted_plots');
+      return saved ? JSON.parse(saved) : [];
+    } catch (e) {
+      return [];
+    }
+  });
+
+  useEffect(() => {
+    try {
+      localStorage.setItem('contacted_plots', JSON.stringify(contactedPlots));
+    } catch (e) {}
+  }, [contactedPlots]);
   const { interestedPlots, addInterest } = useInterests(user?.uid);
   const [authLoading, setAuthLoading] = useState(true);
   const [authMode, setAuthMode] = useState('login'); // 'login' or 'signup'
@@ -402,11 +428,61 @@ function App() {
     }
   };
 
-  const handleInterest = async (plot) => {
-    if (!interestedPlots.find(p => p.id === plot.id)) {
+  const handleToggleInterest = async (plot) => {
+    if (!user) {
+      showToast("Please log in to save properties to your interested list.");
+      return;
+    }
+    const isInterested = interestedPlots.some(p => p.id === plot.id);
+    if (!isInterested) {
       await addInterest(plot);
     }
-    navigate('interested');
+    showToast("You have this property, and it is saved in the 'Interested' section.");
+  };
+
+  const handleDetailInterestClick = async (plot) => {
+    if (!user) {
+      showToast("Please log in to express interest in this property.");
+      return;
+    }
+    const isContacted = contactedPlots.includes(plot.id);
+    if (isContacted) {
+      navigate('contact');
+      return;
+    }
+
+    if (!interestedPlots.some(p => p.id === plot.id)) {
+      await addInterest(plot);
+    }
+
+    setContactedPlots(prev => [...prev, plot.id]);
+    showToast("Interest registered! Sending contact details to seller rep...");
+
+    try {
+      const response = await fetch('/api/send-email', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          adminEmail: 'ykandoi20330@gmail.com',
+          userEmail: user.email,
+          userName: user.displayName || user.email.split('@')[0],
+          plotId: plot.id,
+          plotTitle: plot.title,
+          plotLocation: plot.location,
+          plotPrice: plot.price,
+          plotSize: plot.size
+        })
+      });
+      if (response.ok) {
+        showToast("Seller has been notified of your interest!");
+      } else {
+        console.error("Failed to notify seller via email");
+      }
+    } catch (err) {
+      console.error("Error calling send-email API:", err);
+    }
   };
 
   // File upload handlers
@@ -806,13 +882,21 @@ function App() {
                 onClick={() => handleViewProperty(plot)}
                 style={{
                   cursor: 'pointer', 
-                  transition: 'transform 0.2s, box-shadow 0.2s'
+                  transition: 'transform 0.2s, box-shadow 0.2s',
+                  position: 'relative'
                 }}
                 onMouseEnter={(e) => { e.currentTarget.style.transform = 'translateY(-2px)'; e.currentTarget.style.boxShadow = 'var(--shadow-lg)'; }}
                 onMouseLeave={(e) => { e.currentTarget.style.transform = 'none'; e.currentTarget.style.boxShadow = 'var(--shadow-md)'; }}
               >
                 <div className="plot-image">
                   <div className="plot-badge">{plot.badge || 'Listed'}</div>
+                  <button 
+                    className={`plot-favorite-btn ${interestedPlots.some(p => p.id === plot.id) ? 'is-active' : ''}`}
+                    onClick={(e) => { e.stopPropagation(); handleToggleInterest(plot); }}
+                    title="Save to Interested List"
+                  >
+                    <Heart size={16} fill={interestedPlots.some(p => p.id === plot.id) ? "#ef4444" : "none"} />
+                  </button>
                   <img src={plot.image} alt={plot.title} />
                 </div>
                 <div className="plot-content">
@@ -847,8 +931,8 @@ function App() {
                       <span className="price-label">Total Price</span>
                       <div className="plot-price">{plot.price}</div>
                     </div>
-                    <button className="btn btn-primary" onClick={(e) => { e.stopPropagation(); handleInterest(plot); }}>
-                      Interested <ChevronRight size={16} />
+                    <button className="btn btn-outline" style={{padding: '0.45rem 1rem', fontSize: '0.85rem'}}>
+                      View Details <ChevronRight size={16} />
                     </button>
                   </div>
                 </div>
@@ -1510,13 +1594,21 @@ function App() {
                   style={{
                     cursor: 'pointer', 
                     border: '1px solid var(--border-color)',
-                    transition: 'transform 0.2s, box-shadow 0.2s'
+                    transition: 'transform 0.2s, box-shadow 0.2s',
+                    position: 'relative'
                   }}
                   onMouseEnter={(e) => { e.currentTarget.style.transform = 'translateY(-2px)'; e.currentTarget.style.boxShadow = 'var(--shadow-lg)'; }}
                   onMouseLeave={(e) => { e.currentTarget.style.transform = 'none'; e.currentTarget.style.boxShadow = 'none'; }}
                 >
                   <div className="plot-image" style={{height: '160px'}}>
                     <div className="plot-badge">{plot.badge || 'Listed'}</div>
+                    <button 
+                      className={`plot-favorite-btn ${interestedPlots.some(p => p.id === plot.id) ? 'is-active' : ''}`}
+                      onClick={(e) => { e.stopPropagation(); handleToggleInterest(plot); }}
+                      title="Save to Interested List"
+                    >
+                      <Heart size={16} fill={interestedPlots.some(p => p.id === plot.id) ? "#ef4444" : "none"} />
+                    </button>
                     <img src={plot.image} alt={plot.title} />
                   </div>
                   <div className="plot-content" style={{padding: '1.25rem'}}>
@@ -1537,11 +1629,10 @@ function App() {
                     </div>
                     
                     <button 
-                      className="btn btn-primary" 
-                      style={{width: '100%', padding: '0.5rem', fontSize: '0.85rem'}} 
-                      onClick={(e) => { e.stopPropagation(); handleInterest(plot); }}
+                      className="btn btn-outline" 
+                      style={{width: '100%', padding: '0.5rem', fontSize: '0.85rem'}}
                     >
-                      Interested
+                      View Details
                     </button>
                   </div>
                 </div>
@@ -2639,9 +2730,21 @@ function App() {
                   )}
 
                   <div style={{marginTop: '2rem', padding: '1.5rem', background: '#f0fdf4', borderRadius: '0.75rem', border: '1px solid #bbf7d0'}}>
-                    <h4 style={{fontSize: '1.1rem', fontWeight: 700, color: '#166534', marginBottom: '0.5rem'}}>Interested in this property?</h4>
-                    <p style={{fontSize: '0.9rem', color: '#15803d', marginBottom: '1rem'}}>Register your interest to get more details and arrange a site visit.</p>
-                    <button className="btn btn-primary" style={{width: '100%'}} onClick={() => handleInterest(plot)}>Register Interest</button>
+                    <h4 style={{fontSize: '1.1rem', fontWeight: 700, color: '#166534', marginBottom: '0.5rem'}}>
+                      {contactedPlots.includes(plot.id) ? 'Contact Seller Directly' : 'Interested in this property?'}
+                    </h4>
+                    <p style={{fontSize: '0.9rem', color: '#15803d', marginBottom: '1rem'}}>
+                      {contactedPlots.includes(plot.id) 
+                        ? 'You have expressed interest. Click below to contact our seller rep.' 
+                        : 'Register your interest to notify the seller and request a call back.'}
+                    </p>
+                    <button 
+                      className={`btn ${contactedPlots.includes(plot.id) ? 'btn-accent' : 'btn-primary'}`} 
+                      style={{width: '100%'}} 
+                      onClick={() => handleDetailInterestClick(plot)}
+                    >
+                      {contactedPlots.includes(plot.id) ? 'Contact Seller' : 'Interested'}
+                    </button>
                   </div>
                 </div>
               </div>
@@ -2656,10 +2759,17 @@ function App() {
   /* ============================================
      MAIN RENDER
      ============================================ */
-  if (authLoading) {
+  if (authLoading || plotsLoading) {
     return (
-      <div style={{height: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center'}}>
-        <div className="text-muted">Loading...</div>
+      <div className="global-loader-container">
+        <div className="global-loader-card">
+          <div className="logo-spinner-wrapper">
+            <div className="spinner-ring"></div>
+            <img src="/assets/logo.png" alt="A1Plot" className="spinner-logo" onError={(e) => { e.target.style.display = 'none'; }} />
+          </div>
+          <div className="loader-text">Securing Verified Land Plots...</div>
+          <div className="loader-subtext">Connecting to registry & satellite imagery data</div>
+        </div>
       </div>
     );
   }
@@ -2779,6 +2889,20 @@ function App() {
       </main>
 
       {/* Footer */}
+      {toastMessage && (
+        <div className="toast-notification-container">
+          <div className="toast-notification-card">
+            <div className="toast-icon-circle">
+              <CheckCircle2 size={18} />
+            </div>
+            <div className="toast-content">
+              <div className="toast-title">A1Plot Notification</div>
+              <div className="toast-desc">{toastMessage}</div>
+            </div>
+            <button className="toast-close" onClick={() => setToastMessage(null)}>✕</button>
+          </div>
+        </div>
+      )}
       {view !== 'login' && (
         <footer>
           <div className="container">
