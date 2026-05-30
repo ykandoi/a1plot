@@ -102,7 +102,7 @@ export default async function handler(req, res) {
   }
 
   try {
-    const transporter = nodemailer.createTransport({
+    let transporterConfig = {
       host: smtpHost,
       port: smtpPort,
       secure: smtpPort === 465, // true for port 465, false for 587
@@ -110,7 +110,20 @@ export default async function handler(req, res) {
         user: smtpUser,
         pass: smtpPass
       }
-    });
+    };
+
+    // Auto-select Gmail service for absolute reliability if username/host matches
+    if (smtpHost.includes('gmail') || smtpUser.includes('gmail')) {
+      transporterConfig = {
+        service: 'gmail',
+        auth: {
+          user: smtpUser,
+          pass: smtpPass
+        }
+      };
+    }
+
+    const transporter = nodemailer.createTransport(transporterConfig);
 
     const mailOptions = {
       from: `"A1Plot Lead Alert" <${smtpUser}>`,
