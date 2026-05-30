@@ -2775,21 +2775,32 @@ function App() {
                 </div>
 
                 <div>
-                  {docs.length > 0 && (
-                    <>
-                      <h3 style={{fontSize: '1.25rem', fontWeight: 700, marginBottom: '1rem'}}>Available Documents</h3>
-                      <div className="doc-file-list">
-                        {docs.map((doc, i) => (
-                          <div key={i} className="doc-file-item" style={{background: '#f8fafc', padding: '0.75rem 1rem', borderRadius: '0.5rem', marginBottom: '0.5rem', display: 'flex', alignItems: 'center', gap: '0.75rem', border: '1px solid #e2e8f0'}}>
-                            <div className="doc-file-icon" style={{fontSize: '1.5rem'}}>📄</div>
-                            <div className="doc-file-info">
-                              <div className="doc-file-name" style={{fontWeight: 600, color: '#334155'}}>{doc}</div>
-                              <div style={{fontSize: '0.75rem', color: '#94a3b8'}}>View Only</div>
-                            </div>
+                  <h3 style={{fontSize: '1.25rem', fontWeight: 700, marginBottom: '1rem'}}>Available Documents</h3>
+                  {docs.length > 0 ? (
+                    <div className="doc-file-list">
+                      {docs.map((doc, i) => (
+                        <div key={i} className="doc-file-item" style={{background: '#f8fafc', padding: '0.75rem 1rem', borderRadius: '0.5rem', marginBottom: '0.5rem', display: 'flex', alignItems: 'center', gap: '0.75rem', border: '1px solid #e2e8f0'}}>
+                          <div className="doc-file-icon" style={{fontSize: '1.5rem'}}>📄</div>
+                          <div className="doc-file-info">
+                            <div className="doc-file-name" style={{fontWeight: 600, color: '#334155'}}>{doc}</div>
+                            <div style={{fontSize: '0.75rem', color: '#94a3b8'}}>View Only</div>
                           </div>
-                        ))}
-                      </div>
-                    </>
+                        </div>
+                      ))}
+                    </div>
+                  ) : (
+                    <div style={{
+                      background: '#f8fafc', 
+                      padding: '1rem', 
+                      borderRadius: '0.5rem', 
+                      border: '1px dashed #cbd5e1', 
+                      textAlign: 'center', 
+                      color: '#64748b', 
+                      fontSize: '0.95rem', 
+                      fontWeight: 500
+                    }}>
+                      Documents not uploaded
+                    </div>
                   )}
 
                   <div style={{marginTop: '2rem', padding: '1.5rem', background: '#f0fdf4', borderRadius: '0.75rem', border: '1px solid #bbf7d0'}}>
