@@ -367,7 +367,7 @@ function App() {
       localStorage.setItem('contacted_plots', JSON.stringify(contactedPlots));
     } catch (e) {}
   }, [contactedPlots]);
-  const { interestedPlots, addInterest } = useInterests(user?.uid);
+  const { interestedPlots, addInterest, removeInterest } = useInterests(user?.uid);
   const [authLoading, setAuthLoading] = useState(true);
   const [authMode, setAuthMode] = useState('login'); // 'login' or 'signup'
   const [authEmail, setAuthEmail] = useState('');
@@ -513,10 +513,13 @@ function App() {
       return;
     }
     const isInterested = interestedPlots.some(p => p.id === plot.id);
-    if (!isInterested) {
+    if (isInterested) {
+      if (removeInterest) await removeInterest(plot.id);
+      showToast("Removed property from your 'Interested' list.");
+    } else {
       await addInterest(plot);
+      showToast("You have this property, and it is saved in the 'Interested' section.");
     }
-    showToast("You have this property, and it is saved in the 'Interested' section.");
   };
 
   const handleDetailInterestClick = async (plot) => {
