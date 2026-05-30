@@ -238,7 +238,14 @@ function App() {
   const [editingPlot, setEditingPlot] = useState(null);
   const [adminNewPlot, setAdminNewPlot] = useState({ title: '', location: '', price: '', size: '', features: '', visibility: 'public', status: 'Verification Pending', media: [], documentsAvailable: [] });
   const [adminEditingPlot, setAdminEditingPlot] = useState(null);
-  const [selectedPropertyDetail, setSelectedPropertyDetail] = useState(null);
+  const [selectedPropertyDetail, setSelectedPropertyDetail] = useState(() => {
+    try {
+      const saved = localStorage.getItem('selected_property_detail');
+      return saved ? JSON.parse(saved) : null;
+    } catch (e) {
+      return null;
+    }
+  });
   const [requestingDocsFor, setRequestingDocsFor] = useState(null);
   const [legalAgreed, setLegalAgreed] = useState(false);
   const [selectedMarker, setSelectedMarker] = useState(null);
@@ -271,6 +278,18 @@ function App() {
       return () => clearTimeout(timer);
     }
   }, [toastMessage]);
+
+  useEffect(() => {
+    try {
+      if (selectedPropertyDetail) {
+        localStorage.setItem('selected_property_detail', JSON.stringify(selectedPropertyDetail));
+      } else {
+        localStorage.removeItem('selected_property_detail');
+      }
+    } catch (e) {
+      console.error("Error saving property detail to localStorage:", e);
+    }
+  }, [selectedPropertyDetail]);
 
   const showToast = (msg) => setToastMessage(msg);
 
