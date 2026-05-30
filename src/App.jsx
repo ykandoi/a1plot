@@ -686,15 +686,25 @@ function App() {
     setSubmitError('');
     setIsSubmitting(true);
     try {
+      let staticMapUrl = null;
+      if (sortedPolygonPath.length >= 3 && window.google?.maps?.geometry?.encoding) {
+        const encodedPath = window.google.maps.geometry.encoding.encodePath(sortedPolygonPath);
+        staticMapUrl = `https://maps.googleapis.com/maps/api/staticmap?size=600x400&maptype=satellite&path=color:0x10b981AA|weight:3|fillcolor:0x10b98144|enc:${encodeURIComponent(encodedPath)}&key=${GOOGLE_MAPS_API_KEY}`;
+      }
+
       if (editingPlot) {
-        await updatePlot(editingPlot.id, { ...newPlot, lat: plotLocation.lat, lng: plotLocation.lng });
+        const updateData = { ...newPlot, lat: plotLocation.lat, lng: plotLocation.lng, polygonPath: sortedPolygonPath.length >= 3 ? sortedPolygonPath : null };
+        if (staticMapUrl) {
+          updateData.image = staticMapUrl;
+          if (!updateData.media) updateData.media = editingPlot.media || [];
+          if (!updateData.media.includes(staticMapUrl)) {
+            updateData.media = [staticMapUrl, ...updateData.media];
+          }
+        }
+        await updatePlot(editingPlot.id, updateData);
         setEditingPlot(null);
       } else {
-        let staticMapUrl = 'https://images.unsplash.com/photo-1500382017468-9049fed747ef?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80';
-        if (sortedPolygonPath.length >= 3 && window.google?.maps?.geometry?.encoding) {
-          const encodedPath = window.google.maps.geometry.encoding.encodePath(sortedPolygonPath);
-          staticMapUrl = `https://maps.googleapis.com/maps/api/staticmap?size=600x400&maptype=satellite&path=color:0x10b981AA|weight:3|fillcolor:0x10b98144|enc:${encodeURIComponent(encodedPath)}&key=${GOOGLE_MAPS_API_KEY}`;
-        }
+        const fallbackImage = 'https://images.unsplash.com/photo-1500382017468-9049fed747ef?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80';
         
         // Use a default image — blob URLs are session-only and can't be stored in DB
         const plot = {
@@ -706,7 +716,8 @@ function App() {
           cagr: 'TBD',
           developer: 'Self Listed',
           badge: 'New',
-          image: staticMapUrl,
+          image: staticMapUrl || fallbackImage,
+          media: staticMapUrl ? [staticMapUrl] : [],
           documentsAvailable: await Promise.all(docFiles.map(f => uploadDocToStorage(f))),
           lat: plotLocation.lat,
           lng: plotLocation.lng,
@@ -786,7 +797,16 @@ function App() {
     setIsSubmitting(true);
     setSubmitError('');
     try {
+      let staticMapUrl = null;
+      if (sortedPolygonPath.length >= 3 && window.google?.maps?.geometry?.encoding) {
+        const encodedPath = window.google.maps.geometry.encoding.encodePath(sortedPolygonPath);
+        staticMapUrl = `https://maps.googleapis.com/maps/api/staticmap?size=600x400&maptype=satellite&path=color:0x10b981AA|weight:3|fillcolor:0x10b98144|enc:${encodeURIComponent(encodedPath)}&key=${GOOGLE_MAPS_API_KEY}`;
+      }
+      
       let finalMedia = adminNewPlot.media || [];
+      if (staticMapUrl && !finalMedia.includes(staticMapUrl)) {
+        finalMedia = [staticMapUrl, ...finalMedia];
+      }
       if (mediaFiles.length > 0) {
         const newUrls = mediaFiles.map(f => f.preview || 'https://via.placeholder.com/600');
         finalMedia = [...finalMedia, ...newUrls];
@@ -809,7 +829,7 @@ function App() {
         lng: plotLocation.lng,
         polygonPath: sortedPolygonPath.length > 0 ? sortedPolygonPath : null,
         media: finalMedia,
-        image: finalMedia.length > 0 ? finalMedia[0] : (adminEditingPlot.image || ''),
+        image: staticMapUrl || (finalMedia.length > 0 ? finalMedia[0] : (adminEditingPlot.image || '')),
         documentsAvailable: finalDocs
       });
 
