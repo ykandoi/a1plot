@@ -1274,7 +1274,7 @@ function App() {
                     placeholder="Search location, e.g. Sarjapur Road, Bangalore"
                     className="form-input"
                     defaultValue={newPlot.location}
-                    onChange={(e) => setNewPlot(prev => ({...prev, location: e.target.value}))}
+                    onBlur={(e) => setNewPlot(prev => ({...prev, location: e.target.value}))}
                     style={{marginBottom: '0.75rem'}}
                   />
                 </Autocomplete>
