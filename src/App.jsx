@@ -2650,8 +2650,39 @@ export default function App() {
             <input type="text" className="form-input" required value={adminNewPlot.price} onChange={(e) => setAdminNewPlot({...adminNewPlot, price: e.target.value})} />
           </div>
           <div className="form-group mb-8">
-            <label>Size</label>
-            <input type="text" className="form-input" required value={adminNewPlot.size} onChange={(e) => setAdminNewPlot({...adminNewPlot, size: e.target.value})} />
+            <label>Plot Size <span style={{fontWeight: 'normal', fontSize: '0.85rem', color: 'var(--text-muted)'}}>(Calculated based on satellite imagery of the location)</span></label>
+            <input
+              type="text"
+              placeholder="e.g. 1,200 m² (Click on the map above in 'Draw Boundary' mode to automatically calculate)"
+              className="form-input"
+              required
+              value={adminNewPlot.size}
+              onChange={(e) => setAdminNewPlot({...adminNewPlot, size: e.target.value})}
+            />
+          </div>
+
+          <div className="form-group mb-8">
+            <label>District ➔ Tehsil ➔ Village</label>
+            <p className="text-muted" style={{fontSize: '0.85rem', marginBottom: '0.5rem'}}>Automatically fetched when you mark the plot on the map.</p>
+            <div style={{ display: 'flex', gap: '0.5rem' }}>
+              <input type="text" placeholder="District" className="form-input" style={{flex: 1}} value={adminNewPlot.district || ''} onChange={e => setAdminNewPlot({...adminNewPlot, district: e.target.value})} />
+              <input type="text" placeholder="Tehsil" className="form-input" style={{flex: 1}} value={adminNewPlot.tehsil || ''} onChange={e => setAdminNewPlot({...adminNewPlot, tehsil: e.target.value})} />
+              <input type="text" placeholder="Village" className="form-input" style={{flex: 1}} value={adminNewPlot.village || ''} onChange={e => setAdminNewPlot({...adminNewPlot, village: e.target.value})} />
+            </div>
+          </div>
+
+          <div className="form-group mb-8">
+            <label>Khasra / Khatauni Number <span style={{fontWeight: 'normal', fontSize: '0.85rem', color: '#10b981'}}>(Optional)</span></label>
+            <p className="text-muted" style={{fontSize: '0.85rem', marginBottom: '0.5rem'}}>
+              <strong>Note:</strong> People who provide the Khasra number of their land have a <strong style={{color: '#3b82f6'}}>20x higher chance of selling</strong> as it builds immediate trust!
+            </p>
+            <input
+              type="text"
+              placeholder="e.g. 142/5"
+              className="form-input"
+              value={adminNewPlot.khasraNumber || ''}
+              onChange={(e) => setAdminNewPlot({...adminNewPlot, khasraNumber: e.target.value})}
+            />
           </div>
           <div className="form-group mb-8">
             <label>Key Features</label>
