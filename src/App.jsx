@@ -39,7 +39,7 @@ const defaultCenter = {
 };
 
 const mapOptions = {
-  mapTypeId: 'satellite',
+  mapTypeId: 'hybrid',
   disableDefaultUI: false,
   zoomControl: true,
   mapTypeControl: true,
@@ -1199,7 +1199,7 @@ function App() {
                     zoom={14}
                     onClick={handleMapClickForDrawing}
                     options={{
-                      mapTypeId: 'satellite',
+                      mapTypeId: 'hybrid',
                       disableDefaultUI: true,
                       zoomControl: true,
                       mapTypeControl: true,
@@ -1564,7 +1564,7 @@ function App() {
                       map.fitBounds(bounds, { padding: 40 });
                     }
                   }}
-                  options={{ mapTypeId: 'satellite', mapTypeControl: true, disableDefaultUI: true, zoomControl: true, gestureHandling: 'greedy', disableDoubleClickZoom: true, styles: mapOptions.styles }}
+                  options={{ mapTypeId: 'hybrid', mapTypeControl: true, disableDefaultUI: true, zoomControl: true, gestureHandling: 'greedy', disableDoubleClickZoom: true, styles: mapOptions.styles }}
                 >
                   {myHoldings.map(plot => plot.lat && plot.lng && (
                     <React.Fragment key={plot.id}>
@@ -2534,7 +2534,7 @@ function App() {
                     center={plotLocation}
                     zoom={14}
                     onClick={handleMapClickForDrawing}
-                    options={{ mapTypeId: 'satellite', disableDefaultUI: true, zoomControl: true, mapTypeControl: true, draggableCursor: isDrawingMode ? 'crosshair' : 'grab', styles: mapOptions.styles }}
+                    options={{ mapTypeId: 'hybrid', disableDefaultUI: true, zoomControl: true, mapTypeControl: true, draggableCursor: isDrawingMode ? 'crosshair' : 'grab', styles: mapOptions.styles }}
                   >
                     {!isDrawingMode && <MarkerF position={plotLocation} draggable={true} onDragEnd={onMarkerDragEnd} />}
                     {sortedPolygonPath.length > 0 && <PolygonF paths={sortedPolygonPath} options={{ fillColor: '#10b981', fillOpacity: 0.35, strokeColor: '#10b981', strokeOpacity: 1, strokeWeight: 2, clickable: false }} />}
@@ -2854,7 +2854,7 @@ function App() {
                         mapContainerStyle={{width: '100%', height: '100%'}}
                         center={{ lat: plot.lat, lng: plot.lng }}
                         zoom={15}
-                        options={{ mapTypeId: 'satellite', disableDefaultUI: true, zoomControl: true }}
+                        options={{ mapTypeId: 'hybrid', disableDefaultUI: true, zoomControl: true }}
                       >
                         <MarkerF position={{ lat: plot.lat, lng: plot.lng }} />
                         {plot.polygonPath && plot.polygonPath.length >= 3 && (
