@@ -2596,7 +2596,7 @@ function App() {
                 {adminNewPlot.documentsAvailable.map((doc, i) => (
                   <div key={i} className="doc-file-item">
                     <div className="doc-file-icon">📄</div>
-                    <div className="doc-file-info"><div className="doc-file-name">{doc}</div></div>
+                    <div className="doc-file-info"><div className="doc-file-name">{adminNewPlot.title || 'Property'} Upload No. {i + 1} {adminNewPlot.badge ? `(${adminNewPlot.badge})` : ''}</div></div>
                     <button type="button" className="doc-file-remove" onClick={() => {
                       const updated = [...adminNewPlot.documentsAvailable];
                       updated.splice(i, 1);
@@ -2860,7 +2860,7 @@ function App() {
                           <div className="doc-file-item" style={{background: '#f8fafc', padding: '0.75rem 1rem', borderRadius: '0.5rem', marginBottom: '0.5rem', display: 'flex', alignItems: 'center', gap: '0.75rem', border: '1px solid #e2e8f0', cursor: 'pointer', transition: 'background 0.2s'}} onMouseEnter={e => e.currentTarget.style.background='#eff6ff'} onMouseLeave={e => e.currentTarget.style.background='#f8fafc'}>
                             <div className="doc-file-icon" style={{fontSize: '1.5rem'}}>📄</div>
                             <div className="doc-file-info" style={{flex: 1}}>
-                              <div className="doc-file-name" style={{fontWeight: 600, color: '#334155'}}>{doc.split('/').pop().split('_').slice(1).join('_') || doc.split('/').pop()}</div>
+                              <div className="doc-file-name" style={{fontWeight: 600, color: '#334155'}}>{plot.title} Upload No. {i + 1} {plot.badge ? `(${plot.badge})` : ''}</div>
                               <div style={{fontSize: '0.75rem', color: '#3b82f6'}}>Click to Open ↗</div>
                             </div>
                           </div>
