@@ -1227,11 +1227,7 @@ function App() {
                   />
                 </Autocomplete>
                 <div className="location-map-container" style={{ position: 'relative' }}>
-                  {isDrawingMode && (
-                    <div style={{ position: 'absolute', bottom: '20px', left: '50%', transform: 'translateX(-50%)', background: 'rgba(15,23,42,0.9)', color: 'white', padding: '0.5rem 1rem', borderRadius: '2rem', fontSize: '0.85rem', zIndex: 10, pointerEvents: 'none' }}>
-                      Click on the map to draw your land boundaries
-                    </div>
-                  )}
+
                   <GoogleMap
                     mapContainerStyle={{width: '100%', height: '320px', borderRadius: '0.75rem', cursor: isDrawingMode ? 'crosshair' : 'grab'}}
                     center={plotLocation}
@@ -1296,8 +1292,8 @@ function App() {
                 </div>
                 {/* Mobile-optimized Map Controls */}
                 <div className="map-drawing-controls" style={{ marginTop: '0.75rem', display: 'flex', flexWrap: 'wrap', gap: '0.5rem', width: '100%', justifyContent: 'space-between', alignItems: 'center', background: '#f8fafc', padding: '0.75rem', borderRadius: '0.75rem', border: '1px solid #e2e8f0' }}>
-                  <div style={{ fontSize: '0.85rem', fontWeight: 600, color: '#475569' }}>
-                    Boundary Tools
+                  <div style={{ fontSize: '0.85rem', fontWeight: 600, color: isDrawingMode ? '#3b82f6' : '#475569' }}>
+                    {isDrawingMode ? '👉 Click map to draw boundary' : 'Boundary Tools'}
                   </div>
                   <div style={{ display: 'flex', gap: '0.5rem', flex: '1 1 auto', justifyContent: 'flex-end' }}>
                     <button 
@@ -2586,11 +2582,7 @@ function App() {
             {isLoaded ? (
               <>
                 <div className="location-map-container" style={{ position: 'relative' }}>
-                  {isDrawingMode && (
-                    <div style={{ position: 'absolute', bottom: '20px', left: '50%', transform: 'translateX(-50%)', background: 'rgba(15,23,42,0.9)', color: 'white', padding: '0.5rem 1rem', borderRadius: '2rem', fontSize: '0.85rem', zIndex: 10, pointerEvents: 'none' }}>
-                      Click on the map to draw your land boundaries
-                    </div>
-                  )}
+
                   <GoogleMap
                     mapContainerStyle={{width: '100%', height: '320px', borderRadius: '0.75rem', cursor: isDrawingMode ? 'crosshair' : 'grab'}}
                     center={plotLocation}
@@ -2611,8 +2603,8 @@ function App() {
                 
                 {/* Mobile-optimized Map Controls */}
                 <div className="map-drawing-controls" style={{ marginTop: '0.75rem', display: 'flex', flexWrap: 'wrap', gap: '0.5rem', width: '100%', justifyContent: 'space-between', alignItems: 'center', background: '#f8fafc', padding: '0.75rem', borderRadius: '0.75rem', border: '1px solid #e2e8f0' }}>
-                  <div style={{ fontSize: '0.85rem', fontWeight: 600, color: '#475569' }}>
-                    Boundary Tools
+                  <div style={{ fontSize: '0.85rem', fontWeight: 600, color: isDrawingMode ? '#3b82f6' : '#475569' }}>
+                    {isDrawingMode ? '👉 Click map to draw boundary' : 'Boundary Tools'}
                   </div>
                   <div style={{ display: 'flex', gap: '0.5rem', flex: '1 1 auto', justifyContent: 'flex-end' }}>
                     <button 
