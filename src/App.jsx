@@ -1731,7 +1731,6 @@ function App() {
             <div className="plots-grid" style={{gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: '1.5rem'}}>
               {plots
                 .filter(p => p.visibility !== 'private' && p.status !== 'Verification Pending' && p.status !== 'Rejected')
-                .filter(p => buyerMapSelectedPlotId ? p.id === buyerMapSelectedPlotId : true)
                 .map(plot => (
                 <div 
                   key={plot.id} 
@@ -1774,7 +1773,7 @@ function App() {
                       </div>
                     </div>
                     
-                    {buyerMapSelectedPlotId ? (
+                    {buyerMapSelectedPlotId === plot.id ? (
                       <div style={{display: 'flex', gap: '0.5rem'}}>
                         <button 
                           className="btn btn-primary" 
