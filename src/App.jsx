@@ -2404,7 +2404,7 @@ function App() {
                 </thead>
                 <tbody>
                   {allListedPlots.map(plot => (
-                    <tr key={plot.id}>
+                    <tr key={plot.id} onClick={() => handleAdminEditClick(plot)} style={{cursor: 'pointer'}} className="admin-table-row-clickable">
                       <td>
                         <div className="admin-plot-title">
                           <img src={plot.image} alt="" className="admin-plot-thumb" />
@@ -2426,26 +2426,26 @@ function App() {
                           {plot.status}
                         </span>
                       </td>
-                      <td>
+                      <td onClick={(e) => e.stopPropagation()}>
                         <div className="admin-actions">
-                          <button className="admin-btn" style={{backgroundColor: '#e2e8f0', color: '#1e293b', border: '1px solid #cbd5e1'}} onClick={() => handleAdminEditClick(plot)}>
+                          <button className="admin-btn" style={{backgroundColor: '#e2e8f0', color: '#1e293b', border: '1px solid #cbd5e1'}} onClick={(e) => { e.stopPropagation(); handleAdminEditClick(plot); }}>
                             <Edit3 size={14} /> Edit
                           </button>
                           {plot.status === 'Verification Pending' ? (
                             <>
-                              <button className="admin-btn admin-btn-verify" onClick={() => handleVerifyPlot(plot.id)}>
+                              <button className="admin-btn admin-btn-verify" onClick={(e) => { e.stopPropagation(); handleVerifyPlot(plot.id); }}>
                                 <Check size={14} /> Verify
                               </button>
-                              <button className="admin-btn admin-btn-reject" onClick={() => handleRejectPlot(plot.id)}>
+                              <button className="admin-btn admin-btn-reject" onClick={(e) => { e.stopPropagation(); handleRejectPlot(plot.id); }}>
                                 <X size={14} /> Reject
                               </button>
                             </>
                           ) : plot.status === 'Rejected' ? (
-                            <button className="admin-btn admin-btn-verify" onClick={() => handleVerifyPlot(plot.id)}>
+                            <button className="admin-btn admin-btn-verify" onClick={(e) => { e.stopPropagation(); handleVerifyPlot(plot.id); }}>
                               <Check size={14} /> Verify
                             </button>
                           ) : (
-                            <button className="admin-btn admin-btn-reject" onClick={() => handleRejectPlot(plot.id)}>
+                            <button className="admin-btn admin-btn-reject" onClick={(e) => { e.stopPropagation(); handleRejectPlot(plot.id); }}>
                               <X size={14} /> Reject
                             </button>
                           )}
