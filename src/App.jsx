@@ -2840,7 +2840,7 @@ export default function App() {
     const pendingPlots = plots.filter(p => p.status === 'Verification Pending');
     const verifiedPlots = plots.filter(p => p.status === 'Verified');
     const rejectedPlots = plots.filter(p => p.status === 'Rejected');
-    const allListedPlots = plots.filter(p => p.developer === 'Self Listed');
+    const allListedPlots = plots;
 
     return (
       <section className="section bg-light" style={{paddingTop: '6rem'}}>
