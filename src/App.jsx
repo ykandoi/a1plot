@@ -276,6 +276,7 @@ function App() {
   const [legalAgreed, setLegalAgreed] = useState(false);
   const [selectedMarker, setSelectedMarker] = useState(null);
   const [buyerMapSelectedPlotId, setBuyerMapSelectedPlotId] = useState(null);
+  const [mapFocusPlot, setMapFocusPlot] = useState(null);
   const [droppedPin, setDroppedPin] = useState(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState('');
@@ -1773,12 +1774,42 @@ function App() {
                       </div>
                     </div>
                     
-                    <button 
-                      className="btn btn-outline" 
-                      style={{width: '100%', padding: '0.5rem', fontSize: '0.85rem'}}
-                    >
-                      View Details
-                    </button>
+                    {buyerMapSelectedPlotId ? (
+                      <div style={{display: 'flex', gap: '0.5rem'}}>
+                        <button 
+                          className="btn btn-primary" 
+                          style={{flex: 1, padding: '0.5rem', fontSize: '0.85rem'}}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleViewProperty(plot);
+                          }}
+                        >
+                          Visit Property
+                        </button>
+                        <button 
+                          className="btn btn-outline" 
+                          style={{padding: '0.5rem', fontSize: '0.85rem'}}
+                          title="Zoom to location"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setMapFocusPlot(plot);
+                          }}
+                        >
+                          🔍 Zoom
+                        </button>
+                      </div>
+                    ) : (
+                      <button 
+                        className="btn btn-outline" 
+                        style={{width: '100%', padding: '0.5rem', fontSize: '0.85rem'}}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleViewProperty(plot);
+                        }}
+                      >
+                        View Details
+                      </button>
+                    )}
                   </div>
                 </div>
               ))}
@@ -1790,8 +1821,8 @@ function App() {
             {isLoaded ? (
               <GoogleMap
                 mapContainerStyle={{width: '100%', height: '100%'}}
-                center={selectedMarker ? { lat: selectedMarker.lat, lng: selectedMarker.lng } : (droppedPin ? droppedPin : defaultCenter)}
-                zoom={selectedMarker || droppedPin ? 14 : 6}
+                center={mapFocusPlot ? { lat: mapFocusPlot.lat, lng: mapFocusPlot.lng } : (droppedPin ? droppedPin : defaultCenter)}
+                zoom={mapFocusPlot || droppedPin ? 16 : 6}
                 onLoad={onMapLoad}
                 options={mapOptions}
                 onClick={() => { setBuyerMapSelectedPlotId(null); setSelectedMarker(null); }}
@@ -1851,6 +1882,7 @@ function App() {
                     onCloseClick={() => setSelectedMarker(null)}
                   >
                     <div style={{width: '240px', fontFamily: 'Inter, sans-serif', padding: '0.25rem'}}>
+                      <img src={selectedMarker.image} alt={selectedMarker.title} style={{width: '100%', height: '120px', objectFit: 'cover', borderRadius: '4px', marginBottom: '0.5rem'}} />
                       <h4 style={{fontSize: '0.95rem', fontWeight: 700, marginBottom: '0.25rem', color: '#0f172a'}}>{selectedMarker.title}</h4>
                       <p style={{fontSize: '1.1rem', fontWeight: 700, color: '#3b7a76', marginBottom: '0.5rem'}}>{selectedMarker.price}</p>
                       
