@@ -2814,3 +2814,11 @@ textarea.form-input {
     opacity: 1;
   }
 }
+
+/* ====================================================
+   ADMIN TABLE ACTIONS FLEX GAP
+   ==================================================== */
+.admin-actions {
+  display: flex;
+  gap: 0.5rem;
+}

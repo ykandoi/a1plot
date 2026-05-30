@@ -2666,7 +2666,7 @@ function App() {
             {images.length > 0 && (
               <div style={{height: '400px', width: '100%', overflowX: 'auto', display: 'flex', gap: '2px', background: '#0f172a'}}>
                 {images.map((img, i) => (
-                  <img key={i} src={img} alt="" style={{height: '100%', minWidth: '60%', objectFit: 'cover'}} />
+                  <img key={i} src={img} alt="" style={{height: '100%', minWidth: images.length === 1 ? '100%' : '60%', objectFit: 'cover'}} />
                 ))}
               </div>
             )}
