@@ -800,7 +800,17 @@ function App() {
             {plots
               .filter(p => p.visibility !== 'private' && p.status !== 'Verification Pending' && p.status !== 'Rejected')
               .map((plot) => (
-              <div key={plot.id} className="plot-card">
+              <div 
+                key={plot.id} 
+                className="plot-card"
+                onClick={() => handleViewProperty(plot)}
+                style={{
+                  cursor: 'pointer', 
+                  transition: 'transform 0.2s, box-shadow 0.2s'
+                }}
+                onMouseEnter={(e) => { e.currentTarget.style.transform = 'translateY(-2px)'; e.currentTarget.style.boxShadow = 'var(--shadow-lg)'; }}
+                onMouseLeave={(e) => { e.currentTarget.style.transform = 'none'; e.currentTarget.style.boxShadow = 'var(--shadow-md)'; }}
+              >
                 <div className="plot-image">
                   <div className="plot-badge">{plot.badge || 'Listed'}</div>
                   <img src={plot.image} alt={plot.title} />
@@ -837,7 +847,7 @@ function App() {
                       <span className="price-label">Total Price</span>
                       <div className="plot-price">{plot.price}</div>
                     </div>
-                    <button className="btn btn-primary" onClick={() => handleInterest(plot)}>
+                    <button className="btn btn-primary" onClick={(e) => { e.stopPropagation(); handleInterest(plot); }}>
                       Interested <ChevronRight size={16} />
                     </button>
                   </div>
