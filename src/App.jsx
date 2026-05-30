@@ -234,7 +234,7 @@ function App() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [newPlot, setNewPlot] = useState({ title: '', location: '', price: '', size: '', features: '', visibility: 'public' });
   const [editingPlot, setEditingPlot] = useState(null);
-  const [adminNewPlot, setAdminNewPlot] = useState({ title: '', location: '', price: '', size: '', features: '', visibility: 'public', status: 'Verification Pending' });
+  const [adminNewPlot, setAdminNewPlot] = useState({ title: '', location: '', price: '', size: '', features: '', visibility: 'public', status: 'Verification Pending', media: [], documentsAvailable: [] });
   const [adminEditingPlot, setAdminEditingPlot] = useState(null);
   const [requestingDocsFor, setRequestingDocsFor] = useState(null);
   const [legalAgreed, setLegalAgreed] = useState(false);
@@ -587,7 +587,9 @@ function App() {
       size: plot.size,
       features: plot.features || '',
       visibility: plot.visibility || 'public',
-      status: plot.status || 'Verification Pending'
+      status: plot.status || 'Verification Pending',
+      media: plot.media || (plot.image ? [plot.image] : []),
+      documentsAvailable: plot.documentsAvailable || []
     });
     setPlotLocation({ lat: plot.lat, lng: plot.lng });
     if (plot.polygonPath) {
@@ -604,12 +606,12 @@ function App() {
     setIsSubmitting(true);
     setSubmitError('');
     try {
-      let finalMedia = adminEditingPlot.media || [];
+      let finalMedia = adminNewPlot.media || [];
       if (mediaFiles.length > 0) {
         const newUrls = mediaFiles.map(f => f.preview || 'https://via.placeholder.com/600');
         finalMedia = [...finalMedia, ...newUrls];
       }
-      let finalDocs = adminEditingPlot.documentsAvailable || [];
+      let finalDocs = adminNewPlot.documentsAvailable || [];
       if (docFiles.length > 0) {
         finalDocs = [...finalDocs, ...docFiles.map(f => f.name)];
       }
@@ -626,11 +628,12 @@ function App() {
         lng: plotLocation.lng,
         polygonPath: sortedPolygonPath.length > 0 ? sortedPolygonPath : null,
         media: finalMedia,
+        image: finalMedia.length > 0 ? finalMedia[0] : (adminEditingPlot.image || ''),
         documentsAvailable: finalDocs
       });
 
       setAdminEditingPlot(null);
-      setAdminNewPlot({ title: '', location: '', price: '', size: '', features: '', visibility: 'public', status: 'Verification Pending' });
+      setAdminNewPlot({ title: '', location: '', price: '', size: '', features: '', visibility: 'public', status: 'Verification Pending', media: [], documentsAvailable: [] });
       setMediaFiles([]);
       setDocFiles([]);
       setPolygonPath([]);
@@ -2309,6 +2312,76 @@ function App() {
             ) : (
               <div style={{height: '320px', display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#f1f5f9', borderRadius: '0.75rem'}}>
                 <p className="text-muted">Loading map...</p>
+              </div>
+            )}
+          </div>
+
+          {/* ── Existing & New Images ── */}
+          <div className="form-group mb-8">
+            <label>Images</label>
+            {adminNewPlot.media && adminNewPlot.media.length > 0 && (
+              <div className="media-preview-grid mb-4">
+                {adminNewPlot.media.map((url, i) => (
+                  <div key={i} className="media-preview-item">
+                    <img src={url} alt="" />
+                    <button type="button" className="media-preview-remove" onClick={() => {
+                      const updated = [...adminNewPlot.media];
+                      updated.splice(i, 1);
+                      setAdminNewPlot({ ...adminNewPlot, media: updated });
+                    }}>✕</button>
+                  </div>
+                ))}
+              </div>
+            )}
+            <input ref={mediaInputRef} type="file" multiple accept="image/*,video/*" onChange={handleMediaSelect} style={{display: 'none'}} id="admin-media-upload" />
+            <div className="upload-area" onClick={() => mediaInputRef.current?.click()}>
+              <Upload size={28} className="text-muted" />
+              <p className="text-muted">Click to upload new photos & videos</p>
+            </div>
+            {mediaFiles.length > 0 && (
+              <div className="media-preview-grid mt-4">
+                {mediaFiles.map(f => (
+                  <div key={f.id} className="media-preview-item">
+                    {f.preview ? <img src={f.preview} alt={f.name} /> : <div className="media-preview-video"><span>🎬</span><span>{f.name}</span></div>}
+                    <button type="button" className="media-preview-remove" onClick={() => removeMediaFile(f.id)}>✕</button>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+
+          {/* ── Existing & New Documents ── */}
+          <div className="form-group mb-12">
+            <label>Documents</label>
+            {adminNewPlot.documentsAvailable && adminNewPlot.documentsAvailable.length > 0 && (
+              <div className="doc-file-list mb-4">
+                {adminNewPlot.documentsAvailable.map((doc, i) => (
+                  <div key={i} className="doc-file-item">
+                    <div className="doc-file-icon">📄</div>
+                    <div className="doc-file-info"><div className="doc-file-name">{doc}</div></div>
+                    <button type="button" className="doc-file-remove" onClick={() => {
+                      const updated = [...adminNewPlot.documentsAvailable];
+                      updated.splice(i, 1);
+                      setAdminNewPlot({ ...adminNewPlot, documentsAvailable: updated });
+                    }}>✕</button>
+                  </div>
+                ))}
+              </div>
+            )}
+            <input ref={docInputRef} type="file" multiple accept=".pdf,.doc,.docx,.jpg,.jpeg,.png" onChange={handleDocSelect} style={{display: 'none'}} id="admin-doc-upload" />
+            <div className="upload-area" onClick={() => docInputRef.current?.click()}>
+              <Upload size={28} className="text-muted" />
+              <p className="text-muted">Click to upload new documents</p>
+            </div>
+            {docFiles.length > 0 && (
+              <div className="doc-file-list mt-4">
+                {docFiles.map(f => (
+                  <div key={f.id} className="doc-file-item">
+                    <div className="doc-file-icon">📄</div>
+                    <div className="doc-file-info"><div className="doc-file-name">{f.name}</div><div className="doc-file-size">{f.size}</div></div>
+                    <button type="button" className="doc-file-remove" onClick={() => removeDocFile(f.id)}>✕</button>
+                  </div>
+                ))}
               </div>
             )}
           </div>
