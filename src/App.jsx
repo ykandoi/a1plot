@@ -208,6 +208,7 @@ const viewToPath = {
   'buy-request': '/buy_request',
   'admin': '/admin',
   'admin-edit': '/admin_edit',
+  'property-detail': '/property',
   'login': '/login',
   'about': '/about_us'
 };
@@ -225,6 +226,7 @@ const pathToView = {
   '/buy_request': 'buy-request',
   '/admin': 'admin',
   '/admin_edit': 'admin-edit',
+  '/property': 'property-detail',
   '/login': 'login',
   '/about_us': 'about'
 };
@@ -236,6 +238,7 @@ function App() {
   const [editingPlot, setEditingPlot] = useState(null);
   const [adminNewPlot, setAdminNewPlot] = useState({ title: '', location: '', price: '', size: '', features: '', visibility: 'public', status: 'Verification Pending', media: [], documentsAvailable: [] });
   const [adminEditingPlot, setAdminEditingPlot] = useState(null);
+  const [selectedPropertyDetail, setSelectedPropertyDetail] = useState(null);
   const [requestingDocsFor, setRequestingDocsFor] = useState(null);
   const [legalAgreed, setLegalAgreed] = useState(false);
   const [selectedMarker, setSelectedMarker] = useState(null);
@@ -567,7 +570,7 @@ function App() {
       price: plot.price,
       size: plot.size,
       features: plot.features || '',
-      visibility: plot.visibility || 'private'
+      visibility: plot.visibility || 'public'
     });
     setPlotLocation({ lat: plot.lat, lng: plot.lng });
     if (plot.polygonPath) {
@@ -576,6 +579,11 @@ function App() {
       setPolygonPath([]);
     }
     navigate('seller-edit');
+  };
+
+  const handleViewProperty = (plot) => {
+    setSelectedPropertyDetail(plot);
+    navigate('property-detail');
   };
 
   const handleAdminEditClick = (plot) => {
@@ -1488,13 +1496,14 @@ function App() {
                 <div 
                   key={plot.id} 
                   className="plot-card" 
-                  onClick={() => setSelectedMarker(plot)} 
+                  onClick={() => handleViewProperty(plot)} 
                   style={{
                     cursor: 'pointer', 
-                    border: selectedMarker?.id === plot.id ? '2px solid var(--primary)' : '1px solid var(--border-color)',
-                    transform: selectedMarker?.id === plot.id ? 'translateY(-2px)' : 'none',
-                    boxShadow: selectedMarker?.id === plot.id ? 'var(--shadow-lg)' : 'none'
+                    border: '1px solid var(--border-color)',
+                    transition: 'transform 0.2s, box-shadow 0.2s'
                   }}
+                  onMouseEnter={(e) => { e.currentTarget.style.transform = 'translateY(-2px)'; e.currentTarget.style.boxShadow = 'var(--shadow-lg)'; }}
+                  onMouseLeave={(e) => { e.currentTarget.style.transform = 'none'; e.currentTarget.style.boxShadow = 'none'; }}
                 >
                   <div className="plot-image" style={{height: '160px'}}>
                     <div className="plot-badge">{plot.badge || 'Listed'}</div>
@@ -1551,10 +1560,10 @@ function App() {
                     <React.Fragment key={plot.id}>
                       <MarkerF
                         position={{ lat: plot.lat, lng: plot.lng }}
-                        onClick={() => setSelectedMarker(plot)}
+                        onClick={() => handleViewProperty(plot)}
                         icon={{
                           url: 'data:image/svg+xml;charset=UTF-8,' + encodeURIComponent(
-                            `<svg xmlns="http://www.w3.org/2000/svg" width="36" height="36" viewBox="0 0 24 24" fill="${selectedMarker?.id === plot.id ? '%23f59e0b' : '%233b7a76'}" stroke="white" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3" fill="white"/></svg>`
+                            `<svg xmlns="http://www.w3.org/2000/svg" width="36" height="36" viewBox="0 0 24 24" fill="%233b7a76" stroke="white" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3" fill="white"/></svg>`
                           ),
                           scaledSize: new window.google.maps.Size(40, 40)
                         }}
@@ -1563,14 +1572,14 @@ function App() {
                         <PolygonF
                           paths={plot.polygonPath}
                           options={{
-                            fillColor: selectedMarker?.id === plot.id ? '#f59e0b' : '#3b7a76',
+                            fillColor: '#3b7a76',
                             fillOpacity: 0.35,
-                            strokeColor: selectedMarker?.id === plot.id ? '#f59e0b' : '#3b7a76',
+                            strokeColor: '#3b7a76',
                             strokeOpacity: 1,
                             strokeWeight: 2,
                             clickable: true
                           }}
-                          onClick={() => setSelectedMarker(plot)}
+                          onClick={() => handleViewProperty(plot)}
                         />
                       )}
                     </React.Fragment>
@@ -2536,6 +2545,105 @@ function App() {
   };
 
   /* ============================================
+     PROPERTY DETAIL VIEW (Public)
+     ============================================ */
+  const renderPropertyDetail = () => {
+    if (!selectedPropertyDetail) return null;
+    const plot = selectedPropertyDetail;
+    const images = plot.media && plot.media.length > 0 ? plot.media : (plot.image ? [plot.image] : []);
+    const docs = plot.documentsAvailable || [];
+
+    return (
+      <section className="section bg-light" style={{paddingTop: '6rem', minHeight: '100vh'}}>
+        <div className="container" style={{maxWidth: '1000px'}}>
+          <button className="btn btn-outline mb-6" onClick={() => navigate('buyer-map')} style={{display: 'inline-flex', alignItems: 'center', gap: '0.5rem', padding: '0.5rem 1rem', background: 'white'}}>
+            <ArrowRight size={16} style={{transform: 'rotate(180deg)'}} /> Back to Explore
+          </button>
+          
+          <div style={{background: 'white', borderRadius: '1rem', overflow: 'hidden', boxShadow: 'var(--shadow-md)'}}>
+            {/* Image Gallery Header */}
+            {images.length > 0 && (
+              <div style={{height: '400px', width: '100%', overflowX: 'auto', display: 'flex', gap: '2px', background: '#0f172a'}}>
+                {images.map((img, i) => (
+                  <img key={i} src={img} alt="" style={{height: '100%', minWidth: '60%', objectFit: 'cover'}} />
+                ))}
+              </div>
+            )}
+
+            <div style={{padding: '2rem'}}>
+              <div style={{display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '1rem', marginBottom: '1.5rem'}}>
+                <div>
+                  <div className="flex items-center gap-2 mb-2">
+                    <span className={`admin-status admin-status-${plot.status.toLowerCase().replace(/\s+/g,'-')}`}>
+                      {plot.status === 'Verified' ? <><ShieldCheck size={14} style={{display: 'inline', marginRight: '0.2rem'}} /> Verified</> : plot.status}
+                    </span>
+                    <span style={{fontSize: '0.85rem', color: 'var(--text-muted)'}}><MapPin size={14} style={{display: 'inline', verticalAlign: 'text-top'}} /> {plot.location}</span>
+                  </div>
+                  <h1 style={{fontSize: '2rem', fontWeight: 700, color: 'var(--text-dark)', marginBottom: '0.5rem'}}>{plot.title}</h1>
+                  <p style={{fontSize: '1.1rem', color: 'var(--text-muted)'}}>{plot.features}</p>
+                </div>
+                <div style={{textAlign: 'right'}}>
+                  <div style={{fontSize: '2.5rem', fontWeight: 800, color: 'var(--primary)', lineHeight: '1'}}>{plot.price}</div>
+                  <div style={{fontSize: '1rem', color: 'var(--text-muted)', marginTop: '0.5rem'}}>Size: {plot.size}</div>
+                </div>
+              </div>
+
+              <div style={{display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '2rem', marginTop: '3rem'}}>
+                <div>
+                  <h3 style={{fontSize: '1.25rem', fontWeight: 700, marginBottom: '1rem'}}>Property Location</h3>
+                  <div style={{height: '300px', borderRadius: '0.75rem', overflow: 'hidden', border: '1px solid var(--border-color)'}}>
+                    {isLoaded && plot.lat && plot.lng ? (
+                      <GoogleMap
+                        mapContainerStyle={{width: '100%', height: '100%'}}
+                        center={{ lat: plot.lat, lng: plot.lng }}
+                        zoom={15}
+                        options={{ mapTypeId: 'satellite', disableDefaultUI: true, zoomControl: true }}
+                      >
+                        <MarkerF position={{ lat: plot.lat, lng: plot.lng }} />
+                        {plot.polygonPath && plot.polygonPath.length >= 3 && (
+                          <PolygonF paths={plot.polygonPath} options={{ fillColor: '#10b981', fillOpacity: 0.35, strokeColor: '#10b981', strokeOpacity: 1, strokeWeight: 2 }} />
+                        )}
+                      </GoogleMap>
+                    ) : (
+                      <div style={{height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#f1f5f9'}}><p>Map not available</p></div>
+                    )}
+                  </div>
+                </div>
+
+                <div>
+                  <h3 style={{fontSize: '1.25rem', fontWeight: 700, marginBottom: '1rem'}}>Available Documents</h3>
+                  {docs.length > 0 ? (
+                    <div className="doc-file-list">
+                      {docs.map((doc, i) => (
+                        <div key={i} className="doc-file-item" style={{background: '#f8fafc', padding: '0.75rem 1rem', borderRadius: '0.5rem', marginBottom: '0.5rem', display: 'flex', alignItems: 'center', gap: '0.75rem', border: '1px solid #e2e8f0'}}>
+                          <div className="doc-file-icon" style={{fontSize: '1.5rem'}}>📄</div>
+                          <div className="doc-file-info">
+                            <div className="doc-file-name" style={{fontWeight: 600, color: '#334155'}}>{doc}</div>
+                            <div style={{fontSize: '0.75rem', color: '#94a3b8'}}>View Only</div>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  ) : (
+                    <p className="text-muted">No documents have been uploaded for this property.</p>
+                  )}
+
+                  <div style={{marginTop: '2rem', padding: '1.5rem', background: '#f0fdf4', borderRadius: '0.75rem', border: '1px solid #bbf7d0'}}>
+                    <h4 style={{fontSize: '1.1rem', fontWeight: 700, color: '#166534', marginBottom: '0.5rem'}}>Interested in this property?</h4>
+                    <p style={{fontSize: '0.9rem', color: '#15803d', marginBottom: '1rem'}}>Register your interest to get more details and arrange a site visit.</p>
+                    <button className="btn btn-primary" style={{width: '100%'}} onClick={() => handleInterest(plot)}>Register Interest</button>
+                  </div>
+                </div>
+              </div>
+
+            </div>
+          </div>
+        </div>
+      </section>
+    );
+  };
+
+  /* ============================================
      MAIN RENDER
      ============================================ */
   if (authLoading) {
@@ -2654,6 +2762,7 @@ function App() {
         {view === 'buy-request' && renderBuyRequest()}
         {view === 'admin' && (isAdmin ? renderAdminPanel() : renderAuth())}
         {view === 'admin-edit' && (isAdmin ? renderAdminEditForm() : renderAuth())}
+        {view === 'property-detail' && renderPropertyDetail()}
         {view === 'privacy' && renderPrivacy()}
         {view === 'terms' && renderTerms()}
         {view === 'about' && renderAbout()}
