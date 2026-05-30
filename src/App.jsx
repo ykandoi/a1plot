@@ -666,7 +666,7 @@ function App() {
         
         setMediaFiles(prev => {
           const filtered = prev.filter(f => !f.isStaticMap);
-          return [{ id: 'static-map-' + Date.now(), preview: url, name: 'Boundary Map Preview', isStaticMap: true }, ...filtered];
+          return [{ id: 'static-map-' + Date.now(), preview: url, name: 'Boundary Map Preview', isStaticMap: true, polygonPath: sorted, plotLocation: plotLocation }, ...filtered];
         });
       }
     } else {
@@ -944,7 +944,21 @@ function App() {
               )}
               
               <div className="viewer-img-container" onClick={(e) => e.stopPropagation()}>
-                <img src={images[viewerIndex]} alt="" className="viewer-img" />
+                {images[viewerIndex].includes('staticmap') && selectedPropertyDetail?.polygonPath ? (
+                  <div style={{width: '600px', maxWidth: '100%', aspectRatio: '3/2', borderRadius: '0.5rem', overflow: 'hidden'}}>
+                    <GoogleMap
+                      mapContainerStyle={{ width: '100%', height: '100%' }}
+                      center={{ lat: selectedPropertyDetail.lat, lng: selectedPropertyDetail.lng }}
+                      zoom={18}
+                      options={{ disableDefaultUI: true, gestureHandling: 'none', mapTypeId: 'hybrid', keyboardShortcuts: false }}
+                    >
+                      <PolygonF paths={selectedPropertyDetail.polygonPath} options={{ fillColor: '#10b981', fillOpacity: 0.35, strokeColor: '#10b981', strokeOpacity: 0.8, strokeWeight: 3 }} />
+                      <MarkerF position={{ lat: selectedPropertyDetail.lat, lng: selectedPropertyDetail.lng }} />
+                    </GoogleMap>
+                  </div>
+                ) : (
+                  <img src={images[viewerIndex]} alt="" className="viewer-img" />
+                )}
                 <div className="viewer-counter">{viewerIndex + 1} / {images.length}</div>
               </div>
               
@@ -1355,7 +1369,19 @@ function App() {
               <div className="media-preview-grid">
                 {mediaFiles.map(f => (
                   <div key={f.id} className="media-preview-item">
-                    {f.preview ? (
+                    {f.isStaticMap ? (
+                      <div style={{width: '100%', height: '100%', borderRadius: '0.5rem', overflow: 'hidden', pointerEvents: 'none'}}>
+                        <GoogleMap
+                          mapContainerStyle={{ width: '100%', height: '100%' }}
+                          center={{ lat: f.plotLocation.lat, lng: f.plotLocation.lng }}
+                          zoom={18}
+                          options={{ disableDefaultUI: true, gestureHandling: 'none', mapTypeId: 'hybrid', keyboardShortcuts: false }}
+                        >
+                          <PolygonF paths={f.polygonPath} options={{ fillColor: '#10b981', fillOpacity: 0.35, strokeColor: '#10b981', strokeOpacity: 0.8, strokeWeight: 3 }} />
+                          <MarkerF position={{ lat: f.plotLocation.lat, lng: f.plotLocation.lng }} />
+                        </GoogleMap>
+                      </div>
+                    ) : f.preview ? (
                       <img src={f.preview} alt={f.name} />
                     ) : f.isVideo ? (
                       <div className="media-preview-video">
@@ -2642,7 +2668,19 @@ function App() {
               <div className="media-preview-grid mt-4">
                 {mediaFiles.map(f => (
                   <div key={f.id} className="media-preview-item">
-                    {f.preview ? <img src={f.preview} alt={f.name} /> : <div className="media-preview-video"><span>🎬</span><span>{f.name}</span></div>}
+                    {f.isStaticMap ? (
+                      <div style={{width: '100%', height: '100%', borderRadius: '0.5rem', overflow: 'hidden', pointerEvents: 'none'}}>
+                        <GoogleMap
+                          mapContainerStyle={{ width: '100%', height: '100%' }}
+                          center={{ lat: f.plotLocation.lat, lng: f.plotLocation.lng }}
+                          zoom={18}
+                          options={{ disableDefaultUI: true, gestureHandling: 'none', mapTypeId: 'hybrid', keyboardShortcuts: false }}
+                        >
+                          <PolygonF paths={f.polygonPath} options={{ fillColor: '#10b981', fillOpacity: 0.35, strokeColor: '#10b981', strokeOpacity: 0.8, strokeWeight: 3 }} />
+                          <MarkerF position={{ lat: f.plotLocation.lat, lng: f.plotLocation.lng }} />
+                        </GoogleMap>
+                      </div>
+                    ) : f.preview ? <img src={f.preview} alt={f.name} /> : <div className="media-preview-video"><span>🎬</span><span>{f.name}</span></div>}
                     <button type="button" className="media-preview-remove" onClick={() => removeMediaFile(f.id)}>✕</button>
                   </div>
                 ))}
