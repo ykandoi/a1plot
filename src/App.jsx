@@ -688,7 +688,8 @@ function App() {
     try {
       let staticMapUrl = null;
       if (sortedPolygonPath.length >= 3 && window.google?.maps?.geometry?.encoding) {
-        const encodedPath = window.google.maps.geometry.encoding.encodePath(sortedPolygonPath);
+        const latLngs = sortedPolygonPath.map(p => new window.google.maps.LatLng(p.lat, p.lng));
+        const encodedPath = window.google.maps.geometry.encoding.encodePath(latLngs);
         staticMapUrl = `https://maps.googleapis.com/maps/api/staticmap?size=600x400&maptype=satellite&path=color:0x10b981AA|weight:3|fillcolor:0x10b98144|enc:${encodeURIComponent(encodedPath)}&key=${GOOGLE_MAPS_API_KEY}`;
       }
 
@@ -799,7 +800,8 @@ function App() {
     try {
       let staticMapUrl = null;
       if (sortedPolygonPath.length >= 3 && window.google?.maps?.geometry?.encoding) {
-        const encodedPath = window.google.maps.geometry.encoding.encodePath(sortedPolygonPath);
+        const latLngs = sortedPolygonPath.map(p => new window.google.maps.LatLng(p.lat, p.lng));
+        const encodedPath = window.google.maps.geometry.encoding.encodePath(latLngs);
         staticMapUrl = `https://maps.googleapis.com/maps/api/staticmap?size=600x400&maptype=satellite&path=color:0x10b981AA|weight:3|fillcolor:0x10b98144|enc:${encodeURIComponent(encodedPath)}&key=${GOOGLE_MAPS_API_KEY}`;
       }
       
