@@ -287,6 +287,7 @@ function App() {
   const [plotLocation, setPlotLocation] = useState({ lat: 20.5937, lng: 78.9629 }); // India center
   const [polygonPath, setPolygonPath] = useState([]);
   const [isDrawingMode, setIsDrawingMode] = useState(false);
+  const [mapType, setMapType] = useState('hybrid');
   const sortedPolygonPath = useMemo(() => getSortedPolygonPath(polygonPath), [polygonPath]);
   const mediaInputRef = useRef(null);
   const docInputRef = useRef(null);
@@ -1229,15 +1230,15 @@ function App() {
                 <div className="location-map-container" style={{ position: 'relative' }}>
 
                   <GoogleMap
-                    mapContainerStyle={{width: '100%', height: '320px', borderRadius: '0.75rem', cursor: isDrawingMode ? 'crosshair' : 'grab'}}
+                    mapContainerStyle={{width: '100%', height: '400px', borderRadius: '0.75rem', cursor: isDrawingMode ? 'crosshair' : 'grab'}}
                     center={plotLocation}
                     zoom={14}
                     onClick={handleMapClickForDrawing}
                     options={{
-                      mapTypeId: 'hybrid',
+                      mapTypeId: mapType,
                       disableDefaultUI: true,
                       zoomControl: true,
-                      mapTypeControl: true,
+                      mapTypeControl: false,
                       streetViewControl: false,
                       fullscreenControl: false,
                       gestureHandling: 'greedy',
@@ -1290,14 +1291,14 @@ function App() {
                     <span>📍 {plotLocation.lat.toFixed(5)}, {plotLocation.lng.toFixed(5)}</span>
                   </div>
                   {/* Floating Map Controls Inside Map */}
-                  <div className="map-drawing-controls" style={{ position: 'absolute', top: '10px', right: '10px', zIndex: 10, display: 'flex', gap: '0.5rem', background: 'rgba(255,255,255,0.95)', padding: '0.5rem', borderRadius: '0.5rem', boxShadow: '0 2px 8px rgba(0,0,0,0.15)', flexWrap: 'wrap', maxWidth: 'calc(100% - 70px)' }}>
+                  <div className="map-drawing-controls" style={{ position: 'absolute', top: '10px', left: '10px', zIndex: 10, display: 'flex', gap: '0.5rem', background: 'rgba(255,255,255,0.95)', padding: '0.5rem', borderRadius: '0.5rem', boxShadow: '0 2px 8px rgba(0,0,0,0.15)', flexWrap: 'wrap', maxWidth: 'calc(100% - 20px)' }}>
                     <button 
                       type="button"
                       className={`btn ${isDrawingMode ? 'btn-primary' : 'btn-outline'}`}
                       style={{ padding: '0.4rem 0.75rem', fontSize: '0.8rem', whiteSpace: 'nowrap' }}
                       onClick={handleToggleDrawingMode}
                     >
-                      <Edit3 size={14} style={{display: 'inline', marginRight: '4px'}} /> {isDrawingMode ? 'Stop' : 'Draw'}
+                      <Edit3 size={14} style={{display: 'inline', marginRight: '4px'}} /> {isDrawingMode ? 'Stop' : 'Draw Boundary'}
                     </button>
                     {polygonPath.length > 0 && (
                       <>
@@ -1309,6 +1310,14 @@ function App() {
                         </button>
                       </>
                     )}
+                  </div>
+                </div>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginTop: '0.5rem', flexWrap: 'wrap', gap: '0.5rem' }}>
+                  <div style={{ display: 'flex', gap: '0.25rem', background: '#f8fafc', padding: '0.35rem', borderRadius: '0.5rem', border: '1px solid #e2e8f0', width: '100%', overflowX: 'auto' }}>
+                    <button type="button" className={`btn ${mapType === 'roadmap' ? 'btn-primary' : 'btn-ghost'}`} style={{ padding: '0.35rem 0.75rem', fontSize: '0.8rem', flex: '1 1 auto' }} onClick={() => setMapType('roadmap')}>Map</button>
+                    <button type="button" className={`btn ${mapType === 'satellite' ? 'btn-primary' : 'btn-ghost'}`} style={{ padding: '0.35rem 0.75rem', fontSize: '0.8rem', flex: '1 1 auto' }} onClick={() => setMapType('satellite')}>Satellite</button>
+                    <button type="button" className={`btn ${mapType === 'hybrid' ? 'btn-primary' : 'btn-ghost'}`} style={{ padding: '0.35rem 0.75rem', fontSize: '0.8rem', flex: '1 1 auto' }} onClick={() => setMapType('hybrid')}>Hybrid</button>
+                    <button type="button" className={`btn ${mapType === 'terrain' ? 'btn-primary' : 'btn-ghost'}`} style={{ padding: '0.35rem 0.75rem', fontSize: '0.8rem', flex: '1 1 auto' }} onClick={() => setMapType('terrain')}>Terrain</button>
                   </div>
                 </div>
                 {isDrawingMode && (
@@ -2584,11 +2593,11 @@ function App() {
                 <div className="location-map-container" style={{ position: 'relative' }}>
 
                   <GoogleMap
-                    mapContainerStyle={{width: '100%', height: '320px', borderRadius: '0.75rem', cursor: isDrawingMode ? 'crosshair' : 'grab'}}
+                    mapContainerStyle={{width: '100%', height: '400px', borderRadius: '0.75rem', cursor: isDrawingMode ? 'crosshair' : 'grab'}}
                     center={plotLocation}
                     zoom={14}
                     onClick={handleMapClickForDrawing}
-                    options={{ mapTypeId: 'hybrid', disableDefaultUI: true, zoomControl: true, mapTypeControl: true, draggableCursor: isDrawingMode ? 'crosshair' : 'grab', styles: mapOptions.styles }}
+                    options={{ mapTypeId: mapType, disableDefaultUI: true, zoomControl: true, mapTypeControl: false, draggableCursor: isDrawingMode ? 'crosshair' : 'grab', styles: mapOptions.styles }}
                   >
                     {!isDrawingMode && <MarkerF position={plotLocation} draggable={true} onDragEnd={onMarkerDragEnd} />}
                     {sortedPolygonPath.length > 0 && <PolygonF paths={sortedPolygonPath} options={{ fillColor: '#10b981', fillOpacity: 0.35, strokeColor: '#10b981', strokeOpacity: 1, strokeWeight: 2, clickable: false }} />}
@@ -2600,14 +2609,14 @@ function App() {
                     <span>📍 {plotLocation.lat.toFixed(5)}, {plotLocation.lng.toFixed(5)}</span>
                   </div>
                   {/* Floating Map Controls Inside Map */}
-                  <div className="map-drawing-controls" style={{ position: 'absolute', top: '10px', right: '10px', zIndex: 10, display: 'flex', gap: '0.5rem', background: 'rgba(255,255,255,0.95)', padding: '0.5rem', borderRadius: '0.5rem', boxShadow: '0 2px 8px rgba(0,0,0,0.15)', flexWrap: 'wrap', maxWidth: 'calc(100% - 70px)' }}>
+                  <div className="map-drawing-controls" style={{ position: 'absolute', top: '10px', left: '10px', zIndex: 10, display: 'flex', gap: '0.5rem', background: 'rgba(255,255,255,0.95)', padding: '0.5rem', borderRadius: '0.5rem', boxShadow: '0 2px 8px rgba(0,0,0,0.15)', flexWrap: 'wrap', maxWidth: 'calc(100% - 20px)' }}>
                     <button 
                       type="button"
                       className={`btn ${isDrawingMode ? 'btn-primary' : 'btn-outline'}`}
                       style={{ padding: '0.4rem 0.75rem', fontSize: '0.8rem', whiteSpace: 'nowrap' }}
                       onClick={handleToggleDrawingMode}
                     >
-                      <Edit3 size={14} style={{display: 'inline', marginRight: '4px'}} /> {isDrawingMode ? 'Stop' : 'Draw'}
+                      <Edit3 size={14} style={{display: 'inline', marginRight: '4px'}} /> {isDrawingMode ? 'Stop' : 'Draw Boundary'}
                     </button>
                     {polygonPath.length > 0 && (
                       <>
@@ -2619,6 +2628,14 @@ function App() {
                         </button>
                       </>
                     )}
+                  </div>
+                </div>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginTop: '0.5rem', flexWrap: 'wrap', gap: '0.5rem' }}>
+                  <div style={{ display: 'flex', gap: '0.25rem', background: '#f8fafc', padding: '0.35rem', borderRadius: '0.5rem', border: '1px solid #e2e8f0', width: '100%', overflowX: 'auto' }}>
+                    <button type="button" className={`btn ${mapType === 'roadmap' ? 'btn-primary' : 'btn-ghost'}`} style={{ padding: '0.35rem 0.75rem', fontSize: '0.8rem', flex: '1 1 auto' }} onClick={() => setMapType('roadmap')}>Map</button>
+                    <button type="button" className={`btn ${mapType === 'satellite' ? 'btn-primary' : 'btn-ghost'}`} style={{ padding: '0.35rem 0.75rem', fontSize: '0.8rem', flex: '1 1 auto' }} onClick={() => setMapType('satellite')}>Satellite</button>
+                    <button type="button" className={`btn ${mapType === 'hybrid' ? 'btn-primary' : 'btn-ghost'}`} style={{ padding: '0.35rem 0.75rem', fontSize: '0.8rem', flex: '1 1 auto' }} onClick={() => setMapType('hybrid')}>Hybrid</button>
+                    <button type="button" className={`btn ${mapType === 'terrain' ? 'btn-primary' : 'btn-ghost'}`} style={{ padding: '0.35rem 0.75rem', fontSize: '0.8rem', flex: '1 1 auto' }} onClick={() => setMapType('terrain')}>Terrain</button>
                   </div>
                 </div>
                 {isDrawingMode && (
