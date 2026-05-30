@@ -2820,7 +2820,23 @@ function App() {
                     </span>
                     <span style={{fontSize: '0.85rem', color: 'var(--text-muted)'}}><MapPin size={14} style={{display: 'inline', verticalAlign: 'text-top'}} /> {plot.location}</span>
                   </div>
-                  <h1 style={{fontSize: '2rem', fontWeight: 700, color: 'var(--text-dark)', marginBottom: '0.5rem'}}>{plot.title}</h1>
+                  <div style={{display: 'flex', alignItems: 'center', gap: '1rem', marginBottom: '0.5rem'}}>
+                    <h1 style={{fontSize: '2rem', fontWeight: 700, color: 'var(--text-dark)', margin: 0}}>{plot.title}</h1>
+                    <button 
+                      onClick={() => handleToggleInterest(plot)}
+                      style={{
+                        display: 'flex', alignItems: 'center', gap: '0.5rem', 
+                        padding: '0.5rem 1rem', borderRadius: '2rem', 
+                        border: `1px solid ${interestedPlots.some(p => p.id === plot.id) ? '#ef4444' : '#e2e8f0'}`,
+                        background: interestedPlots.some(p => p.id === plot.id) ? '#fef2f2' : 'white',
+                        color: interestedPlots.some(p => p.id === plot.id) ? '#ef4444' : '#64748b',
+                        fontWeight: 600, cursor: 'pointer', transition: 'all 0.2s'
+                      }}
+                    >
+                      <Heart size={18} fill={interestedPlots.some(p => p.id === plot.id) ? "#ef4444" : "none"} />
+                      {interestedPlots.some(p => p.id === plot.id) ? 'Liked' : 'Like Property'}
+                    </button>
+                  </div>
                   <p style={{fontSize: '1.1rem', color: 'var(--text-muted)'}}>{plot.features}</p>
                 </div>
                 <div style={{textAlign: 'right'}}>

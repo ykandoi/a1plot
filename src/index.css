@@ -2306,7 +2306,7 @@ textarea.form-input {
 .plot-favorite-btn {
   position: absolute;
   top: 1rem;
-  right: 1rem;
+  left: 1rem;
   width: 36px;
   height: 36px;
   border-radius: 50%;
@@ -2506,7 +2506,7 @@ textarea.form-input {
 .plot-favorite-btn {
   position: absolute;
   top: 1rem;
-  right: 1rem;
+  left: 1rem;
   width: 36px;
   height: 36px;
   border-radius: 50%;
@@ -2707,7 +2707,7 @@ textarea.form-input {
 .plot-favorite-btn {
   position: absolute;
   top: 1rem;
-  right: 1rem;
+  left: 1rem;
   width: 36px;
   height: 36px;
   border-radius: 50%;
