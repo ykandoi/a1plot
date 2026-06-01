@@ -227,6 +227,7 @@ const pathToView = {
   '/buy_request': 'buy-request',
   '/admin': 'admin',
   '/admin_edit': 'admin-edit',
+      '/admin_map': 'admin-map',
   '/property': 'property-detail',
   '/login': 'login',
   '/about_us': 'about'
@@ -264,7 +265,7 @@ export default function App() {
   };
   const [view, setView] = useState(getInitialView);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-  const [newPlot, setNewPlot] = useState({ title: '', location: '', price: '', size: '', features: '', visibility: 'public', khasraNumber: '', district: '', tehsil: '', village: '' });
+  const [newPlot, setNewPlot] = useState({ title: '', location: '', price: '', size: '', features: '', visibility: 'public', khasraNumber: '', state: '', district: '', tehsil: '', village: '' });
   const [editingPlot, setEditingPlot] = useState(null);
   const [adminNewPlot, setAdminNewPlot] = useState({ title: '', location: '', price: '', size: '', features: '', visibility: 'public', status: 'Verification Pending', media: [], documentsAvailable: [] });
   const [adminEditingPlot, setAdminEditingPlot] = useState(null);
@@ -656,11 +657,13 @@ export default function App() {
       const geocoder = new window.google.maps.Geocoder();
       geocoder.geocode({ location: { lat: Number(lat), lng: Number(lng) } }, (results, status) => {
         if (status === 'OK' && results && results[0] && results[0].address_components) {
+          let state = '';
           let district = '';
           let tehsil = '';
           let village = '';
           results[0].address_components.forEach(comp => {
             const types = comp.types || [];
+            if (types.includes('administrative_area_level_1')) state = comp.long_name;
             if (types.includes('administrative_area_level_3')) tehsil = comp.long_name;
             if (types.includes('administrative_area_level_2')) district = comp.long_name;
             if (types.includes('sublocality') || types.includes('locality') || types.includes('neighborhood')) {
@@ -671,6 +674,7 @@ export default function App() {
           
           setNewPlot(prev => ({
             ...prev,
+            state: state || prev.state,
             district: district || prev.district,
             tehsil: tehsil || prev.tehsil,
             village: village || prev.village,
@@ -682,6 +686,21 @@ export default function App() {
       console.error("fetchAddressFromCoords error:", err);
     }
   }
+
+  const getStateBhulekhLink = (stateName) => {
+    if (!stateName) return null;
+    const lowerState = stateName.toLowerCase();
+    if (lowerState.includes('uttar pradesh')) return 'https://upbhulekh.gov.in/public/public_ror/Public_ROR.jsp';
+    if (lowerState.includes('madhya pradesh')) return 'https://mpbhulekh.gov.in/';
+    if (lowerState.includes('maharashtra')) return 'https://bhulekh.mahabhumi.gov.in/';
+    if (lowerState.includes('rajasthan')) return 'https://apnakhata.rajasthan.gov.in/';
+    if (lowerState.includes('karnataka')) return 'https://landrecords.karnataka.gov.in/Service84/';
+    if (lowerState.includes('gujarat')) return 'https://anyror.gujarat.gov.in/';
+    if (lowerState.includes('bihar')) return 'http://biharbhumi.bihar.gov.in/';
+    if (lowerState.includes('haryana')) return 'https://jamabandi.nic.in/';
+    if (lowerState.includes('punjab')) return 'https://jamabandi.punjab.gov.in/';
+    return 'https://landrecords.gov.in/'; // Generic fallback
+  };
 
   // Places autocomplete handler
   const onPlaceSelected = () => {
@@ -1460,6 +1479,24 @@ export default function App() {
               value={newPlot.khasraNumber || ''}
               onChange={(e) => setNewPlot({...newPlot, khasraNumber: e.target.value})}
             />
+
+            {newPlot.state && newPlot.district && (
+              <div style={{
+                marginTop: '1rem', padding: '1rem', backgroundColor: '#ecfdf5', border: '1px solid #10b981',
+                borderRadius: '0.5rem', display: 'flex', gap: '1rem', alignItems: 'flex-start'
+              }}>
+                <MapPin size={24} color="#10b981" style={{ flexShrink: 0, marginTop: '2px' }} />
+                <div>
+                  <h4 style={{ margin: '0 0 0.25rem 0', color: '#065f46', fontSize: '0.95rem' }}>Smart Village Lookup Detected</h4>
+                  <p style={{ margin: '0 0 0.5rem 0', color: '#047857', fontSize: '0.85rem' }}>
+                    <strong>{newPlot.village || 'Location'}</strong> in {newPlot.tehsil ? `${newPlot.tehsil}, ` : ''}{newPlot.district}, {newPlot.state}.
+                  </p>
+                  <p style={{ margin: 0, fontSize: '0.8rem', color: '#064e3b' }}>
+                    Don't know your Khasra number? <a href={getStateBhulekhLink(newPlot.state)} target="_blank" rel="noopener noreferrer" style={{ color: '#10b981', fontWeight: 'bold', textDecoration: 'underline' }}>Verify it on {newPlot.state} Bhulekh Portal</a>
+                  </p>
+                </div>
+              </div>
+            )}
           </div>
 
           {/* ── Upload Images / Videos ── */}
@@ -2690,65 +2727,13 @@ export default function App() {
      ADMIN EDIT FORM
      ============================================ */
   const renderAdminEditForm = () => (
-    <section className="section bg-white" style={{paddingTop: '6rem'}}>
+    <section className="admin-panel-section pt-32 pb-20 fade-in">
       <div className="container" style={{maxWidth: '800px'}}>
         <div className="section-header">
           <h2 className="section-title">Admin Property Details & Edit</h2>
           <p className="text-muted">Review and update details for "{adminEditingPlot?.title}"</p>
         </div>
         <form className="listing-form" onSubmit={handleAdminUpdateProperty}>
-          <div className="form-group mb-8">
-            <label>Plot Title</label>
-            <input type="text" className="form-input" required value={adminNewPlot.title} onChange={(e) => setAdminNewPlot({...adminNewPlot, title: e.target.value})} />
-          </div>
-          <div className="form-group mb-8">
-            <label>Expected Price</label>
-            <input type="text" className="form-input" required value={adminNewPlot.price} onChange={(e) => setAdminNewPlot({...adminNewPlot, price: e.target.value})} />
-          </div>
-          <div className="form-group mb-8">
-            <label>Plot Size <span style={{fontWeight: 'normal', fontSize: '0.85rem', color: 'var(--text-muted)'}}>(Calculated based on satellite imagery of the location)</span></label>
-            <input
-              type="text"
-              placeholder="e.g. 1,200 m² (Click on the map above in 'Draw Boundary' mode to automatically calculate)"
-              className="form-input"
-              required
-              value={adminNewPlot.size}
-              onChange={(e) => setAdminNewPlot({...adminNewPlot, size: e.target.value})}
-            />
-          </div>
-
-          <div className="form-group mb-8">
-            <label>District ➔ Tehsil ➔ Village</label>
-            <p className="text-muted" style={{fontSize: '0.85rem', marginBottom: '0.5rem'}}>Automatically fetched when you mark the plot on the map.</p>
-            <div style={{ display: 'flex', gap: '0.5rem' }}>
-              <input type="text" placeholder="District" className="form-input" style={{flex: 1}} value={adminNewPlot.district || ''} onChange={e => setAdminNewPlot({...adminNewPlot, district: e.target.value})} />
-              <input type="text" placeholder="Tehsil" className="form-input" style={{flex: 1}} value={adminNewPlot.tehsil || ''} onChange={e => setAdminNewPlot({...adminNewPlot, tehsil: e.target.value})} />
-              <input type="text" placeholder="Village" className="form-input" style={{flex: 1}} value={adminNewPlot.village || ''} onChange={e => setAdminNewPlot({...adminNewPlot, village: e.target.value})} />
-            </div>
-          </div>
-
-          <div className="form-group mb-8">
-            <label>Khasra / Khatauni Number <span style={{fontWeight: 'normal', fontSize: '0.85rem', color: '#10b981'}}>(Optional)</span></label>
-            <p className="text-muted" style={{fontSize: '0.85rem', marginBottom: '0.5rem'}}>
-              <strong>Note:</strong> People who provide the Khasra number of their land have a <strong style={{color: '#3b82f6'}}>20x higher chance of selling</strong> as it builds immediate trust!
-            </p>
-            <input
-              type="text"
-              placeholder="e.g. 142/5"
-              className="form-input"
-              value={adminNewPlot.khasraNumber || ''}
-              onChange={(e) => setAdminNewPlot({...adminNewPlot, khasraNumber: e.target.value})}
-            />
-          </div>
-          <div className="form-group mb-8">
-            <label>Key Features</label>
-            <input type="text" className="form-input" value={adminNewPlot.features} onChange={(e) => setAdminNewPlot({...adminNewPlot, features: e.target.value})} />
-          </div>
-          <div className="form-group mb-8">
-            <label>Location (Text)</label>
-            <input type="text" className="form-input" required value={adminNewPlot.location} onChange={(e) => setAdminNewPlot({...adminNewPlot, location: e.target.value})} />
-          </div>
-
           {/* ── Property Location on Map ── */}
           <div className="form-group mb-8">
             <label><MapPin size={16} style={{display: 'inline', verticalAlign: 'middle', marginRight: '0.35rem'}} />Property Location Map</label>
@@ -2815,6 +2800,58 @@ export default function App() {
             )}
           </div>
 
+          <div className="form-group mb-8">
+            <label>Plot Size <span style={{fontWeight: 'normal', fontSize: '0.85rem', color: 'var(--text-muted)'}}>(Calculated based on satellite imagery of the location)</span></label>
+            <input
+              type="text"
+              placeholder="e.g. 1,200 m² (Click on the map above in 'Draw Boundary' mode to automatically calculate)"
+              className="form-input"
+              required
+              value={adminNewPlot.size}
+              onChange={(e) => setAdminNewPlot({...adminNewPlot, size: e.target.value})}
+            />
+          </div>
+
+          <div className="form-group mb-8">
+            <label>District ➔ Tehsil ➔ Village</label>
+            <p className="text-muted" style={{fontSize: '0.85rem', marginBottom: '0.5rem'}}>Automatically fetched when you mark the plot on the map.</p>
+            <div style={{ display: 'flex', gap: '0.5rem' }}>
+              <input type="text" placeholder="District" className="form-input" style={{flex: 1}} value={adminNewPlot.district || ''} onChange={e => setAdminNewPlot({...adminNewPlot, district: e.target.value})} />
+              <input type="text" placeholder="Tehsil" className="form-input" style={{flex: 1}} value={adminNewPlot.tehsil || ''} onChange={e => setAdminNewPlot({...adminNewPlot, tehsil: e.target.value})} />
+              <input type="text" placeholder="Village" className="form-input" style={{flex: 1}} value={adminNewPlot.village || ''} onChange={e => setAdminNewPlot({...adminNewPlot, village: e.target.value})} />
+            </div>
+          </div>
+
+          <div className="form-group mb-8">
+            <label>Khasra / Khatauni Number <span style={{fontWeight: 'normal', fontSize: '0.85rem', color: '#10b981'}}>(Optional)</span></label>
+            <p className="text-muted" style={{fontSize: '0.85rem', marginBottom: '0.5rem'}}>
+              <strong>Note:</strong> People who provide the Khasra number of their land have a <strong style={{color: '#3b82f6'}}>20x higher chance of selling</strong> as it builds immediate trust!
+            </p>
+            <input
+              type="text"
+              placeholder="e.g. 142/5"
+              className="form-input"
+              value={adminNewPlot.khasraNumber || ''}
+              onChange={(e) => setAdminNewPlot({...adminNewPlot, khasraNumber: e.target.value})}
+            />
+          {adminNewPlot.state && adminNewPlot.district && (
+              <div style={{
+                marginTop: '1rem', padding: '1rem', backgroundColor: '#ecfdf5', border: '1px solid #10b981',
+                borderRadius: '0.5rem', display: 'flex', gap: '1rem', alignItems: 'flex-start'
+              }}>
+                <MapPin size={24} color="#10b981" style={{ flexShrink: 0, marginTop: '2px' }} />
+                <div>
+                  <h4 style={{ margin: '0 0 0.25rem 0', color: '#065f46', fontSize: '0.95rem' }}>Smart Village Lookup Detected</h4>
+                  <p style={{ margin: '0 0 0.5rem 0', color: '#047857', fontSize: '0.85rem' }}>
+                    <strong>{adminNewPlot.village || 'Location'}</strong> in {adminNewPlot.tehsil ? `${adminNewPlot.tehsil}, ` : ''}{adminNewPlot.district}, {adminNewPlot.state}.
+                  </p>
+                  <p style={{ margin: 0, fontSize: '0.8rem', color: '#064e3b' }}>
+                    Don't know your Khasra number? <a href={getStateBhulekhLink(adminNewPlot.state)} target="_blank" rel="noopener noreferrer" style={{ color: '#10b981', fontWeight: 'bold', textDecoration: 'underline' }}>Verify it on {adminNewPlot.state} Bhulekh Portal</a>
+                  </p>
+                </div>
+              </div>
+            )}
+          </div>
           {/* ── Existing & New Images ── */}
           <div className="form-group mb-8">
             <label>Images</label>
@@ -2886,6 +2923,23 @@ export default function App() {
           </div>
 
           <div className="form-group mb-8">
+            <label>Plot Title</label>
+            <input type="text" className="form-input" required value={adminNewPlot.title} onChange={(e) => setAdminNewPlot({...adminNewPlot, title: e.target.value})} />
+          </div>
+          <div className="form-group mb-8">
+            <label>Location (Text)</label>
+            <input type="text" className="form-input" required value={adminNewPlot.location} onChange={(e) => setAdminNewPlot({...adminNewPlot, location: e.target.value})} />
+          </div>
+
+          <div className="form-group mb-8">
+            <label>Key Features</label>
+            <input type="text" className="form-input" value={adminNewPlot.features} onChange={(e) => setAdminNewPlot({...adminNewPlot, features: e.target.value})} />
+          </div>
+          <div className="form-group mb-8">
+            <label>Expected Price</label>
+            <input type="text" className="form-input" required value={adminNewPlot.price} onChange={(e) => setAdminNewPlot({...adminNewPlot, price: e.target.value})} />
+          </div>
+          <div className="form-group mb-8">
             <label>Status</label>
             <select className="form-input" value={adminNewPlot.status} onChange={(e) => setAdminNewPlot({...adminNewPlot, status: e.target.value})}>
               <option value="Verification Pending">Verification Pending</option>
@@ -2920,7 +2974,114 @@ export default function App() {
     </section>
   );
 
+  
   /* ============================================
+     ADMIN MAP ANALYSIS
+     ============================================ */
+  const renderAdminMapAnalysis = () => {
+    const mapPlots = plots.filter(p => p.lat && p.lng);
+
+    return (
+      <section className="section bg-light" style={{paddingTop: '6rem', height: '100vh', display: 'flex', flexDirection: 'column'}}>
+        <div className="container" style={{maxWidth: '1200px', flex: 1, display: 'flex', flexDirection: 'column'}}>
+          <div className="flex items-center justify-between mb-4">
+            <div>
+              <div className="flex items-center gap-2" style={{marginBottom: '0.25rem'}}>
+                <Navigation size={24} className="text-primary" />
+                <h2 className="section-title" style={{marginBottom: 0}}>Analyse Lands in India</h2>
+              </div>
+              <p className="text-muted">Map view of all user-listed properties. <span style={{color: '#10b981', fontWeight: 'bold'}}>Green icons</span> indicate verified Bhulekh data (Khasra provided).</p>
+            </div>
+            <button className="btn btn-outline" onClick={() => navigate('admin')}>
+              Back to List
+            </button>
+          </div>
+          
+          <div style={{flex: 1, minHeight: '500px', borderRadius: '1rem', overflow: 'hidden', position: 'relative', border: '1px solid #e2e8f0'}}>
+            {isLoaded ? (
+              <GoogleMap
+                mapContainerStyle={{width: '100%', height: '100%'}}
+                center={{ lat: 23.5937, lng: 78.9629 }}
+                zoom={5}
+                options={{ mapTypeId: 'hybrid', streetViewControl: false }}
+              >
+                {mapPlots.map(plot => {
+                  const hasKhasra = plot.khasraNumber && plot.khasraNumber.trim().length > 0;
+                  const iconUrl = hasKhasra 
+                    ? 'data:image/svg+xml;charset=UTF-8,' + encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="#10b981" stroke="white" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path><circle cx="12" cy="10" r="3" fill="white"></circle></svg>')
+                    : 'data:image/svg+xml;charset=UTF-8,' + encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="#ef4444" stroke="white" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path><circle cx="12" cy="10" r="3" fill="white"></circle></svg>');
+                  
+                  return (
+                    <MarkerF
+                      key={plot.id}
+                      position={{ lat: plot.lat, lng: plot.lng }}
+                      icon={{
+                        url: iconUrl,
+                        scaledSize: new window.google.maps.Size(hasKhasra ? 32 : 28, hasKhasra ? 32 : 28),
+                        anchor: new window.google.maps.Point(hasKhasra ? 16 : 14, hasKhasra ? 32 : 28)
+                      }}
+                      onClick={() => setSelectedPropertyDetailId(plot.id)}
+                    />
+                  );
+                })}
+                
+                {selectedPropertyDetailId && (
+                  (() => {
+                    const selected = mapPlots.find(p => p.id === selectedPropertyDetailId);
+                    if (!selected) return null;
+                    return (
+                      <InfoWindowF
+                        position={{ lat: selected.lat, lng: selected.lng }}
+                        onCloseClick={() => setSelectedPropertyDetailId(null)}
+                      >
+                        <div style={{padding: '0.5rem', maxWidth: '250px'}}>
+                          <h4 style={{margin: '0 0 0.5rem 0', color: '#1e293b', fontSize: '1rem'}}>{selected.title || 'Untitled Plot'}</h4>
+                          <p style={{margin: '0 0 0.25rem 0', fontSize: '0.85rem', color: '#64748b'}}><strong>Size:</strong> {selected.size}</p>
+                          <p style={{margin: '0 0 0.25rem 0', fontSize: '0.85rem', color: '#64748b'}}><strong>Price:</strong> {selected.price}</p>
+                          <p style={{margin: '0 0 0.25rem 0', fontSize: '0.85rem', color: '#64748b'}}><strong>Location:</strong> {selected.location}</p>
+                          {selected.khasraNumber && (
+                            <div style={{background: '#ecfdf5', padding: '0.35rem', borderRadius: '0.25rem', border: '1px solid #10b981', marginTop: '0.5rem', marginBottom: '0.5rem'}}>
+                              <p style={{margin: 0, fontSize: '0.8rem', color: '#047857'}}><strong>Khasra Number:</strong> {selected.khasraNumber}</p>
+                              <p style={{margin: '0.25rem 0 0 0', fontSize: '0.75rem', color: '#065f46'}}>✓ Bhulekh Data Provided</p>
+                            </div>
+                          )}
+                          <div style={{marginTop: '0.75rem', display: 'flex', gap: '0.5rem'}}>
+                            <button 
+                              className="btn btn-primary" 
+                              style={{padding: '0.25rem 0.5rem', fontSize: '0.75rem', flex: 1}}
+                              onClick={() => {
+                                handleAdminEditClick(selected.id);
+                              }}
+                            >
+                              Edit Property
+                            </button>
+                            <button 
+                              className="btn btn-outline" 
+                              style={{padding: '0.25rem 0.5rem', fontSize: '0.75rem'}}
+                              onClick={() => {
+                                setSelectedPropertyDetail(selected);
+                                navigate('property');
+                              }}
+                            >
+                              View
+                            </button>
+                          </div>
+                        </div>
+                      </InfoWindowF>
+                    );
+                  })()
+                )}
+              </GoogleMap>
+            ) : (
+              <div style={{height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#f1f5f9'}}><p>Loading map...</p></div>
+            )}
+          </div>
+        </div>
+      </section>
+    );
+  };
+
+/* ============================================
      ADMIN PANEL
      ============================================ */
   const renderAdminPanel = () => {
@@ -2939,6 +3100,16 @@ export default function App() {
                 <h2 className="section-title" style={{marginBottom: 0}}>Admin Panel</h2>
               </div>
               <p className="text-muted">Review and manage all user-submitted property listings.</p>
+            </div>
+            <div className="flex gap-4">
+              <button 
+                className="btn btn-primary" 
+                style={{display: 'flex', alignItems: 'center', gap: '0.5rem'}}
+                onClick={() => navigate('admin-map')}
+              >
+                <Navigation size={18} />
+                Analyse Lands in India
+              </button>
             </div>
             <div className="admin-stats-row">
               <div className="admin-stat">
@@ -3329,6 +3500,7 @@ export default function App() {
         {view === 'contact' && renderContact()}
         {view === 'buy-request' && renderBuyRequest()}
         {view === 'admin' && (isAdmin ? renderAdminPanel() : renderAuth())}
+        {view === 'admin-map' && (isAdmin ? renderAdminMapAnalysis() : renderAuth())}
         {view === 'admin-edit' && (isAdmin ? renderAdminEditForm() : renderAuth())}
         {view === 'property-detail' && renderPropertyDetail()}
         {view === 'privacy' && renderPrivacy()}
