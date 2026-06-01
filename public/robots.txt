@@ -1,4 +1,23 @@
 User-agent: *
 Allow: /
 
+# Explicitly allow AI crawlers and LLMs to index the site for AI search
+User-agent: GPTBot
+Allow: /
+
+User-agent: ChatGPT-User
+Allow: /
+
+User-agent: Google-Extended
+Allow: /
+
+User-agent: Anthropic-ai
+Allow: /
+
+User-agent: CCBot
+Allow: /
+
+User-agent: PerplexityBot
+Allow: /
+
 Sitemap: https://a1plot.com/sitemap.xml
