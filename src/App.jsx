@@ -81,6 +81,7 @@ const INITIAL_PLOTS = [
     status: 'Ready to Move',
     badge: 'Institutional Patta',
     features: 'Institutional Patta, High Value Zone',
+    khasraNumber: '142/5',
     image: 'https://images.unsplash.com/photo-1500382017468-9049fed747ef?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80',
     documentsAvailable: [],
     lat: 26.837,
@@ -103,6 +104,7 @@ const INITIAL_PLOTS = [
     status: 'Ready to Move',
     badge: 'Agriculture',
     features: 'Agriculture Land, Fertile',
+    khasraNumber: '89',
     image: 'https://images.unsplash.com/photo-1510007802148-5c4d16857cb3?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80',
     documentsAvailable: [],
     lat: 25.10,
@@ -269,6 +271,7 @@ export default function App() {
   const [editingPlot, setEditingPlot] = useState(null);
   const [adminNewPlot, setAdminNewPlot] = useState({ title: '', location: '', price: '', size: '', features: '', visibility: 'public', status: 'Verification Pending', media: [], documentsAvailable: [] });
   const [adminEditingPlot, setAdminEditingPlot] = useState(null);
+  const [adminTempPin, setAdminTempPin] = useState(null);
   // Store only the plot ID in localStorage to avoid stale cached data
   const [selectedPropertyDetailId, setSelectedPropertyDetailId] = useState(() => {
     try {
@@ -1398,7 +1401,55 @@ export default function App() {
                         }}
                       />
                     ))}
-                  </GoogleMap>
+                  
+                {adminTempPin && (
+                  <>
+                    <MarkerF
+                      position={{ lat: adminTempPin.lat, lng: adminTempPin.lng }}
+                      icon={{
+                        url: 'data:image/svg+xml;charset=UTF-8,' + encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="#3b82f6" stroke="white" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path><circle cx="12" cy="10" r="3" fill="white"></circle></svg>'),
+                        scaledSize: new window.google.maps.Size(32, 32),
+                        anchor: new window.google.maps.Point(16, 32)
+                      }}
+                      onClick={() => {}} 
+                    />
+                    <InfoWindowF
+                      position={{ lat: adminTempPin.lat, lng: adminTempPin.lng }}
+                      onCloseClick={() => setAdminTempPin(null)}
+                      options={{ pixelOffset: new window.google.maps.Size(0, -32) }}
+                    >
+                      <div style={{padding: '0.5rem', maxWidth: '280px'}}>
+                        <h4 style={{margin: '0 0 0.5rem 0', color: '#1e293b', fontSize: '1rem'}}>Bhulekh Locator</h4>
+                        {adminTempPin.loading ? (
+                          <p style={{margin: 0, fontSize: '0.85rem', color: '#64748b'}}>Detecting village...</p>
+                        ) : adminTempPin.error ? (
+                          <p style={{margin: 0, fontSize: '0.85rem', color: '#ef4444'}}>{adminTempPin.error}</p>
+                        ) : (
+                          <>
+                            <p style={{margin: '0 0 0.25rem 0', fontSize: '0.85rem', color: '#64748b'}}><strong>State:</strong> {adminTempPin.state}</p>
+                            <p style={{margin: '0 0 0.25rem 0', fontSize: '0.85rem', color: '#64748b'}}><strong>District:</strong> {adminTempPin.district}</p>
+                            <p style={{margin: '0 0 0.25rem 0', fontSize: '0.85rem', color: '#64748b'}}><strong>Tehsil:</strong> {adminTempPin.tehsil}</p>
+                            <p style={{margin: '0 0 0.5rem 0', fontSize: '0.85rem', color: '#64748b'}}><strong>Village:</strong> <span style={{color: '#0f172a', fontWeight: 'bold'}}>{adminTempPin.village}</span></p>
+                            
+                            <div style={{marginTop: '0.75rem'}}>
+                              <a 
+                                href={getStateBhulekhLink(adminTempPin.state)}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="btn btn-primary"
+                                style={{display: 'block', textAlign: 'center', padding: '0.35rem', fontSize: '0.8rem', textDecoration: 'none'}}
+                              >
+                                View on {adminTempPin.state} Bhulekh
+                              </a>
+                            </div>
+                          </>
+                        )}
+                      </div>
+                    </InfoWindowF>
+                  </>
+                )}
+
+              </GoogleMap>
                   <div className="location-coords">
                     <span>📍 {plotLocation.lat.toFixed(5)}, {plotLocation.lng.toFixed(5)}</span>
                   </div>
@@ -2981,6 +3032,39 @@ export default function App() {
   const renderAdminMapAnalysis = () => {
     const mapPlots = plots.filter(p => p.lat && p.lng);
 
+    const handleAdminMapClick = async (e) => {
+      if (!e.latLng) return;
+      const lat = e.latLng.lat();
+      const lng = e.latLng.lng();
+      setAdminTempPin({ lat, lng, loading: true });
+      
+      try {
+        const address = await fetchAddressFromCoords(lat, lng);
+        if (address && address.village) {
+          setAdminTempPin({
+            lat,
+            lng,
+            loading: false,
+            ...address
+          });
+        } else {
+          setAdminTempPin({
+            lat,
+            lng,
+            loading: false,
+            error: "Could not detect a village at this location."
+          });
+        }
+      } catch (err) {
+        setAdminTempPin({
+          lat,
+          lng,
+          loading: false,
+          error: "Failed to fetch address details."
+        });
+      }
+    };
+
     return (
       <section className="section bg-light" style={{paddingTop: '6rem', height: '100vh', display: 'flex', flexDirection: 'column'}}>
         <div className="container" style={{maxWidth: '1200px', flex: 1, display: 'flex', flexDirection: 'column'}}>
@@ -2990,7 +3074,7 @@ export default function App() {
                 <Navigation size={24} className="text-primary" />
                 <h2 className="section-title" style={{marginBottom: 0}}>Analyse Lands in India</h2>
               </div>
-              <p className="text-muted">Map view of all user-listed properties. <span style={{color: '#10b981', fontWeight: 'bold'}}>Green icons</span> indicate verified Bhulekh data (Khasra provided).</p>
+              <p className="text-muted">Map view of all user-listed properties. <span style={{color: '#10b981', fontWeight: 'bold'}}>Green icons</span> indicate verified Bhulekh data. <br/><strong>Interactive Locator:</strong> Click anywhere on the map to find its village and generate a direct Bhulekh link!</p>
             </div>
             <button className="btn btn-outline" onClick={() => navigate('admin')}>
               Back to List
@@ -3003,7 +3087,8 @@ export default function App() {
                 mapContainerStyle={{width: '100%', height: '100%'}}
                 center={{ lat: 23.5937, lng: 78.9629 }}
                 zoom={5}
-                options={{ mapTypeId: 'hybrid', streetViewControl: false }}
+                options={{ mapTypeId: 'hybrid', streetViewControl: false, draggableCursor: 'crosshair' }}
+                onClick={handleAdminMapClick}
               >
                 {mapPlots.map(plot => {
                   const hasKhasra = plot.khasraNumber && plot.khasraNumber.trim().length > 0;
