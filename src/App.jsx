@@ -69,7 +69,7 @@ const chartData = [
 
 
 const ADMIN_MAP_DEFAULT_CENTER = { lat: 23.5937, lng: 78.9629 };
-const ADMIN_MAP_OPTIONS = { mapTypeId: 'hybrid', streetViewControl: false, draggableCursor: 'crosshair' };
+const ADMIN_MAP_OPTIONS = { mapTypeId: 'hybrid', streetViewControl: false, draggableCursor: 'crosshair', clickableIcons: false, disableDoubleClickZoom: true };
 
 const INITIAL_PLOTS = [
   {
