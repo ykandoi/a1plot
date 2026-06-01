@@ -291,6 +291,7 @@ export default function App() {
   const [docFiles, setDocFiles] = useState([]);
   const [plotLocation, setPlotLocation] = useState({ lat: 20.5937, lng: 78.9629 }); // India center
   const [buyerMapCenter, setBuyerMapCenter] = useState(defaultCenter);
+  const [userLocation, setUserLocation] = useState(null);
   const [polygonPath, setPolygonPath] = useState([]);
   const [isDrawingMode, setIsDrawingMode] = useState(false);
   const [mapType, setMapType] = useState('hybrid');
@@ -465,10 +466,9 @@ export default function App() {
     if (navigator.geolocation) {
       navigator.geolocation.getCurrentPosition(
         (position) => {
-          setCenter({
-            lat: position.coords.latitude,
-            lng: position.coords.longitude
-          });
+          const loc = { lat: position.coords.latitude, lng: position.coords.longitude };
+          setCenter(loc);
+          setUserLocation(loc);
         },
         () => {
           alert("Could not get your location. Please check browser permissions.");
@@ -1306,7 +1306,9 @@ export default function App() {
                   />
                 </Autocomplete>
                 <div className="location-map-container" style={{ position: 'relative' }}>
-
+                  <button type="button" style={{ position: 'absolute', bottom: '20px', left: '20px', zIndex: 10, padding: '0.6rem', borderRadius: '50%', width: '45px', height: '45px', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 4px 6px rgba(0,0,0,0.3)', backgroundColor: 'white', color: '#1a73e8', border: 'none', cursor: 'pointer' }} onClick={() => handleLocateMe(setPlotLocation)} title="Locate Me">
+                    <Navigation size={20} />
+                  </button>
                   <GoogleMap
                     mapContainerStyle={{width: '100%', height: '400px', borderRadius: '0.75rem', cursor: isDrawingMode ? 'crosshair' : 'grab'}}
                     center={plotLocation}
@@ -1330,6 +1332,19 @@ export default function App() {
                         position={plotLocation}
                         draggable={true}
                         onDragEnd={onMarkerDragEnd}
+                      />
+                    )}
+                    {userLocation && (
+                      <MarkerF
+                        position={userLocation}
+                        icon={{
+                          url: 'data:image/svg+xml;charset=UTF-8,' + encodeURIComponent(
+                            '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" fill="#4285F4" stroke="white" stroke-width="2"/><circle cx="12" cy="12" r="4" fill="white"/></svg>'
+                          ),
+                          scaledSize: new window.google.maps.Size(24, 24),
+                          anchor: new window.google.maps.Point(12, 12)
+                        }}
+                        zIndex={999}
                       />
                     )}
                     {sortedPolygonPath.length > 0 && (
@@ -1993,9 +2008,22 @@ export default function App() {
                 options={mapOptions}
                 onClick={() => { setBuyerMapSelectedPlotId(null); setSelectedMarker(null); }}
               >
-                <button type="button" className="btn btn-primary" style={{ position: 'absolute', bottom: '20px', right: '10px', zIndex: 10, padding: '0.6rem', borderRadius: '50%', width: '45px', height: '45px', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 4px 6px rgba(0,0,0,0.3)' }} onClick={() => { setMapFocusPlot(null); handleLocateMe(setBuyerMapCenter); }} title="Locate Me">
+                <button type="button" style={{ position: 'absolute', bottom: '20px', left: '20px', zIndex: 10, padding: '0.6rem', borderRadius: '50%', width: '45px', height: '45px', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 4px 6px rgba(0,0,0,0.3)', backgroundColor: 'white', color: '#1a73e8', border: 'none', cursor: 'pointer' }} onClick={() => { setMapFocusPlot(null); handleLocateMe(setBuyerMapCenter); }} title="Locate Me">
                   <Navigation size={20} />
                 </button>
+                {userLocation && (
+                  <MarkerF
+                    position={userLocation}
+                    icon={{
+                      url: 'data:image/svg+xml;charset=UTF-8,' + encodeURIComponent(
+                        '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" fill="#4285F4" stroke="white" stroke-width="2"/><circle cx="12" cy="12" r="4" fill="white"/></svg>'
+                      ),
+                      scaledSize: new window.google.maps.Size(24, 24),
+                      anchor: new window.google.maps.Point(12, 12)
+                    }}
+                    zIndex={999}
+                  />
+                )}
                 {plots
                   .filter(p => p.visibility !== 'private' && p.status !== 'Verification Pending' && p.status !== 'Rejected')
                   .map(plot => (
