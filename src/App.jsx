@@ -697,15 +697,23 @@ export default function App() {
   const getStateBhulekhLink = (stateName) => {
     if (!stateName) return null;
     const lowerState = stateName.toLowerCase();
-    if (lowerState.includes('uttar pradesh')) return 'https://upbhulekh.gov.in/public/public_ror/Public_ROR.jsp';
+    
+    // Priority to Bhu-Naksha (Cadastral Map) Portals
+    if (lowerState.includes('rajasthan')) return 'https://bhunaksha.rajasthan.gov.in/';
+    if (lowerState.includes('uttar pradesh')) return 'https://upbhunaksha.gov.in/';
+    if (lowerState.includes('maharashtra')) return 'https://mahabhunaksha.mahabhumi.gov.in/';
+    if (lowerState.includes('bihar')) return 'http://bhunaksha.bihar.gov.in/';
+    if (lowerState.includes('chhattisgarh')) return 'https://bhunaksha.cg.nic.in/';
+    if (lowerState.includes('jharkhand')) return 'https://jharbhoomi.jharkhand.gov.in/bhunaksha/';
+    if (lowerState.includes('odisha')) return 'https://bhunakshaodisha.nic.in/';
+    
+    // Fallback to integrated land record portals
     if (lowerState.includes('madhya pradesh')) return 'https://mpbhulekh.gov.in/';
-    if (lowerState.includes('maharashtra')) return 'https://bhulekh.mahabhumi.gov.in/';
-    if (lowerState.includes('rajasthan')) return 'https://apnakhata.rajasthan.gov.in/';
     if (lowerState.includes('karnataka')) return 'https://landrecords.karnataka.gov.in/Service84/';
     if (lowerState.includes('gujarat')) return 'https://anyror.gujarat.gov.in/';
-    if (lowerState.includes('bihar')) return 'http://biharbhumi.bihar.gov.in/';
     if (lowerState.includes('haryana')) return 'https://jamabandi.nic.in/';
     if (lowerState.includes('punjab')) return 'https://jamabandi.punjab.gov.in/';
+    
     return 'https://landrecords.gov.in/'; // Generic fallback
   };
 
