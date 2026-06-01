@@ -694,26 +694,34 @@ export default function App() {
     }
   }
 
-  const getStateBhulekhLink = (stateName) => {
-    if (!stateName) return null;
+    const getStateBhulekhLink = (stateName) => {
+    if (!stateName) return 'https://landrecords.gov.in/';
     const lowerState = stateName.toLowerCase();
     
     // Priority to Bhu-Naksha (Cadastral Map) Portals
     if (lowerState.includes('rajasthan')) return 'https://bhunaksha.rajasthan.gov.in/';
-    if (lowerState.includes('uttar pradesh')) return 'https://upbhunaksha.gov.in/';
+    if (lowerState.includes('uttar') && lowerState.includes('pradesh')) return 'https://upbhunaksha.gov.in/';
     if (lowerState.includes('maharashtra')) return 'https://mahabhunaksha.mahabhumi.gov.in/';
-    if (lowerState.includes('bihar')) return 'http://bhunaksha.bihar.gov.in/';
-    if (lowerState.includes('chhattisgarh')) return 'https://bhunaksha.cg.nic.in/';
+    if (lowerState.includes('bihar')) return 'https://bhunaksha.bihar.gov.in/';
+    if (lowerState.includes('chhattisgarh') || lowerState.includes('chhatisgarh')) return 'https://bhunaksha.cg.nic.in/';
     if (lowerState.includes('jharkhand')) return 'https://jharbhoomi.jharkhand.gov.in/bhunaksha/';
-    if (lowerState.includes('odisha')) return 'https://bhunakshaodisha.nic.in/';
+    if (lowerState.includes('odisha') || lowerState.includes('orissa')) return 'https://bhunakshaodisha.nic.in/';
     
-    // Fallback to integrated land record portals
-    if (lowerState.includes('madhya pradesh')) return 'https://mpbhulekh.gov.in/';
+    // Integrated land record portals
+    if (lowerState.includes('madhya') && lowerState.includes('pradesh')) return 'https://mpbhulekh.gov.in/';
     if (lowerState.includes('karnataka')) return 'https://landrecords.karnataka.gov.in/Service84/';
     if (lowerState.includes('gujarat')) return 'https://anyror.gujarat.gov.in/';
     if (lowerState.includes('haryana')) return 'https://jamabandi.nic.in/';
     if (lowerState.includes('punjab')) return 'https://jamabandi.punjab.gov.in/';
-    
+    if (lowerState.includes('telangana')) return 'https://dharani.telangana.gov.in/gis/';
+    if (lowerState.includes('andhra') && lowerState.includes('pradesh')) return 'https://meebhoomi.ap.gov.in/';
+    if (lowerState.includes('tamil nadu') || lowerState.includes('tamilnadu')) return 'https://eservices.tn.gov.in/';
+    if (lowerState.includes('kerala')) return 'https://emrekha.kerala.gov.in/';
+    if (lowerState.includes('west bengal')) return 'https://banglarbhumi.gov.in/';
+    if (lowerState.includes('assam')) return 'https://revenueassam.nic.in/';
+    if (lowerState.includes('uttarakhand')) return 'https://bhulekh.uk.gov.in/';
+    if (lowerState.includes('himachal')) return 'https://himbhoomi.nic.in/';
+
     return 'https://landrecords.gov.in/'; // Generic fallback
   };
 
