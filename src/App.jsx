@@ -1406,53 +1406,7 @@ export default function App() {
                       />
                     ))}
                   
-                {adminTempPin && (
-                  <>
-                    <MarkerF
-                      position={{ lat: adminTempPin.lat, lng: adminTempPin.lng }}
-                      icon={{
-                        url: 'data:image/svg+xml;charset=UTF-8,' + encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="#3b82f6" stroke="white" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path><circle cx="12" cy="10" r="3" fill="white"></circle></svg>'),
-                        scaledSize: new window.google.maps.Size(32, 32),
-                        anchor: new window.google.maps.Point(16, 32)
-                      }}
-                      onClick={() => {}} 
-                    />
-                    <InfoWindowF
-                      position={{ lat: adminTempPin.lat, lng: adminTempPin.lng }}
-                      onCloseClick={() => setAdminTempPin(null)}
-                      options={{ pixelOffset: new window.google.maps.Size(0, -32) }}
-                    >
-                      <div style={{padding: '0.5rem', maxWidth: '280px'}}>
-                        <h4 style={{margin: '0 0 0.5rem 0', color: '#1e293b', fontSize: '1rem'}}>Bhulekh Locator</h4>
-                        {adminTempPin.loading ? (
-                          <p style={{margin: 0, fontSize: '0.85rem', color: '#64748b'}}>Detecting village...</p>
-                        ) : adminTempPin.error ? (
-                          <p style={{margin: 0, fontSize: '0.85rem', color: '#ef4444'}}>{adminTempPin.error}</p>
-                        ) : (
-                          <>
-                            <p style={{margin: '0 0 0.25rem 0', fontSize: '0.85rem', color: '#64748b'}}><strong>State:</strong> {adminTempPin.state}</p>
-                            <p style={{margin: '0 0 0.25rem 0', fontSize: '0.85rem', color: '#64748b'}}><strong>District:</strong> {adminTempPin.district}</p>
-                            <p style={{margin: '0 0 0.25rem 0', fontSize: '0.85rem', color: '#64748b'}}><strong>Tehsil:</strong> {adminTempPin.tehsil}</p>
-                            <p style={{margin: '0 0 0.5rem 0', fontSize: '0.85rem', color: '#64748b'}}><strong>Village:</strong> <span style={{color: '#0f172a', fontWeight: 'bold'}}>{adminTempPin.village}</span></p>
-                            
-                            <div style={{marginTop: '0.75rem'}}>
-                              <a 
-                                href={getStateBhulekhLink(adminTempPin.state)}
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                className="btn btn-primary"
-                                style={{display: 'block', textAlign: 'center', padding: '0.35rem', fontSize: '0.8rem', textDecoration: 'none'}}
-                              >
-                                View on {adminTempPin.state} Bhulekh
-                              </a>
-                            </div>
-                          </>
-                        )}
-                      </div>
-                    </InfoWindowF>
-                  </>
-                )}
-
+                
               </GoogleMap>
                   <div className="location-coords">
                     <span>📍 {plotLocation.lat.toFixed(5)}, {plotLocation.lng.toFixed(5)}</span>
