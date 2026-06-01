@@ -67,6 +67,10 @@ const chartData = [
   { name: 'Jun', value: 6500 },
 ];
 
+
+const ADMIN_MAP_DEFAULT_CENTER = { lat: 23.5937, lng: 78.9629 };
+const ADMIN_MAP_OPTIONS = { mapTypeId: 'hybrid', streetViewControl: false, draggableCursor: 'crosshair' };
+
 const INITIAL_PLOTS = [
   {
     id: 1,
@@ -3092,9 +3096,9 @@ export default function App() {
             {isLoaded ? (
               <GoogleMap
                 mapContainerStyle={{width: '100%', height: '100%'}}
-                center={{ lat: 23.5937, lng: 78.9629 }}
+                center={ADMIN_MAP_DEFAULT_CENTER}
                 zoom={5}
-                options={{ mapTypeId: 'hybrid', streetViewControl: false, draggableCursor: 'crosshair' }}
+                options={ADMIN_MAP_OPTIONS}
                 onClick={handleAdminMapClick}
               >
                 {mapPlots.map(plot => {
