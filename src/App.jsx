@@ -3032,37 +3032,44 @@ export default function App() {
   const renderAdminMapAnalysis = () => {
     const mapPlots = plots.filter(p => p.lat && p.lng);
 
-    const handleAdminMapClick = async (e) => {
+    const handleAdminMapClick = (e) => {
       if (!e.latLng) return;
       const lat = e.latLng.lat();
       const lng = e.latLng.lng();
       setAdminTempPin({ lat, lng, loading: true });
       
-      try {
-        const address = await fetchAddressFromCoords(lat, lng);
-        if (address && address.village) {
-          setAdminTempPin({
-            lat,
-            lng,
-            loading: false,
-            ...address
-          });
-        } else {
-          setAdminTempPin({
-            lat,
-            lng,
-            loading: false,
-            error: "Could not detect a village at this location."
-          });
-        }
-      } catch (err) {
-        setAdminTempPin({
-          lat,
-          lng,
-          loading: false,
-          error: "Failed to fetch address details."
-        });
+      if (!window.google?.maps?.Geocoder) {
+        setAdminTempPin({ lat, lng, loading: false, error: "Maps API not loaded." });
+        return;
       }
+
+      const geocoder = new window.google.maps.Geocoder();
+      geocoder.geocode({ location: { lat, lng } }, (results, status) => {
+        if (status === 'OK' && results && results[0] && results[0].address_components) {
+          let state = '';
+          let district = '';
+          let tehsil = '';
+          let village = '';
+          results[0].address_components.forEach(comp => {
+            const types = comp.types || [];
+            if (types.includes('administrative_area_level_1')) state = comp.long_name;
+            if (types.includes('administrative_area_level_3')) tehsil = comp.long_name;
+            if (types.includes('administrative_area_level_2')) district = comp.long_name;
+            if (types.includes('sublocality') || types.includes('locality') || types.includes('neighborhood')) {
+              if (!village) village = comp.long_name;
+            }
+          });
+          if (!village && results[0].address_components[0]) village = results[0].address_components[0].long_name;
+          
+          if (village || state) {
+            setAdminTempPin({ lat, lng, loading: false, state, district, tehsil, village });
+          } else {
+            setAdminTempPin({ lat, lng, loading: false, error: "Could not detect location details." });
+          }
+        } else {
+          setAdminTempPin({ lat, lng, loading: false, error: "Could not detect a village at this location." });
+        }
+      });
     };
 
     return (
