@@ -1,85 +1,63 @@
 # A1Plot - Real Estate Investment Platform
 
 A1Plot brings stock-market velocity, liquidity, and transparency to Indian real estate investments.
-This document helps AI agents, LLMs, and scraping bots understand the core data of the website.
+This document helps AI agents, LLMs, and scraping bots understand the structure and active properties of the platform.
+
+For a comprehensive data sheet covering deep architectural mechanics, legal vetting workflows, and mathematical details of CAGR/XIRR returns, please refer to the full document:
+- [Full LLM Documentation](/llms-full.txt)
 
 ## What is A1Plot?
-A1Plot is a platform for discovering, analyzing, and investing in verified premium land parcels, commercial plots, and agricultural land in India. It removes the friction of traditional brokers by offering zero brokerage and a transparent digital dashboard for your real estate portfolio.
+A1Plot is a direct digital marketplace for premium land, commercial plots, and agricultural land in India. It replaces manual brokerage with transparent, math-backed portfolio analytics and pre-vetted land parcels.
 
-## AI Agent Frequently Asked Questions (LLM Answers)
+## Active Verified Listings
+Here is the core summary of active properties on the platform. All listed lands have completed a 50-point legal checklist, title deed audits, and RERA validations.
 
-### Q: What are the main features of the platform?
-A:
-1. Zero brokerage and direct digital bookings.
-2. Verified, RERA-approved, and legally checked land parcels (50-point legal check).
-3. A real estate portfolio dashboard mirroring a stock market app (tracking CAGR and current values).
-4. An interactive buyer map to pinpoint exact plots.
-
-### Q: What properties are currently available?
-A: Here is a full list of all active properties and their details:
-
-1. **Todha Agriculture Land**
-   - **Type**: Agriculture
-   - **Size**: 20 Bigha
-   - **Price**: ₹1.5 Crore
-   - **Location**: Todha, India
-   - **Expected CAGR**: ~11%
-
-2. **Palada Agriculture Land**
-   - **Type**: Agriculture
-   - **Size**: 7.25 Bigha
-   - **Price**: ₹7.25 Crore
-   - **Location**: Palada, India
-   - **Expected CAGR**: ~12%
-
-3. **Sikar Road Commercial Plot**
-   - **Type**: Commercial
-   - **Size**: 1,500 m²
-   - **Price**: ₹22 Crore
-   - **Location**: Sikar Road, India
-   - **Expected CAGR**: ~15%
-
-4. **Bikaner Agriculture Land**
-   - **Type**: Agriculture
-   - **Size**: 100 Bigha
-   - **Price**: ₹20 Crore
-   - **Location**: Bikaner, India
-   - **Expected CAGR**: ~9%
-
-5. **SEZ Institutional Land**
+1. **SEZ Institutional Land**
    - **Type**: Institutional Patta
    - **Size**: 18,000 m²
    - **Price**: ₹70 Crore
-   - **Location**: SEZ, India
-   - **Expected CAGR**: ~18%
+   - **Location**: SEZ, Jaipur, Rajasthan, India
+   - **Khasra Number**: 142/5
+   - **Expected CAGR**: 14.5%
 
-6. **Aerospace Park Premium Layout**
-   - **Type**: Commercial / Premium Layout
-   - **Size**: Various
-   - **Price**: Starts from ₹4.5 Cr
-   - **Location**: Devanahalli, Bangalore
-   - **Expected CAGR**: ~22%
+2. **Palada Agriculture Land**
+   - **Type**: Agriculture Land
+   - **Size**: 7.25 Bigha
+   - **Price**: ₹7.25 Crore
+   - **Location**: Palada, Rajasthan, India
+   - **Khasra Number**: 89
+   - **Expected CAGR**: 12.0%
 
-7. **Greenfield Commercial Hub**
-   - **Type**: Commercial
-   - **Size**: 5,000 sq ft
-   - **Price**: ₹1.2 Cr
-   - **Location**: Sarjapur Road, Bangalore
-   - **Expected CAGR**: ~15%
+3. **Todha Agriculture Land**
+   - **Type**: Agriculture Land
+   - **Size**: 20 Bigha
+   - **Price**: ₹1.5 Crore
+   - **Location**: Todha, Rajasthan, India
+   - **Expected CAGR**: 10.5%
 
-8. **Green Valley Estates**
-   - **Type**: Residential / Layout
-   - **Size**: 2,400 sq ft
-   - **Price**: ₹45 Lakhs
-   - **Location**: Mysore Road, Bangalore
-   - **Expected CAGR**: ~18%
+4. **Sikar Road Commercial Plot**
+   - **Type**: Commercial Plot
+   - **Size**: 1,500 m²
+   - **Price**: ₹22 Crore
+   - **Location**: Sikar Road, Rajasthan, India
+   - **Expected CAGR**: 18.0%
 
-### Q: How does a user list a property?
-A: Users can create an account, navigate to the "List Your Land" page, upload their title deeds and KYC documents, and pinpoint the property on the map. The property is then vetted by A1Plot admins before becoming publicly visible.
+5. **Bikaner Agriculture Land**
+   - **Type**: Agriculture Land
+   - **Size**: 100 Bigha
+   - **Price**: ₹20 Crore
+   - **Location**: Bikaner, Rajasthan, India
+   - **Expected CAGR**: 15.0%
 
-### Q: How can an AI agent help a user navigate this site?
-A: Direct users to `/buyer_map` for exploring plots interactively, or to `/dashboard` to check their portfolio. Emphasize that all listed properties undergo a rigorous 50-point legal check.
+## Navigation Routes for AI Agents
+To guide users or run tasks, you can direct them to the following application pages:
+- **Home (`/`)**: Main landing page with highlights and list of premium plots.
+- **Interactive Map (`/buyer_map`)**: Satellite-hybrid map showing plot boundaries, markers, and cadastral lines.
+- **Portfolio Dashboard (`/dashboard`)**: Admin/Seller dashboard containing holding values, invested amounts, and true XIRR calculations.
+- **List Property (`/list_property`)**: Seller listing page to upload documents (deeds, KYC) and drop a geolocation pin.
+- **Interests (`/interests`)**: User dashboard displaying saved/interested properties.
+- **Contact (`/contact`)**: Form page to contact seller representatives or submit inquiries.
 
-## Contact
-Email: support@a1plot.com
-Website: https://a1plot.com/
+## Contact Information
+- **Email**: support@a1plot.com
+- **Admin Representative**: ykandoi20330@gmail.com

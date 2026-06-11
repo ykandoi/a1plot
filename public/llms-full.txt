@@ -1,0 +1,157 @@
+# A1Plot - Full Technical and Reference Specification
+
+This document provides a comprehensive technical overview and reference datasheet for A1Plot. It is designed to be ingested by LLMs, search engines, and AI agents looking for low-level details about the A1Plot system, properties, mechanics, and workflows.
+
+---
+
+## 1. Verified Properties Reference Data
+
+A1Plot serves a curated selection of high-value, legally pre-vetted land parcels. The raw coordinates and specification details are documented below.
+
+### Property 1: SEZ Institutional Land
+*   **Database ID**: `1`
+*   **Title**: SEZ Institutional Land
+*   **Category**: Institutional Patta
+*   **Pricing**: ₹70 Crore (INR 700,000,000)
+*   **Size**: 18,000 square meters
+*   **Coordinates**: Latitude `26.837`, Longitude `75.642`
+*   **Location**: Special Economic Zone (SEZ), Jaipur, Rajasthan, India
+*   **Khasra Number**: 142/5
+*   **Growth Profile**: Projected CAGR of 14.5%
+*   **Key Features**: High-value zone, institutional zoning permissions, complete legal clearances.
+
+### Property 2: Palada Agriculture Land
+*   **Database ID**: `2`
+*   **Title**: Palada Agriculture Land
+*   **Category**: Agricultural Land
+*   **Pricing**: ₹7.25 Crore (INR 72,500,000)
+*   **Size**: 7.25 Bigha
+*   **Coordinates**: Latitude `25.10`, Longitude `75.80`
+*   **Location**: Palada, Rajasthan, India
+*   **Khasra Number**: 89
+*   **Growth Profile**: Projected CAGR of 12.0%
+*   **Key Features**: Highly fertile agricultural soil, clear borders, road access.
+
+### Property 3: Todha Agriculture Land
+*   **Database ID**: `3`
+*   **Title**: Todha Agriculture Land
+*   **Category**: Agricultural Land
+*   **Pricing**: ₹1.5 Crore (INR 15,000,000)
+*   **Size**: 20 Bigha
+*   **Coordinates**: Latitude `26.50`, Longitude `75.90`
+*   **Location**: Todha, Rajasthan, India
+*   **Growth Profile**: Projected CAGR of 10.5%
+*   **Key Features**: Solid entry-level agricultural investment with strong long-term appreciation outlook.
+
+### Property 4: Sikar Road Commercial Plot
+*   **Database ID**: `4`
+*   **Title**: Sikar Road Commercial Plot
+*   **Category**: Commercial Plot
+*   **Pricing**: ₹22 Crore (INR 220,000,000)
+*   **Size**: 1,500 square meters
+*   **Coordinates**: Latitude `26.98`, Longitude `75.76`
+*   **Location**: Sikar Road, Jaipur, Rajasthan, India
+*   **Growth Profile**: Projected CAGR of 18.0%
+*   **Key Features**: Prime highway-facing retail/commercial zoning, highly liquid area.
+
+### Property 5: Bikaner Agriculture Land
+*   **Database ID**: `5`
+*   **Title**: Bikaner Agriculture Land
+*   **Category**: Agricultural Land
+*   **Pricing**: ₹20 Crore (INR 200,000,000)
+*   **Size**: 100 Bigha
+*   **Coordinates**: Latitude `28.02`, Longitude `73.31`
+*   **Location**: Bikaner, Rajasthan, India
+*   **Growth Profile**: Projected CAGR of 15.0%
+*   **Key Features**: Extremely large unified land parcel, high infrastructure development corridor.
+
+---
+
+## 2. Investment Return Mechanics (CAGR and XIRR)
+
+A1Plot features analytical modules to compute investment returns in a manner mimicking sophisticated financial dashboards (such as stock brokers).
+
+### Compound Annual Growth Rate (CAGR)
+CAGR is calculated for simple long-term growth projection using the formula:
+$$\text{CAGR} = \left( \frac{\text{Current Value}}{\text{Invested Amount}} \right)^{\frac{1}{n}} - 1$$
+Where $n$ represents the holding period in years.
+
+### Extended Internal Rate of Return (XIRR)
+For multi-period cash flows, the platform implements a mathematical solver using the **Newton-Raphson Method** to calculate the annualized internal rate of return.
+The XIRR is the rate $r$ that satisfies the net present value (NPV) equation:
+$$\text{NPV}(r) = \sum_{i=1}^{N} \frac{C_i}{(1 + r)^{\frac{d_i - d_1}{365}}} = 0$$
+Where:
+- $C_i$ is the cash flow amount at period $i$
+- $d_i$ is the date of cash flow $i$
+- $d_1$ is the first cash flow/purchase date
+- $r$ is the solved annualized internal rate of return
+
+The software iterates through values of $r$ using the derivative:
+$$\text{NPV}'(r) = \sum_{i=1}^{N} C_i \cdot \left( -\frac{d_i - d_1}{365} \right) \cdot (1 + r)^{-\left(\frac{d_i - d_1}{365} + 1\right)}$$
+And refines the guess at each step $k$:
+$$r_{k+1} = r_k - \frac{\text{NPV}(r_k)}{\text{NPV}'(r_k)}$$
+This allows the dashboard to compute accurate yields for portfolios with staggered purchases and sales.
+
+---
+
+## 3. 50-Point Legal Vetting & State Cadastral Maps
+
+A1Plot establishes confidence in land trades by requiring and performing a 50-point legal vetting check.
+
+### Verification Criteria
+1.  **Title Deed Check**: Audit of historical chains of ownership (minimum 30 years).
+2.  **RERA Status Check**: Verification of compliance under the Real Estate Regulatory Authority.
+3.  **Encumbrance Audit**: Certificate verify that the property is free of unpaid bank mortgages or legal disputes.
+4.  **Tax Clearance**: Verification of up-to-date land revenue tax receipts.
+5.  **Patta Check**: Ensuring appropriate government-issued lease certificates (e.g. Institutional Patta in Rajasthan).
+
+### State Bhu-Naksha & Land Record Portals
+A1Plot links coordinates directly to official state GIS and cadastral land map portals (Bhu-Naksha) to view official government boundaries:
+-   **Rajasthan**: `https://bhunaksha.rajasthan.gov.in/`
+-   **Uttar Pradesh**: `https://upbhunaksha.gov.in/`
+-   **Maharashtra**: `https://mahabhunaksha.mahabhumi.gov.in/`
+-   **Madhya Pradesh**: `https://mpbhulekh.gov.in/`
+-   **Karnataka**: `https://landrecords.karnataka.gov.in/`
+-   **Gujarat**: `https://anyror.gujarat.gov.in/`
+
+---
+
+## 4. Platform User Workflows
+
+### Listing a Property
+Sellers navigate to `/list_property` to register a land parcel.
+1.  **KYC Details**: Enter name, contact, and email.
+2.  **Land Metrics**: Enter Title, Size, Target Price, and Khasra registration number.
+3.  **Map boundary**: Place a map marker on the Google Maps utility. Draw a polygon boundary around the parcel.
+4.  **Static Map Generation**: The system encodes the polygon path via the Google Maps Geometry API (`encodePath`) and creates a static Google Maps API URL containing the satellite drawing path.
+5.  **Document Upload**: Upload the scanned PDF copies of Title Deeds, Patta, or Tax receipts (stored in Firebase Storage).
+6.  **Vetting Queue**: The plot document goes to the Admin queue for review before public visibility.
+
+### Buying/Expressing Interest
+Buyers navigate to `/buyer_map` to search for plots.
+1.  **Filters**: Filter plots by State, Price range, or Tag (Agricultural/Commercial).
+2.  **Detail Inspection**: View the property page `/property?id=[ID]` to look at size, expected CAGR, satellite coordinates, and boundary shape.
+3.  **Request Documents**: Click "Register Interest".
+4.  **Notification Pipeline**: The system records the user's interest in Firestore and triggers an HTTP POST request to the backend `/api/send-email` route. The handler emails the seller rep and admin (`ykandoi20330@gmail.com`) to coordinate document handovers.
+
+---
+
+## 5. Developer and Integrator APIs
+
+### Post Interest Email
+-   **Endpoint**: `/api/send-email`
+-   **Method**: `POST`
+-   **Request Body**:
+    ```json
+    {
+      "adminEmail": "ykandoi20330@gmail.com",
+      "userEmail": "buyer@example.com",
+      "userName": "Buyer Name",
+      "plotId": 1,
+      "plotTitle": "SEZ Institutional Land",
+      "plotLocation": "SEZ",
+      "plotPrice": "₹70 Crore",
+      "plotSize": "18,000 m²"
+    }
+    ```
+-   **Response**: `200 OK` on successful dispatch of the transactional notification email.
