@@ -280,6 +280,7 @@ export default function App() {
   const [view, setView] = useState(getInitialView);
   const [leadEmail, setLeadEmail] = useState('');
   const [leadPhone, setLeadPhone] = useState('');
+  const [directStep, setDirectStep] = useState('landing');
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [newPlot, setNewPlot] = useState({ title: '', location: '', price: '', size: '', features: '', visibility: 'public', khasraNumber: '', state: '', district: '', tehsil: '', village: '' });
   const [editingPlot, setEditingPlot] = useState(null);
@@ -3533,6 +3534,241 @@ export default function App() {
     );
   };
 
+  const renderDirectPromoPage = () => {
+    return (
+      <div style={{
+        minHeight: '100vh',
+        backgroundColor: 'var(--bg-color)',
+        color: 'var(--text-main)',
+        fontFamily: "'Inter', sans-serif",
+        display: 'flex',
+        flexDirection: 'column'
+      }}>
+        {/* Simple Clean Header */}
+        <header style={{
+          borderBottom: '1px solid var(--border-color)',
+          backgroundColor: 'var(--surface)',
+          padding: '1.25rem 2rem',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center'
+        }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+            <span style={{
+              fontSize: '1.8rem',
+              fontWeight: 800,
+              color: 'var(--primary)',
+              letterSpacing: '-0.02em'
+            }}>A1Plot</span>
+            <span style={{
+              backgroundColor: 'rgba(59, 122, 118, 0.1)',
+              color: 'var(--primary)',
+              fontSize: '0.75rem',
+              fontWeight: 600,
+              padding: '0.25rem 0.75rem',
+              borderRadius: 'var(--radius-full)'
+            }}>Direct Listing Portal</span>
+          </div>
+        </header>
+
+        {/* Hero Section */}
+        <main style={{ flex: 1, padding: '4rem 1.5rem', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+          <div style={{
+            maxWidth: '750px',
+            margin: '0 auto',
+            textAlign: 'center',
+            background: 'var(--surface)',
+            padding: '4rem 3rem',
+            borderRadius: 'var(--radius-lg)',
+            boxShadow: 'var(--shadow-lg)',
+            border: '1px solid var(--border-color)'
+          }}>
+            {/* Badge */}
+            <div style={{
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: '0.5rem',
+              backgroundColor: 'rgba(16, 185, 129, 0.1)',
+              color: 'var(--accent-green)',
+              padding: '0.5rem 1.25rem',
+              borderRadius: 'var(--radius-full)',
+              fontSize: '0.875rem',
+              fontWeight: 600,
+              marginBottom: '2rem',
+              border: '1px solid rgba(16, 185, 129, 0.2)'
+            }}>
+              ⚡ Direct Land Listing (No Account Required)
+            </div>
+
+            {/* Headline */}
+            <h1 style={{
+              fontSize: '2.5rem',
+              fontWeight: 800,
+              lineHeight: 1.15,
+              color: 'var(--text-main)',
+              marginBottom: '1.5rem',
+              letterSpacing: '-0.02em'
+            }}>
+              List Your Land Parcel & Reach Thousands of Buyers
+            </h1>
+
+            {/* Subtitle */}
+            <p style={{
+              fontSize: '1.15rem',
+              color: 'var(--text-muted)',
+              marginBottom: '3rem',
+              lineHeight: 1.6,
+              maxWidth: '600px',
+              margin: '0 auto 3rem'
+            }}>
+              Direct onboarding for Meta Ads users. Skip Google Sign-In entirely and submit your property details to our admin desk in 3 minutes.
+            </p>
+
+            {/* CTA Button */}
+            <button 
+              className="btn btn-primary"
+              onClick={() => setDirectStep('form')}
+              style={{
+                padding: '1.25rem 3.5rem',
+                fontSize: '1.1rem',
+                borderRadius: 'var(--radius-lg)',
+                backgroundColor: 'var(--primary)',
+                border: 'none',
+                color: 'white',
+                fontWeight: 700,
+                cursor: 'pointer',
+                boxShadow: 'var(--shadow-md)',
+                transition: 'var(--transition)'
+              }}
+            >
+              List Your Land Now &rarr;
+            </button>
+
+            {/* Verification Features Row */}
+            <div style={{
+              display: 'grid',
+              gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))',
+              gap: '1.5rem',
+              marginTop: '4rem',
+              paddingTop: '3rem',
+              borderTop: '1px solid var(--border-color)',
+              textAlign: 'left'
+            }}>
+              <div>
+                <h4 style={{ fontWeight: 700, color: 'var(--primary)', marginBottom: '0.25rem', fontSize: '1.05rem' }}>1. No Sign-In</h4>
+                <p style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>Provide contact info directly without account registration.</p>
+              </div>
+              <div>
+                <h4 style={{ fontWeight: 700, color: 'var(--primary)', marginBottom: '0.25rem', fontSize: '1.05rem' }}>2. Satellite Pin</h4>
+                <p style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>Pinpoint your exact boundary layout on our integrated map tool.</p>
+              </div>
+              <div>
+                <h4 style={{ fontWeight: 700, color: 'var(--primary)', marginBottom: '0.25rem', fontSize: '1.05rem' }}>3. Instant Review</h4>
+                <p style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>Admin team processes verification docs to list it live on the map.</p>
+              </div>
+            </div>
+          </div>
+        </main>
+
+        {/* Footer */}
+        <footer style={{
+          borderTop: '1px solid var(--border-color)',
+          backgroundColor: 'var(--surface)',
+          padding: '2.5rem 1rem',
+          textAlign: 'center',
+          color: 'var(--text-muted)',
+          fontSize: '0.85rem'
+        }}>
+          <p>© {new Date().getFullYear()} A1Plot Partner Portal. All rights reserved.</p>
+          <p style={{ marginTop: '0.5rem', fontSize: '0.75rem', color: 'var(--text-muted)' }}>This is a secure private listing portal powered by A1Plot.</p>
+        </footer>
+      </div>
+    );
+  };
+
+  const renderDirectLandingPage = () => {
+    if (directStep === 'landing') {
+      return renderDirectPromoPage();
+    }
+
+    return (
+      <div style={{
+        minHeight: '100vh',
+        backgroundColor: 'var(--bg-color)',
+        color: 'var(--text-main)',
+        fontFamily: "'Inter', sans-serif",
+        display: 'flex',
+        flexDirection: 'column'
+      }}>
+        {/* Simple Clean Header */}
+        <header style={{
+          borderBottom: '1px solid var(--border-color)',
+          backgroundColor: 'var(--surface)',
+          padding: '1.25rem 2rem',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center'
+        }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+            <span style={{
+              fontSize: '1.8rem',
+              fontWeight: 800,
+              color: 'var(--primary)',
+              letterSpacing: '-0.02em'
+            }}>A1Plot</span>
+            <span style={{
+              backgroundColor: 'rgba(59, 122, 118, 0.1)',
+              color: 'var(--primary)',
+              fontSize: '0.75rem',
+              fontWeight: 600,
+              padding: '0.25rem 0.75rem',
+              borderRadius: 'var(--radius-full)'
+            }}>Direct Listing Portal</span>
+          </div>
+        </header>
+
+        <main style={{ flex: 1 }}>
+          {/* Back button above the form */}
+          <div style={{ maxWidth: '800px', margin: '2rem auto 0 auto', padding: '0 2rem' }}>
+            <button 
+              onClick={() => setDirectStep('landing')}
+              style={{
+                color: 'var(--text-muted)',
+                background: 'none',
+                border: 'none',
+                cursor: 'pointer',
+                fontSize: '0.95rem',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '0.5rem',
+                fontWeight: 500,
+                transition: 'var(--transition)'
+              }}
+              onMouseOver={(e) => { e.currentTarget.style.color = 'var(--primary)'; }}
+              onMouseOut={(e) => { e.currentTarget.style.color = 'var(--text-muted)'; }}
+            >
+              &larr; Back to Portal Home
+            </button>
+          </div>
+          {renderSellerForm()}
+        </main>
+
+        {/* Simple Clean Footer */}
+        <footer style={{
+          borderTop: '1px solid var(--border-color)',
+          backgroundColor: 'var(--surface)',
+          padding: '2.5rem 1rem',
+          textAlign: 'center',
+          color: 'var(--text-muted)',
+          fontSize: '0.85rem'
+        }}>
+          <p>© {new Date().getFullYear()} A1Plot Partner Portal. All rights reserved.</p>
+          <p style={{ marginTop: '0.5rem', fontSize: '0.75rem', color: 'var(--text-muted)' }}>This is a secure private listing portal powered by A1Plot.</p>
+        </footer>
+      </div>
+    );
+  };
+
   /* ============================================
      MAIN RENDER
      ============================================ */
@@ -3549,6 +3785,10 @@ export default function App() {
         </div>
       </div>
     );
+  }
+
+  if (view === 'direct-list') {
+    return renderDirectLandingPage();
   }
 
   return (
