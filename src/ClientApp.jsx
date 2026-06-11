@@ -218,7 +218,8 @@ const viewToPath = {
   'admin-edit': '/admin_edit',
   'property-detail': '/property',
   'login': '/login',
-  'about': '/about_us'
+  'about': '/about_us',
+  'direct-list': '/direct-list'
 };
 
 const pathToView = {
@@ -234,10 +235,13 @@ const pathToView = {
   '/buy_request': 'buy-request',
   '/admin': 'admin',
   '/admin_edit': 'admin-edit',
-      '/admin_map': 'admin-map',
+  '/admin_map': 'admin-map',
   '/property': 'property-detail',
   '/login': 'login',
-  '/about_us': 'about'
+  '/about_us': 'about',
+  '/direct-list': 'direct-list',
+  '/quick-list': 'direct-list',
+  '/meta-ads': 'direct-list'
 };
 
 const autocompleteOptions = {
@@ -266,11 +270,16 @@ export default function App() {
       '/admin_edit': 'admin-edit',
       '/property': 'property-detail',
       '/login': 'login',
-      '/about_us': 'about'
+      '/about_us': 'about',
+      '/direct-list': 'direct-list',
+      '/quick-list': 'direct-list',
+      '/meta-ads': 'direct-list'
     };
     return pathToViewMap[window.location.pathname] || 'home';
   };
   const [view, setView] = useState(getInitialView);
+  const [leadEmail, setLeadEmail] = useState('');
+  const [leadPhone, setLeadPhone] = useState('');
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [newPlot, setNewPlot] = useState({ title: '', location: '', price: '', size: '', features: '', visibility: 'public', khasraNumber: '', state: '', district: '', tehsil: '', village: '' });
   const [editingPlot, setEditingPlot] = useState(null);
@@ -863,11 +872,12 @@ export default function App() {
         const plot = {
           ...newPlot,
           id: Date.now().toString(),
-          ownerUid: user?.uid,
-          ownerEmail: user?.email || '',
+          ownerUid: user?.uid || 'meta-ad',
+          ownerEmail: user?.email || leadEmail || '',
+          ownerPhone: leadPhone || '',
           status: 'Verification Pending',
           cagr: 'TBD',
-          developer: 'Self Listed',
+          developer: user ? 'Self Listed' : 'Meta Ads Lead',
           badge: 'New',
           image: staticMapUrl || fallbackImage,
           media: staticMapUrl ? [staticMapUrl] : [],
@@ -883,12 +893,20 @@ export default function App() {
         await addPlot(plot);
       }
       setNewPlot({ title: '', location: '', price: '', size: '', features: '', visibility: 'public', khasraNumber: '', district: '', tehsil: '', village: '' });
+      setLeadEmail('');
+      setLeadPhone('');
       setMediaFiles([]);
       setDocFiles([]);
       setPolygonPath([]);
       setIsDrawingMode(false);
       setPlotLocation({ lat: 20.5937, lng: 78.9629 });
-      navigate('seller-dashboard');
+      
+      if (view === 'direct-list') {
+        showToast("Property successfully listed! Our admin team will verify it soon.");
+        navigate('home');
+      } else {
+        navigate('seller-dashboard');
+      }
     } catch (err) {
       console.error('Submit failed:', err);
       setSubmitError(err?.message || 'Failed to submit. Please try again.');
@@ -1293,6 +1311,32 @@ export default function App() {
           <p className="text-muted">{editingPlot ? 'Update your property details below.' : 'Fill in the details below to start the verification process.'}</p>
         </div>
         <form className="listing-form" onSubmit={handleListProperty}>
+          {view === 'direct-list' && (
+            <div style={{display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '1.5rem', marginBottom: '1.5rem'}}>
+              <div className="form-group mb-8">
+                <label>Contact Email Address <span style={{color: 'var(--accent-red)'}}>*</span></label>
+                <input
+                  type="email"
+                  placeholder="e.g. name@domain.com"
+                  className="form-input"
+                  required
+                  value={leadEmail}
+                  onChange={(e) => setLeadEmail(e.target.value)}
+                />
+              </div>
+              <div className="form-group mb-8">
+                <label>Contact Phone Number <span style={{color: 'var(--accent-red)'}}>*</span></label>
+                <input
+                  type="tel"
+                  placeholder="e.g. +91 98765 43210"
+                  className="form-input"
+                  required
+                  value={leadPhone}
+                  onChange={(e) => setLeadPhone(e.target.value)}
+                />
+              </div>
+            </div>
+          )}
           <div className="form-group mb-8">
             <label>Plot Title</label>
             <input
@@ -3608,6 +3652,7 @@ export default function App() {
         {view === 'home' && renderHome()}
         {view === 'login' && renderAuth()}
         {(view === 'seller-list' || view === 'seller-edit') && (user ? renderSellerForm() : renderAuth())}
+        {view === 'direct-list' && renderSellerForm()}
         {view === 'seller-dashboard' && (user ? renderSellerDashboard() : renderAuth())}
         {view === 'buyer-map' && renderBuyerMap()}
         {view === 'interested' && renderInterested()}
