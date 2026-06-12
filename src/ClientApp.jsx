@@ -868,8 +868,29 @@ export default function App() {
         setEditingPlot(null);
       } else {
         const fallbackImage = 'https://images.unsplash.com/photo-1500382017468-9049fed747ef?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80';
-        
-        // Use a default image — blob URLs are session-only and can't be stored in DB
+
+        // Upload photos/videos to Firebase Storage
+        const uploadableMedia = mediaFiles.filter(f => !f.isStaticMap);
+        const uploadedMediaUrls = await Promise.all(
+          uploadableMedia.map(async (f) => {
+            if (!storage) return f.preview || null;
+            try {
+              const sRef = ref(storage, `media/${Date.now()}_${f.name}`);
+              await uploadBytes(sRef, f.file);
+              return await getDownloadURL(sRef);
+            } catch (err) {
+              console.warn('Media upload failed for', f.name, err);
+              return null;
+            }
+          })
+        ).then(urls => urls.filter(Boolean));
+
+        // Build final media array: satellite map first, then uploaded photos
+        const finalMedia = [
+          ...(staticMapUrl ? [staticMapUrl] : []),
+          ...uploadedMediaUrls,
+        ];
+
         const plot = {
           ...newPlot,
           id: Date.now().toString(),
@@ -880,8 +901,8 @@ export default function App() {
           cagr: 'TBD',
           developer: user ? 'Self Listed' : 'Meta Ads Lead',
           badge: 'New',
-          image: staticMapUrl || fallbackImage,
-          media: staticMapUrl ? [staticMapUrl] : [],
+          image: finalMedia[0] || fallbackImage,
+          media: finalMedia,
           documentsAvailable: await Promise.all(docFiles.map(f => uploadDocToStorage(f))),
           lat: plotLocation.lat,
           lng: plotLocation.lng,
@@ -3686,88 +3707,62 @@ export default function App() {
     );
   };
 
-  const renderDirectLandingPage = () => {
-    if (directStep === 'landing') {
-      return renderDirectPromoPage();
-    }
-
-    return (
-      <div style={{
-        minHeight: '100vh',
-        backgroundColor: 'var(--bg-color)',
-        color: 'var(--text-main)',
-        fontFamily: "'Inter', sans-serif",
+  const renderDirectLandingPage = () => (
+    <div style={{
+      minHeight: '100vh',
+      backgroundColor: 'var(--bg-color)',
+      color: 'var(--text-main)',
+      fontFamily: "'Inter', sans-serif",
+      display: 'flex',
+      flexDirection: 'column'
+    }}>
+      {/* Minimal branded header — no nav links */}
+      <header style={{
+        borderBottom: '1px solid var(--border-color)',
+        backgroundColor: 'var(--surface)',
+        padding: '1rem 2rem',
         display: 'flex',
-        flexDirection: 'column'
+        alignItems: 'center',
+        justifyContent: 'center',
+        position: 'sticky',
+        top: 0,
+        zIndex: 50,
+        boxShadow: 'var(--shadow-sm)'
       }}>
-        {/* Simple Clean Header */}
-        <header style={{
-          borderBottom: '1px solid var(--border-color)',
-          backgroundColor: 'var(--surface)',
-          padding: '1.25rem 2rem',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center'
-        }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
-            <span style={{
-              fontSize: '1.8rem',
-              fontWeight: 800,
-              color: 'var(--primary)',
-              letterSpacing: '-0.02em'
-            }}>A1Plot</span>
-            <span style={{
-              backgroundColor: 'rgba(59, 122, 118, 0.1)',
-              color: 'var(--primary)',
-              fontSize: '0.75rem',
-              fontWeight: 600,
-              padding: '0.25rem 0.75rem',
-              borderRadius: 'var(--radius-full)'
-            }}>Direct Listing Portal</span>
-          </div>
-        </header>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+          <img src="/assets/logo.png" alt="A1Plot" style={{ height: '44px', width: 'auto', objectFit: 'contain' }} onError={e => { e.target.style.display = 'none'; }} />
+          <span style={{ fontSize: '1.6rem', fontWeight: 800, color: 'var(--primary)', letterSpacing: '-0.02em' }}>A1Plot</span>
+          <span style={{
+            backgroundColor: 'rgba(16, 185, 129, 0.1)',
+            color: 'var(--accent-green)',
+            border: '1px solid rgba(16, 185, 129, 0.2)',
+            fontSize: '0.72rem',
+            fontWeight: 600,
+            padding: '0.2rem 0.65rem',
+            borderRadius: 'var(--radius-full)'
+          }}>Direct Listing — No Sign-In Required</span>
+        </div>
+      </header>
 
-        <main style={{ flex: 1 }}>
-          {/* Back button above the form */}
-          <div style={{ maxWidth: '800px', margin: '2rem auto 0 auto', padding: '0 2rem' }}>
-            <button 
-              onClick={() => setDirectStep('landing')}
-              style={{
-                color: 'var(--text-muted)',
-                background: 'none',
-                border: 'none',
-                cursor: 'pointer',
-                fontSize: '0.95rem',
-                display: 'flex',
-                alignItems: 'center',
-                gap: '0.5rem',
-                fontWeight: 500,
-                transition: 'var(--transition)'
-              }}
-              onMouseOver={(e) => { e.currentTarget.style.color = 'var(--primary)'; }}
-              onMouseOut={(e) => { e.currentTarget.style.color = 'var(--text-muted)'; }}
-            >
-              &larr; Back to Portal Home
-            </button>
-          </div>
-          {renderSellerForm()}
-        </main>
+      {/* The full seller form — exact same as main site */}
+      <main style={{ flex: 1 }}>
+        {renderSellerForm()}
+      </main>
 
-        {/* Simple Clean Footer */}
-        <footer style={{
-          borderTop: '1px solid var(--border-color)',
-          backgroundColor: 'var(--surface)',
-          padding: '2.5rem 1rem',
-          textAlign: 'center',
-          color: 'var(--text-muted)',
-          fontSize: '0.85rem'
-        }}>
-          <p>© {new Date().getFullYear()} A1Plot Partner Portal. All rights reserved.</p>
-          <p style={{ marginTop: '0.5rem', fontSize: '0.75rem', color: 'var(--text-muted)' }}>This is a secure private listing portal powered by A1Plot.</p>
-        </footer>
-      </div>
-    );
-  };
+      {/* Simple footer */}
+      <footer style={{
+        borderTop: '1px solid var(--border-color)',
+        backgroundColor: 'var(--surface)',
+        padding: '2rem 1rem',
+        textAlign: 'center',
+        color: 'var(--text-muted)',
+        fontSize: '0.82rem'
+      }}>
+        <p>\u00A9 {new Date().getFullYear()} A1Plot \u2014 India's Premium Land Investment Platform</p>
+        <p style={{ marginTop: '0.4rem', fontSize: '0.75rem' }}>Your listing is reviewed and verified by our admin team before going live.</p>
+      </footer>
+    </div>
+  );
 
   /* ============================================
      MAIN RENDER
