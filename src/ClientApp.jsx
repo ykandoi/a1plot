@@ -278,6 +278,7 @@ export default function App() {
     return pathToViewMap[window.location.pathname] || 'home';
   };
   const [view, setView] = useState(getInitialView);
+  const [redirectTarget, setRedirectTarget] = useState(null);
   const [leadEmail, setLeadEmail] = useState('');
   const [leadPhone, setLeadPhone] = useState('');
   const [directStep, setDirectStep] = useState('landing');
@@ -428,7 +429,9 @@ export default function App() {
       setAuthError('');
       const result = await signInWithPopup(auth, googleProvider);
       if (result?.user) {
-        navigate('home');
+        const target = redirectTarget || (['login', 'home'].includes(view) ? 'home' : view);
+        navigate(target);
+        setRedirectTarget(null);
       }
     } catch (err) {
       const code = err?.code || '';
@@ -462,7 +465,9 @@ export default function App() {
       }
       setAuthEmail('');
       setAuthPassword('');
-      navigate('home');
+      const target = redirectTarget || (['login', 'home'].includes(view) ? 'home' : view);
+      navigate(target);
+      setRedirectTarget(null);
     } catch (err) {
       setAuthError(err.message.replace('Firebase: ', '').replace('auth/', ''));
     }
@@ -497,6 +502,7 @@ export default function App() {
   // Gate seller features behind auth
   const requireAuth = (targetView) => {
     if (!user) {
+      setRedirectTarget(targetView);
       navigate('login');
     } else {
       navigate(targetView);
