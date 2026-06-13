@@ -18,6 +18,7 @@ import {
   ArrowRight,
   LandPlot
 } from 'lucide-react';
+import './tailwind.css';
 
 export default function SellPage() {
   const [formData, setFormData] = useState({
