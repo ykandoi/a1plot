@@ -4,6 +4,8 @@
   "version": "0.0.0",
   "scripts": {
     "dev": "next dev --webpack",
+    "build:sell-css": "tailwindcss -i app/sell/input.css -o app/sell/tailwind.css --minify",
+    "prebuild": "npm run build:sell-css",
     "build": "next build --webpack",
     "start": "next start",
     "lint": "next lint"
