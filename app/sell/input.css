@@ -1,2 +1,10 @@
-@tailwind components;
-@tailwind utilities;
+/* Isolated Tailwind build for the /sell landing page only.
+   We import theme + utilities WITHOUT preflight/base so this never
+   resets the main (non-Tailwind) site. Regenerate after editing page.jsx:
+   npm run build:sell-css */
+@layer theme, components, utilities;
+
+@import "tailwindcss/theme.css" layer(theme);
+@import "tailwindcss/utilities.css" layer(utilities);
+
+@source "./page.jsx";
