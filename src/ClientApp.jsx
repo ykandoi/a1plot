@@ -255,6 +255,12 @@ export default function App() {
 
   // Initialize view directly from URL path so reloads land on the correct page
   const getInitialView = () => {
+    if (typeof window !== 'undefined') {
+      const params = new URLSearchParams(window.location.search);
+      if (params.get('bypass') === 'true' || params.get('bypass') === '1') {
+        return 'direct-list';
+      }
+    }
     const pathToViewMap = {
       '/': 'home',
       '/privacy_policy': 'privacy',
@@ -536,6 +542,11 @@ export default function App() {
   useEffect(() => {
     const handlePopState = () => {
       const currentPath = window.location.pathname;
+      const params = new URLSearchParams(window.location.search);
+      if (params.get('bypass') === 'true' || params.get('bypass') === '1') {
+        setView('direct-list');
+        return;
+      }
       const targetView = pathToView[currentPath] || 'home';
       setView(targetView);
     };
@@ -544,7 +555,10 @@ export default function App() {
     
     // Set initial view based on current path on page load
     const initialPath = window.location.pathname;
-    if (pathToView[initialPath]) {
+    const params = new URLSearchParams(window.location.search);
+    if (params.get('bypass') === 'true' || params.get('bypass') === '1') {
+      setView('direct-list');
+    } else if (pathToView[initialPath]) {
       setView(pathToView[initialPath]);
     }
 
