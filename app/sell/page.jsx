@@ -170,20 +170,29 @@ export default function SellPage() {
               <CheckCircle2 className="w-16 h-16 text-emerald-400" />
             </div>
           </div>
-          <h1 className="text-4xl md:text-5xl font-extrabold mb-4 tracking-tight">Your Listing is Submitted!</h1>
+          <h1 className="text-4xl md:text-5xl font-extrabold mb-4 tracking-tight">Thank you! Your Listing is Submitted.</h1>
           <p className="text-lg text-slate-400 mb-10 leading-relaxed">
-            Thank you for listing your property. Our legal desk will perform the initial 50-point land records check within 24 hours. We will contact you shortly to publish it live on the buyer map.
+            Our team will contact you within 24 hours to complete your listing — including the 50-point legal check before we publish it live for verified buyers. Want it live faster? Add your full property details now.
           </p>
-          <a 
-            href="https://wa.me/918306041133?text=Hi%20A1Plot%20team,%20I%20just%20submitted%20my%20land%20details%20for%20free%20listing." 
-            target="_blank" 
-            rel="noopener noreferrer"
-            className="group inline-flex items-center gap-3 bg-[#25D366] hover:bg-[#20bd5a] text-white px-8 py-4 rounded-xl font-bold transition-all shadow-[0_0_20px_rgba(37,211,102,0.3)] hover:-translate-y-0.5 text-lg"
-          >
-            <MessageCircle className="w-6 h-6 fill-white stroke-none" />
-            <span>Connect with Admin on WhatsApp</span>
-            <ArrowRight className="w-5 h-5 opacity-0 group-hover:opacity-100 transition-all -translate-x-2 group-hover:translate-x-0" />
-          </a>
+          <div className="flex flex-col sm:flex-row items-center justify-center gap-4 w-full max-w-xl">
+            <a
+              href="https://a1plot.com/quick-list"
+              className="group w-full sm:w-auto inline-flex justify-center items-center gap-3 bg-emerald-500 hover:bg-emerald-400 text-white px-8 py-4 rounded-xl font-bold transition-all shadow-[0_4px_20px_rgba(16,185,129,0.35)] hover:-translate-y-0.5 text-lg"
+            >
+              <LandPlot className="w-6 h-6" />
+              <span>Complete Your Detailed Listing</span>
+              <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
+            </a>
+            <a
+              href="https://wa.me/918306041133?text=Hi%20A1Plot%20team,%20I%20just%20submitted%20my%20land%20details%20for%20free%20listing."
+              target="_blank"
+              rel="noopener noreferrer"
+              className="group w-full sm:w-auto inline-flex justify-center items-center gap-3 bg-[#25D366] hover:bg-[#20bd5a] text-white px-8 py-4 rounded-xl font-bold transition-all shadow-[0_0_20px_rgba(37,211,102,0.3)] hover:-translate-y-0.5 text-lg"
+            >
+              <MessageCircle className="w-6 h-6 fill-white stroke-none" />
+              <span>Chat with Us on WhatsApp</span>
+            </a>
+          </div>
         </div>
       </div>
     );
@@ -852,9 +861,23 @@ export default function SellPage() {
                       Verifying with Registry...
                     </>
                   ) : (
-                    'Submit My Land Listing (FREE)'
+                    <>
+                      Submit My Property for Free Listing <ArrowRight className="w-5 h-5" />
+                    </>
                   )}
                 </button>
+
+                <p className="text-center text-xs text-slate-400 mt-4 flex items-center justify-center gap-1.5 font-jakarta">
+                  <Lock className="w-3.5 h-3.5" />
+                  Your details are safe. We never share your data with third parties.
+                </p>
+
+                <p className="text-center text-sm text-slate-500 mt-4 font-jakarta">
+                  Prefer to add full property details yourself?{' '}
+                  <a href="https://a1plot.com/quick-list" className="font-bold text-emerald-600 hover:text-emerald-700 underline underline-offset-2">
+                    List your property directly →
+                  </a>
+                </p>
               </div>
             </form>
           </div>
