@@ -5,29 +5,13 @@ import { getStorage } from 'firebase/storage';
 
 const cleanEnv = (val) => val ? String(val).replace(/\\r|\\n|\r|\n|\s/g, '') : undefined;
 
-const getEnvVal = (key) => {
-  const nextKey = key.startsWith('VITE_') ? 'NEXT_PUBLIC_' + key.substring(5) : key;
-  if (typeof process !== 'undefined' && process.env) {
-    if (process.env[nextKey]) return process.env[nextKey];
-    if (process.env[key]) return process.env[key];
-  }
-  try {
-    const metaEnv = import.meta.env;
-    if (metaEnv) {
-      if (metaEnv[key]) return metaEnv[key];
-      if (metaEnv[nextKey]) return metaEnv[nextKey];
-    }
-  } catch (e) {}
-  return undefined;
-};
-
 const firebaseConfig = {
-  apiKey: cleanEnv(getEnvVal('VITE_FIREBASE_API_KEY')),
-  authDomain: cleanEnv(getEnvVal('VITE_FIREBASE_AUTH_DOMAIN')),
-  projectId: cleanEnv(getEnvVal('VITE_FIREBASE_PROJECT_ID')),
-  storageBucket: cleanEnv(getEnvVal('VITE_FIREBASE_STORAGE_BUCKET')),
-  messagingSenderId: cleanEnv(getEnvVal('VITE_FIREBASE_MESSAGING_SENDER_ID')),
-  appId: cleanEnv(getEnvVal('VITE_FIREBASE_APP_ID'))
+  apiKey: cleanEnv(process.env.NEXT_PUBLIC_FIREBASE_API_KEY || (typeof import.meta !== 'undefined' && import.meta.env ? import.meta.env.VITE_FIREBASE_API_KEY : undefined)),
+  authDomain: cleanEnv(process.env.NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN || (typeof import.meta !== 'undefined' && import.meta.env ? import.meta.env.VITE_FIREBASE_AUTH_DOMAIN : undefined)),
+  projectId: cleanEnv(process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID || (typeof import.meta !== 'undefined' && import.meta.env ? import.meta.env.VITE_FIREBASE_PROJECT_ID : undefined)),
+  storageBucket: cleanEnv(process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET || (typeof import.meta !== 'undefined' && import.meta.env ? import.meta.env.VITE_FIREBASE_STORAGE_BUCKET : undefined)),
+  messagingSenderId: cleanEnv(process.env.NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID || (typeof import.meta !== 'undefined' && import.meta.env ? import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID : undefined)),
+  appId: cleanEnv(process.env.NEXT_PUBLIC_FIREBASE_APP_ID || (typeof import.meta !== 'undefined' && import.meta.env ? import.meta.env.VITE_FIREBASE_APP_ID : undefined))
 };
 
 let app, auth, googleProvider, db, storage;
