@@ -22,7 +22,7 @@ import { signInWithPopup, signInWithEmailAndPassword, createUserWithEmailAndPass
 import { usePlots } from './hooks/usePlots';
 import { useInterests } from './hooks/useInterests';
 
-const GOOGLE_MAPS_API_KEY = import.meta.env.VITE_GOOGLE_MAPS_API_KEY || '';
+const GOOGLE_MAPS_API_KEY = (typeof process !== 'undefined' && process.env && process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY) ? process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY : '';
 
 const mapContainerStyle = {
   width: '100%',
@@ -475,11 +475,7 @@ export default function App() {
     navigate('home');
   };
 
-  const handleLogout = () => {
-    setIsLoggedIn(false);
-    setUserRole(null);
-    setSearchQuery('');
-  };
+
 
   const handleLocateMe = (setCenter) => {
     if (navigator.geolocation) {
@@ -1092,40 +1088,7 @@ export default function App() {
               </div>
             </div>
           </div>
-          {viewerOpen && images.length > 0 && (
-            <div className="image-viewer-overlay" onClick={() => setViewerOpen(false)}>
-              <button className="viewer-close" onClick={() => setViewerOpen(false)}>✕</button>
-              
-              {images.length > 1 && (
-                <button 
-                  className="viewer-arrow viewer-arrow-left" 
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    setViewerIndex((prev) => (prev === 0 ? images.length - 1 : prev - 1));
-                  }}
-                >
-                  ‹
-                </button>
-              )}
-              
-              <div className="viewer-img-container" onClick={(e) => e.stopPropagation()}>
-                <img src={images[viewerIndex]} alt="" className="viewer-img" />
-                <div className="viewer-counter">{viewerIndex + 1} / {images.length}</div>
-              </div>
-              
-              {images.length > 1 && (
-                <button 
-                  className="viewer-arrow viewer-arrow-right" 
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    setViewerIndex((prev) => (prev === images.length - 1 ? 0 : prev + 1));
-                  }}
-                >
-                  ›
-                </button>
-              )}
-            </div>
-          )}
+
         </div>
       </section>
 
