@@ -64,6 +64,21 @@ export default function SellPage() {
     }
   }, []);
 
+  // Load Google Analytics (GA4) — scoped to this landing page only so the
+  // generate_lead event can fire on form submission.
+  useEffect(() => {
+    if (typeof window === 'undefined' || window.gtag) return;
+    const GA_ID = 'G-B7Y33BBVGX';
+    const s = document.createElement('script');
+    s.async = true;
+    s.src = `https://www.googletagmanager.com/gtag/js?id=${GA_ID}`;
+    document.head.appendChild(s);
+    window.dataLayer = window.dataLayer || [];
+    window.gtag = function () { window.dataLayer.push(arguments); };
+    window.gtag('js', new Date());
+    window.gtag('config', GA_ID);
+  }, []);
+
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
