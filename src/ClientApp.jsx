@@ -330,7 +330,7 @@ export default function App() {
 
   // Auth State
   const [user, setUser] = useState(null);
-  const { plots, loading: plotsLoading, addPlot, updatePlot } = usePlots(INITIAL_PLOTS);
+  const { plots, loading: plotsLoading, addPlot, updatePlot, deletePlot } = usePlots(INITIAL_PLOTS);
 
   const [toastMessage, setToastMessage] = useState(null);
   
@@ -855,6 +855,28 @@ export default function App() {
     await updatePlot(plotId, { status: 'Rejected', badge: 'Rejected' });
   };
 
+  const handleDeletePlot = async (plot) => {
+    const ok = window.confirm(`Delete "${plot.title || 'this property'}" permanently? This removes it from the list and cannot be undone.`);
+    if (!ok) return;
+    try {
+      await deletePlot(plot.id);
+      showToast('Property deleted.');
+    } catch (e) {
+      showToast('Failed to delete property. Please try again.');
+    }
+  };
+
+  // Format the time a property was listed for the admin table.
+  const formatListedTime = (plot) => {
+    let ts = plot.createdAt;
+    if (ts && typeof ts === 'object' && typeof ts.toDate === 'function') ts = ts.toDate().getTime(); // Firestore Timestamp
+    if (!ts && /^\d{13}$/.test(String(plot.id))) ts = Number(plot.id); // legacy: id was Date.now()
+    if (!ts) return '—';
+    const d = new Date(Number(ts));
+    if (isNaN(d.getTime())) return '—';
+    return d.toLocaleString('en-IN', { day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' });
+  };
+
   const handleListProperty = async (e) => {
     e.preventDefault();
     setSubmitError('');
@@ -910,6 +932,7 @@ export default function App() {
         const plot = {
           ...newPlot,
           id: Date.now().toString(),
+          createdAt: Date.now(),
           ownerUid: user?.uid || 'meta-ad',
           ownerEmail: user?.email || leadEmail || '',
           ownerPhone: leadPhone || '',
@@ -3306,6 +3329,7 @@ export default function App() {
                     <th>Documents</th>
                     <th>Visibility</th>
                     <th>Status</th>
+                    <th>Listed</th>
                     <th>Actions</th>
                   </tr>
                 </thead>
@@ -3350,6 +3374,9 @@ export default function App() {
                           );
                         })()}
                       </td>
+                      <td className="text-muted" style={{whiteSpace: 'nowrap', fontSize: '0.8rem'}}>
+                        {formatListedTime(plot)}
+                      </td>
                       <td onClick={(e) => e.stopPropagation()}>
                         <div className="admin-actions">
                           <button className="admin-btn" style={{backgroundColor: '#e2e8f0', color: '#1e293b', border: '1px solid #cbd5e1'}} onClick={(e) => { e.stopPropagation(); handleAdminEditClick(plot); }}>
@@ -3373,6 +3400,9 @@ export default function App() {
                               <X size={14} /> Reject
                             </button>
                           )}
+                          <button className="admin-btn" style={{backgroundColor: '#fee2e2', color: '#991b1b', border: '1px solid #fecaca'}} onClick={(e) => { e.stopPropagation(); handleDeletePlot(plot); }}>
+                            <Trash2 size={14} /> Delete
+                          </button>
                         </div>
                       </td>
                     </tr>

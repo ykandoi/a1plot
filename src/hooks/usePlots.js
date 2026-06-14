@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { collection, onSnapshot, addDoc, updateDoc, doc, getDocs, writeBatch } from 'firebase/firestore';
+import { collection, onSnapshot, addDoc, updateDoc, deleteDoc, doc, getDocs, writeBatch } from 'firebase/firestore';
 import { db } from '../firebase';
 
 // A Firestore instance always has a 'type' property equal to 'firestore'
@@ -136,6 +136,22 @@ export function usePlots(initialSeedPlots) {
     }
   };
 
-  return { plots, loading, addPlot, updatePlot };
+  const deletePlot = async (plotId) => {
+    if (!isDbReady()) {
+      console.warn("Firestore not ready — plot not deleted.");
+      return;
+    }
+    const startTime = performance.now();
+    try {
+      const plotDocRef = doc(db, 'plots', plotId.toString());
+      await withTimeout(deleteDoc(plotDocRef));
+      console.log(`🗑️ Plot deleted in ${((performance.now() - startTime) / 1000).toFixed(2)}s — ID: ${plotId}`);
+    } catch (e) {
+      console.error(`❌ Error deleting plot after ${((performance.now() - startTime) / 1000).toFixed(2)}s:`, e);
+      throw e;
+    }
+  };
+
+  return { plots, loading, addPlot, updatePlot, deletePlot };
 }
 
