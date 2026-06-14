@@ -66,6 +66,21 @@ export default function RootLayout({ children }) {
         </noscript>
         {/* End Meta Pixel Code */}
 
+        {/* Google Analytics (GA4) — site-wide */}
+        <Script
+          src="https://www.googletagmanager.com/gtag/js?id=G-B7Y33BBVGX"
+          strategy="afterInteractive"
+        />
+        <Script id="ga4-init" strategy="afterInteractive">
+          {`
+            window.dataLayer = window.dataLayer || [];
+            function gtag(){dataLayer.push(arguments);}
+            gtag('js', new Date());
+            gtag('config', 'G-B7Y33BBVGX');
+          `}
+        </Script>
+        {/* End Google Analytics */}
+
         {/* Structured Data for AI & Search Engines */}
         <script
           type="application/ld+json"
