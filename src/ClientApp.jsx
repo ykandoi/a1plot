@@ -1733,7 +1733,7 @@ export default function App() {
     if (myHoldings.length === 0) return '0.00';
     const cashFlows = [];
     myHoldings.forEach((p, idx) => {
-      const charCode = p.id ? p.id.charCodeAt(0) : idx * 10;
+      const charCode = p.id ? String(p.id).charCodeAt(0) : idx * 10;
       const daysHeld = 200 + (charCode % 400); // held between 200 and 600 days
       cashFlows.push({ amount: -(p.investedAmount || 0), days: daysHeld });
     });
