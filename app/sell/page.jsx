@@ -1,18 +1,14 @@
 "use client";
 
-import React, { useState, useEffect } from 'react';
-import { collection, addDoc, serverTimestamp } from 'firebase/firestore';
-import { db } from '../../src/firebase';
+import { useState, useEffect } from 'react';
 import {
   TrendingUp,
   ShieldCheck,
-  CheckCircle2,
   Search,
   Banknote,
   Users,
   Lock,
   ArrowRight,
-  MessageCircle,
   Map,
   ChevronDown,
   Clock,
@@ -20,125 +16,28 @@ import {
   IndianRupee
 } from 'lucide-react';
 
-const WHATSAPP_URL = 'https://wa.me/918306041133?text=Hi%20A1Plot%20team,%20I%20just%20submitted%20my%20land%20for%20a%20free%20listing.';
+const WHATSAPP_URL = 'https://wa.me/918306041133?text=Hi%20A1Plot%20team,%20I%20want%20to%20list%20my%20land%20for%20free.';
 const QUICK_LIST_URL = 'https://a1plot.com/quick-list';
-
-const INDIAN_STATES = [
-  "Andhra Pradesh", "Arunachal Pradesh", "Assam", "Bihar", "Chhattisgarh", "Goa", "Gujarat",
-  "Haryana", "Himachal Pradesh", "Jharkhand", "Karnataka", "Kerala", "Madhya Pradesh",
-  "Maharashtra", "Manipur", "Meghalaya", "Mizoram", "Nagaland", "Odisha", "Punjab", "Rajasthan",
-  "Sikkim", "Tamil Nadu", "Telangana", "Tripura", "Uttar Pradesh", "Uttarakhand", "West Bengal",
-  "Andaman & Nicobar Islands", "Chandigarh", "Dadra & Nagar Haveli and Daman & Diu", "Delhi",
-  "Jammu & Kashmir", "Ladakh", "Lakshadweep", "Puducherry"
-];
 
 const FAQS = [
   { q: "Is listing really free?", a: "Yes. Listing your land on A1Plot is 100% free. We charge zero commission and zero brokerage — you keep your entire sale price." },
   { q: "How long does verification take?", a: "Our team completes the 50-point legal check within 24 hours of submission, then publishes your listing to verified buyers." },
   { q: "What types of land can I list?", a: "Agricultural land, residential plots, commercial plots, farm land, and industrial plots — anywhere across India." },
   { q: "Will brokers contact me?", a: "No. Only verified buyers on the A1Plot platform can reach out to you directly. Your details are protected from broker spam." },
-  { q: "What happens after I submit the form?", a: "Our team contacts you within 24 hours to collect documents, complete verification, and publish your listing live on the buyer network." }
+  { q: "What happens after I list?", a: "Our team contacts you within 24 hours to collect documents, complete verification, and publish your listing live on the buyer network." }
 ];
 
 export default function SellPage() {
-  const [formData, setFormData] = useState({
-    fullName: '', mobileNumber: '', emailAddress: '',
-    propertyType: '', state: '', city: '',
-    plotSize: '', plotSizeUnit: 'Sq. Ft.', expectedPrice: '', additionalDetails: ''
-  });
-  const [utms, setUtms] = useState({ utm_source: '', utm_medium: '', utm_campaign: '' });
-  const [errors, setErrors] = useState({});
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const [isSuccess, setIsSuccess] = useState(false);
-  const [submitError, setSubmitError] = useState('');
+  // Forward any UTM params from the ad URL onto the quick-list link so ad
+  // attribution carries through to the actual listing tool.
+  const [listHref, setListHref] = useState(QUICK_LIST_URL);
   const [activeFaq, setActiveFaq] = useState(0);
 
-  // Capture UTM parameters from the ad URL into hidden fields
   useEffect(() => {
     if (typeof window === 'undefined') return;
-    const params = new URLSearchParams(window.location.search);
-    setUtms({
-      utm_source: params.get('utm_source') || '',
-      utm_medium: params.get('utm_medium') || '',
-      utm_campaign: params.get('utm_campaign') || ''
-    });
+    const search = window.location.search;
+    if (search && search.length > 1) setListHref(QUICK_LIST_URL + search);
   }, []);
-
-  // Load Google Analytics (GA4) — scoped to this landing page only so the
-  // generate_lead event can fire. Kept off the global layout to avoid
-  // touching the rest of the site.
-  useEffect(() => {
-    if (typeof window === 'undefined' || window.gtag) return;
-    const GA_ID = 'G-B7Y33BBVGX';
-    const s = document.createElement('script');
-    s.async = true;
-    s.src = `https://www.googletagmanager.com/gtag/js?id=${GA_ID}`;
-    document.head.appendChild(s);
-    window.dataLayer = window.dataLayer || [];
-    window.gtag = function () { window.dataLayer.push(arguments); };
-    window.gtag('js', new Date());
-    window.gtag('config', GA_ID);
-  }, []);
-
-  const handleChange = (e) => {
-    const { name, value } = e.target;
-    setFormData((p) => ({ ...p, [name]: value }));
-    if (errors[name]) setErrors((p) => ({ ...p, [name]: '' }));
-  };
-
-  const scrollToForm = (e) => {
-    if (e) e.preventDefault();
-    const el = document.getElementById('listing-form');
-    if (el) {
-      const y = el.getBoundingClientRect().top + window.pageYOffset - 80;
-      window.scrollTo({ top: y, behavior: 'smooth' });
-    }
-  };
-
-  const validate = () => {
-    const e = {};
-    if (!formData.fullName.trim()) e.fullName = 'Please enter your full name.';
-    if (!/^[0-9]{10}$/.test(formData.mobileNumber.trim())) e.mobileNumber = 'Enter a valid 10-digit mobile number.';
-    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.emailAddress.trim())) e.emailAddress = 'Enter a valid email address.';
-    if (!formData.propertyType) e.propertyType = 'Select a property type.';
-    if (!formData.state) e.state = 'Select your state.';
-    if (!formData.city.trim()) e.city = 'Enter your city / district.';
-    if (!formData.plotSize.trim()) e.plotSize = 'Enter the plot size.';
-    if (!formData.expectedPrice.trim()) e.expectedPrice = 'Enter your expected price.';
-    return e;
-  };
-
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    setSubmitError('');
-    const v = validate();
-    if (Object.keys(v).length) {
-      setErrors(v);
-      const first = document.querySelector('.has-error');
-      if (first) first.scrollIntoView({ behavior: 'smooth', block: 'center' });
-      return;
-    }
-
-    setIsSubmitting(true);
-    try {
-      if (db) {
-        await addDoc(collection(db, 'seller_leads'), {
-          ...formData, ...utms, status: 'New', createdAt: serverTimestamp()
-        });
-      }
-      if (typeof window !== 'undefined') {
-        if (window.fbq) window.fbq('track', 'Lead');
-        if (window.gtag) window.gtag('event', 'generate_lead', { event_category: 'Seller', event_label: 'Sell Landing Page' });
-      }
-      setIsSuccess(true);
-      window.scrollTo({ top: 0, behavior: 'smooth' });
-    } catch (err) {
-      console.error('Submission error:', err);
-      setSubmitError('Something went wrong. Please try again, or reach us on WhatsApp.');
-    } finally {
-      setIsSubmitting(false);
-    }
-  };
 
   const styles = `
     .sell-page { background-color: var(--bg-color); }
@@ -161,27 +60,15 @@ export default function SellPage() {
     .sell-strip-stat h4 { font-size:1.35rem; font-weight:800; color:#fff; letter-spacing:-0.01em; }
     .sell-strip-stat p { color:#94a3b8; font-size:0.82rem; font-weight:600; text-transform:uppercase; letter-spacing:0.04em; }
 
-    /* Form */
-    .sell-form-wrap { max-width:760px; margin:0 auto; }
-    .sell-page .form-group { margin-bottom:1.4rem; }
-    .sell-page .form-input { font-size:0.98rem; }
-    .sell-req { color:var(--accent-red); }
-    .form-error { color:#dc2626; font-size:0.82rem; margin-top:0.4rem; display:block; }
-    .form-input.has-error { border-color:#ef4444; background:#fff7f7; }
-    select.form-input { appearance:none; background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='20' height='20' viewBox='0 0 24 24' fill='none' stroke='%2364748b' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
-      background-repeat:no-repeat; background-position:right 0.9rem center; padding-right:2.5rem; }
-    .sell-phone { position:relative; }
-    .sell-phone-prefix { position:absolute; left:1rem; top:50%; transform:translateY(-50%); font-weight:600; color:var(--text-muted); pointer-events:none; }
-    .sell-phone .form-input { padding-left:3rem; }
-    .sell-size-row { display:flex; gap:0.75rem; }
-    .sell-size-row .form-input:first-child { flex:1; }
-    .sell-unit { width:140px; flex-shrink:0; }
-    .sell-submit { width:100%; padding:1.05rem; font-size:1.05rem; margin-top:0.5rem; }
-    .sell-note { text-align:center; font-size:0.83rem; color:var(--text-muted); margin-top:1.1rem; display:flex; align-items:center; justify-content:center; gap:0.45rem; }
-    .sell-alt { text-align:center; font-size:0.92rem; color:var(--text-muted); margin-top:1.25rem; padding-top:1.25rem; border-top:1px solid var(--border-color); }
-    .sell-alt a { color:var(--accent-green); font-weight:700; }
-    .sell-form-error-banner { background:#fef2f2; border:1px solid #fecaca; color:#dc2626; padding:0.9rem 1.1rem;
-      border-radius:var(--radius-md); font-size:0.9rem; font-weight:500; margin-bottom:1.5rem; }
+    /* List CTA card (replaces the embedded form) */
+    .sell-cta-card { max-width:620px; margin:0 auto; background:#fff; border:1px solid var(--border-color);
+      border-radius:var(--radius-lg); box-shadow:var(--shadow-lg); padding:3rem 2.5rem; text-align:center; position:relative; overflow:hidden; }
+    .sell-cta-card::before { content:''; position:absolute; top:0; left:0; width:100%; height:5px;
+      background:linear-gradient(90deg, var(--primary), var(--accent-green)); }
+    .sell-cta-steps { display:flex; flex-direction:column; gap:0.85rem; text-align:left; max-width:380px; margin:2rem auto 2.25rem; }
+    .sell-cta-step { display:flex; align-items:center; gap:0.75rem; color:var(--text-main); font-weight:600; font-size:0.95rem; }
+    .sell-cta-step svg { color:var(--accent-green); flex-shrink:0; }
+    .sell-note { font-size:0.83rem; color:var(--text-muted); margin-top:1.1rem; display:flex; align-items:center; justify-content:center; gap:0.45rem; }
 
     /* Why cards icon */
     .sell-why-icon { width:56px; height:56px; border-radius:1rem; background:rgba(16,185,129,0.1); color:var(--accent-green);
@@ -199,57 +86,17 @@ export default function SellPage() {
     .sell-faq-a { max-height:0; overflow:hidden; transition:max-height 0.3s ease, padding 0.3s ease; color:var(--text-muted); line-height:1.7; font-size:0.95rem; padding:0 1.5rem; }
     .sell-faq-item.open .sell-faq-a { max-height:320px; padding:0 1.5rem 1.4rem; }
 
-    /* CTA band */
+    /* Final CTA band */
     .sell-final { text-align:center; }
     .sell-final h2 { color:#fff; font-size:2.25rem; font-weight:800; margin-bottom:1rem; letter-spacing:-0.02em; }
     .sell-final p { color:#94a3b8; font-size:1.05rem; max-width:560px; margin:0 auto 2rem; }
 
-    /* Success */
-    .sell-success { min-height:100vh; display:flex; flex-direction:column; align-items:center; justify-content:center;
-      text-align:center; padding:2rem; background:linear-gradient(135deg,#0f172a 0%,#0b1121 60%,#0f172a 100%); color:#fff; }
-    .sell-success-ico { width:96px; height:96px; border-radius:50%; background:rgba(16,185,129,0.12);
-      display:flex; align-items:center; justify-content:center; margin-bottom:2rem; }
-    .sell-success h1 { font-size:2.5rem; font-weight:800; margin-bottom:1rem; letter-spacing:-0.02em; }
-    .sell-success p { color:#94a3b8; font-size:1.1rem; max-width:560px; line-height:1.7; margin-bottom:2.5rem; }
-    .sell-success-btns { display:flex; flex-wrap:wrap; gap:1rem; justify-content:center; }
-    .sell-success-btns a { display:inline-flex; align-items:center; justify-content:center; gap:0.6rem;
-      padding:1rem 1.75rem; border-radius:var(--radius-md); font-weight:700; font-size:1.02rem; transition:var(--transition); }
-    .sell-wa { background:#25D366; color:#fff; }
-    .sell-wa:hover { background:#20bd5a; transform:translateY(-1px); }
-
     @media (max-width:768px) {
       .sell-strip-grid { grid-template-columns:1fr 1fr; gap:2rem 1.5rem; }
-      .sell-size-row { flex-direction:column; }
-      .sell-unit { width:100%; }
       .sell-final h2 { font-size:1.75rem; }
-      .sell-success h1 { font-size:2rem; }
+      .sell-cta-card { padding:2.25rem 1.5rem; }
     }
   `;
-
-  if (isSuccess) {
-    return (
-      <>
-        <style dangerouslySetInnerHTML={{ __html: styles }} />
-        <div className="sell-success">
-          <div className="sell-success-ico"><CheckCircle2 size={52} color="#10b981" /></div>
-          <h1>Thank you!</h1>
-          <p>
-            Our team will contact you within 24 hours to complete your listing, including the
-            50-point legal check before we publish it to verified buyers. Want it live faster?
-            Add your full property details now.
-          </p>
-          <div className="sell-success-btns">
-            <a href={QUICK_LIST_URL} className="btn btn-accent">
-              <Map size={20} /> Complete Detailed Listing
-            </a>
-            <a href={WHATSAPP_URL} target="_blank" rel="noopener noreferrer" className="sell-wa">
-              <MessageCircle size={20} /> Chat with Us on WhatsApp
-            </a>
-          </div>
-        </div>
-      </>
-    );
-  }
 
   return (
     <div className="sell-page">
@@ -261,9 +108,9 @@ export default function SellPage() {
           <a href="/" className="navbar-brand" style={{ textDecoration: 'none' }}>
             <img src="/assets/logo.png" alt="A1Plot Logo" className="logo-img" />
           </a>
-          <button className="btn btn-accent sell-nav-cta" onClick={scrollToForm}>
+          <a href={listHref} className="btn btn-accent sell-nav-cta">
             List Your Land Free <ArrowRight size={16} />
-          </button>
+          </a>
         </div>
       </nav>
 
@@ -290,9 +137,9 @@ export default function SellPage() {
             </div>
 
             <div className="flex justify-center gap-4">
-              <button className="btn btn-accent sell-cta-lg" onClick={scrollToForm}>
+              <a href={listHref} className="btn btn-accent sell-cta-lg">
                 Start Listing — Free <ArrowRight size={18} />
-              </button>
+              </a>
             </div>
 
             <div className="hero-stats">
@@ -309,13 +156,13 @@ export default function SellPage() {
         <div className="container">
           <div className="section-header">
             <h2 className="section-title">List in 3 Simple Steps</h2>
-            <p className="text-muted">From form to live listing — we handle the heavy lifting for you.</p>
+            <p className="text-muted">From listing to live — we handle the heavy lifting for you.</p>
           </div>
           <div className="steps-grid">
             <div className="step-card">
               <div className="step-icon"><Clock size={24} /></div>
-              <h3 className="step-title">1. Fill the Form</h3>
-              <p className="step-desc">Share a few details about your land. Takes about 2 minutes — no documents needed to start.</p>
+              <h3 className="step-title">1. Add Your Details</h3>
+              <p className="step-desc">Share a few details about your land on our listing tool. Takes about 2 minutes to get started.</p>
             </div>
             <div className="step-card">
               <div className="step-icon"><Search size={24} /></div>
@@ -355,121 +202,26 @@ export default function SellPage() {
         </div>
       </section>
 
-      {/* 5. Listing Form */}
-      <section id="listing-form" className="section bg-light">
+      {/* 5. List CTA (replaces the embedded form → routes to /quick-list) */}
+      <section id="list-cta" className="section bg-light">
         <div className="container">
           <div className="section-header">
             <h2 className="section-title">List Your Property in 2 Minutes</h2>
-            <p className="text-muted">Our team will verify and publish your listing within 24 hours.</p>
+            <p className="text-muted">Add your land on our secure listing tool. Our team verifies and publishes it within 24 hours.</p>
           </div>
 
-          <div className="sell-form-wrap">
-            <form className="listing-form" onSubmit={handleSubmit} noValidate>
-              {submitError && <div className="sell-form-error-banner">{submitError}</div>}
-
-              <input type="hidden" name="utm_source" value={utms.utm_source} />
-              <input type="hidden" name="utm_medium" value={utms.utm_medium} />
-              <input type="hidden" name="utm_campaign" value={utms.utm_campaign} />
-
-              <div className="form-grid">
-                <div className="form-group">
-                  <label>Full Name <span className="sell-req">*</span></label>
-                  <input className={`form-input ${errors.fullName ? 'has-error' : ''}`} type="text" name="fullName"
-                    value={formData.fullName} onChange={handleChange} placeholder="e.g. Rahul Sharma" />
-                  {errors.fullName && <span className="form-error">{errors.fullName}</span>}
-                </div>
-                <div className="form-group">
-                  <label>Mobile Number <span className="sell-req">*</span></label>
-                  <div className="sell-phone">
-                    <span className="sell-phone-prefix">+91</span>
-                    <input className={`form-input ${errors.mobileNumber ? 'has-error' : ''}`} type="tel" name="mobileNumber"
-                      value={formData.mobileNumber} onChange={handleChange} placeholder="9876543210" maxLength={10} inputMode="numeric" />
-                  </div>
-                  {errors.mobileNumber && <span className="form-error">{errors.mobileNumber}</span>}
-                </div>
-              </div>
-
-              <div className="form-group">
-                <label>Email Address <span className="sell-req">*</span></label>
-                <input className={`form-input ${errors.emailAddress ? 'has-error' : ''}`} type="email" name="emailAddress"
-                  value={formData.emailAddress} onChange={handleChange} placeholder="name@example.com" />
-                {errors.emailAddress && <span className="form-error">{errors.emailAddress}</span>}
-              </div>
-
-              <div className="form-grid">
-                <div className="form-group">
-                  <label>Property Type <span className="sell-req">*</span></label>
-                  <select className={`form-input ${errors.propertyType ? 'has-error' : ''}`} name="propertyType"
-                    value={formData.propertyType} onChange={handleChange}>
-                    <option value="">Select type</option>
-                    <option>Agricultural Land</option>
-                    <option>Residential Plot</option>
-                    <option>Commercial Plot</option>
-                    <option>Farm Land</option>
-                    <option>Other</option>
-                  </select>
-                  {errors.propertyType && <span className="form-error">{errors.propertyType}</span>}
-                </div>
-                <div className="form-group">
-                  <label>Expected Price (₹) <span className="sell-req">*</span></label>
-                  <input className={`form-input ${errors.expectedPrice ? 'has-error' : ''}`} type="number" name="expectedPrice"
-                    value={formData.expectedPrice} onChange={handleChange} placeholder="e.g. 5000000" min="0" />
-                  {errors.expectedPrice && <span className="form-error">{errors.expectedPrice}</span>}
-                </div>
-              </div>
-
-              <div className="form-grid">
-                <div className="form-group">
-                  <label>State <span className="sell-req">*</span></label>
-                  <select className={`form-input ${errors.state ? 'has-error' : ''}`} name="state"
-                    value={formData.state} onChange={handleChange}>
-                    <option value="">Select state</option>
-                    {INDIAN_STATES.map((s) => <option key={s} value={s}>{s}</option>)}
-                  </select>
-                  {errors.state && <span className="form-error">{errors.state}</span>}
-                </div>
-                <div className="form-group">
-                  <label>City / District <span className="sell-req">*</span></label>
-                  <input className={`form-input ${errors.city ? 'has-error' : ''}`} type="text" name="city"
-                    value={formData.city} onChange={handleChange} placeholder="e.g. Jaipur" />
-                  {errors.city && <span className="form-error">{errors.city}</span>}
-                </div>
-              </div>
-
-              <div className="form-group">
-                <label>Plot Size <span className="sell-req">*</span></label>
-                <div className="sell-size-row">
-                  <input className={`form-input ${errors.plotSize ? 'has-error' : ''}`} type="number" name="plotSize"
-                    value={formData.plotSize} onChange={handleChange} placeholder="e.g. 1500" min="0" />
-                  <select className="form-input sell-unit" name="plotSizeUnit" value={formData.plotSizeUnit} onChange={handleChange}>
-                    <option>Sq. Ft.</option>
-                    <option>Sq. Mt.</option>
-                    <option>Bigha</option>
-                    <option>Acres</option>
-                    <option>Guntha</option>
-                  </select>
-                </div>
-                {errors.plotSize && <span className="form-error">{errors.plotSize}</span>}
-              </div>
-
-              <div className="form-group">
-                <label>Additional Details <span className="text-muted" style={{ fontWeight: 400 }}>(optional)</span></label>
-                <textarea className="form-input" name="additionalDetails" rows={3}
-                  value={formData.additionalDetails} onChange={handleChange}
-                  placeholder="Describe road access, water availability, nearby landmarks..." />
-              </div>
-
-              <button type="submit" className="btn btn-accent sell-submit" disabled={isSubmitting}>
-                {isSubmitting ? 'Submitting…' : <>Submit My Property for Free Listing <ArrowRight size={18} /></>}
-              </button>
-
-              <p className="sell-note"><Lock size={14} /> Your details are safe. We never share your data with third parties.</p>
-
-              <p className="sell-alt">
-                Prefer to add full property details yourself?{' '}
-                <a href={QUICK_LIST_URL}>List your property directly →</a>
-              </p>
-            </form>
+          <div className="sell-cta-card">
+            <div className="sell-why-icon" style={{ margin: '0 auto 0.5rem' }}><Map size={26} /></div>
+            <h3 className="step-title" style={{ fontSize: '1.5rem' }}>Start Your Free Listing</h3>
+            <div className="sell-cta-steps">
+              <div className="sell-cta-step"><BadgeCheck size={18} /> 100% free — zero brokerage, zero commission</div>
+              <div className="sell-cta-step"><ShieldCheck size={18} /> 50-point legal verification within 24 hours</div>
+              <div className="sell-cta-step"><Users size={18} /> Reach verified buyers directly across India</div>
+            </div>
+            <a href={listHref} className="btn btn-accent sell-cta-lg" style={{ width: '100%' }}>
+              List My Property — Free <ArrowRight size={18} />
+            </a>
+            <p className="sell-note"><Lock size={14} /> Your details are safe. We never share your data with third parties.</p>
           </div>
         </div>
       </section>
@@ -528,9 +280,9 @@ export default function SellPage() {
           <div className="sell-final">
             <h2>Ready to list your land?</h2>
             <p>Join thousands of owners selling directly to verified buyers — with zero brokerage and full legal verification.</p>
-            <button className="btn btn-accent sell-cta-lg" onClick={scrollToForm}>
+            <a href={listHref} className="btn btn-accent sell-cta-lg">
               List Your Land Free <ArrowRight size={18} />
-            </button>
+            </a>
           </div>
         </div>
       </section>
@@ -550,7 +302,7 @@ export default function SellPage() {
             <div className="footer-links">
               <h4>For Sellers</h4>
               <ul>
-                <li><a onClick={scrollToForm} style={{ cursor: 'pointer' }}>List Your Land</a></li>
+                <li><a href={listHref}>List Your Land</a></li>
                 <li><a href={QUICK_LIST_URL}>Interactive Listing</a></li>
                 <li><a href="/">Browse Plots</a></li>
               </ul>
