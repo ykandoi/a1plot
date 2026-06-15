@@ -2,15 +2,39 @@ rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
 
-    // Plots: anyone can read public listings, authenticated users can create/update
-    match /plots/{plotId} {
-      allow read: if true;
-      allow create: if request.auth != null;
-      allow update: if request.auth != null;
-      allow delete: if request.auth != null;
+    // Admins are identified by their authenticated email (server-enforced,
+    // not just the client-side ADMIN_EMAILS check in the app).
+    function isAdmin() {
+      return request.auth != null
+        && request.auth.token.email in ['kdy20330@gmail.com', 'ykandoi20330@gmail.com'];
     }
 
-    // Interests: users can only read/write their own interests
+    // The signed-in user owns this document.
+    function isOwner() {
+      return request.auth != null
+        && resource.data.ownerUid == request.auth.uid;
+    }
+
+    match /plots/{plotId} {
+      // Listings are public to read.
+      allow read: if true;
+
+      // New listings must start as 'Verification Pending'. Only an admin can
+      // create a listing in any other state — this stops a malicious user from
+      // self-publishing a plot pre-marked 'Verified'.
+      allow create: if isAdmin()
+        || (request.auth != null && request.resource.data.status == 'Verification Pending');
+
+      // Owners may edit their own listing but CANNOT change its verification
+      // status. Only an admin can verify/reject or edit any listing.
+      allow update: if isAdmin()
+        || (isOwner() && request.resource.data.status == resource.data.status);
+
+      // Only an admin or the listing's owner can delete it.
+      allow delete: if isAdmin() || isOwner();
+    }
+
+    // Each user can only read/write their own saved interests.
     match /interests/{userId}/plots/{plotId} {
       allow read, write: if request.auth != null && request.auth.uid == userId;
     }

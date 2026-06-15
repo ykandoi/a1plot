@@ -29,7 +29,10 @@ export async function POST(request) {
     return Response.json({ error: 'Invalid JSON body' }, { status: 400, headers: corsHeaders });
   }
 
-  const { adminEmail, userEmail, userName, plotId, plotTitle, plotLocation, plotPrice, plotSize } = body;
+  // SECURITY: never send to a client-supplied address (that would make this an
+  // open email relay). The recipient is fixed server-side.
+  const { userEmail, userName, plotId, plotTitle, plotLocation, plotPrice, plotSize } = body;
+  const adminEmail = process.env.ADMIN_NOTIFY_EMAIL || 'ykandoi20330@gmail.com';
 
   const smtpUser = process.env.SMTP_USER || process.env.EMAIL_USER;
   const smtpPass = process.env.SMTP_PASS || process.env.EMAIL_PASS;
