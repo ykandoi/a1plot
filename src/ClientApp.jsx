@@ -1332,11 +1332,11 @@ export default function App() {
      SELLER: LISTING FORM
      ============================================ */
   const renderSellerForm = () => (
-    <section className="section bg-white" style={{paddingTop: '6rem'}}>
+    <section className="section bg-white" style={{paddingTop: view === 'direct-list' ? '2rem' : '6rem'}}>
       <div className="container" style={{maxWidth: '800px'}}>
-        <div className="section-header">
-          <h2 className="section-title">{editingPlot ? 'Edit Land Details' : 'List Your Land Parcel'}</h2>
-          <p className="text-muted">{editingPlot ? 'Update your property details below.' : 'Fill in the details below to start the verification process.'}</p>
+        <div className="section-header" style={view === 'direct-list' ? {marginBottom: '1.75rem'} : undefined}>
+          <h2 className="section-title">{editingPlot ? 'Edit Land Details' : (view === 'direct-list' ? 'List Your Land Free' : 'List Your Land Parcel')}</h2>
+          <p className="text-muted">{editingPlot ? 'Update your property details below.' : (view === 'direct-list' ? 'List your land directly on A1Plot and reach verified buyers across India — zero brokerage, a 50-point legal check, and your listing live within 24 hours. Just fill in the short form below to get started.' : 'Fill in the details below to start the verification process.')}</p>
         </div>
         <form className="listing-form" onSubmit={handleListProperty}>
           {view === 'direct-list' && (
@@ -1366,7 +1366,7 @@ export default function App() {
             </div>
           )}
           <div className="form-group mb-8">
-            <label>Plot Title</label>
+            <label>Plot Title <span style={{color: 'var(--accent-red)'}}>*</span></label>
             <input
               type="text"
               placeholder="e.g. Premium Corner Plot in Sarjapur"
@@ -1377,7 +1377,7 @@ export default function App() {
             />
           </div>
           <div className="form-group mb-8">
-            <label>Expected Price (Quotation)</label>
+            <label>Expected Price (Quotation) <span style={{color: 'var(--accent-red)'}}>*</span></label>
             <input
               type="text"
               placeholder="₹ e.g. 45 L or 1.2 Cr"
@@ -1544,7 +1544,7 @@ export default function App() {
           </div>
 
           <div className="form-group mb-8">
-            <label>Plot Size <span style={{fontWeight: 'normal', fontSize: '0.85rem', color: 'var(--text-muted)'}}>(Calculated based on satellite imagery of the location)</span></label>
+            <label>Plot Size <span style={{color: 'var(--accent-red)'}}>*</span> <span style={{fontWeight: 'normal', fontSize: '0.85rem', color: 'var(--text-muted)'}}>(Calculated based on satellite imagery of the location)</span></label>
             <input
               type="text"
               placeholder="e.g. 1,200 m² (Click on the map above in 'Draw Boundary' mode to automatically calculate)"
@@ -2899,7 +2899,7 @@ export default function App() {
           </div>
 
           <div className="form-group mb-8">
-            <label>Plot Size <span style={{fontWeight: 'normal', fontSize: '0.85rem', color: 'var(--text-muted)'}}>(Calculated based on satellite imagery of the location)</span></label>
+            <label>Plot Size <span style={{color: 'var(--accent-red)'}}>*</span> <span style={{fontWeight: 'normal', fontSize: '0.85rem', color: 'var(--text-muted)'}}>(Calculated based on satellite imagery of the location)</span></label>
             <input
               type="text"
               placeholder="e.g. 1,200 m² (Click on the map above in 'Draw Boundary' mode to automatically calculate)"
@@ -3021,7 +3021,7 @@ export default function App() {
           </div>
 
           <div className="form-group mb-8">
-            <label>Plot Title</label>
+            <label>Plot Title <span style={{color: 'var(--accent-red)'}}>*</span></label>
             <input type="text" className="form-input" required value={adminNewPlot.title} onChange={(e) => setAdminNewPlot({...adminNewPlot, title: e.target.value})} />
           </div>
           <div className="form-group mb-8">
