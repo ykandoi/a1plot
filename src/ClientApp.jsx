@@ -953,6 +953,14 @@ export default function App() {
           purchaseDate: new Date().toISOString().split('T')[0]
         };
         await addPlot(plot);
+
+        // Conversion signal for the Leads ad campaign: fire when a NEW listing
+        // is submitted (e.g. via /quick-list). The Meta Pixel base code is
+        // loaded globally in layout.jsx, so window.fbq is available here.
+        if (typeof window !== 'undefined') {
+          if (window.fbq) window.fbq('track', 'Lead');
+          if (window.gtag) window.gtag('event', 'generate_lead', { event_category: 'Seller', event_label: 'Quick List' });
+        }
       }
       setNewPlot({ title: '', location: '', price: '', size: '', features: '', visibility: 'public', khasraNumber: '', district: '', tehsil: '', village: '' });
       setLeadEmail('');
