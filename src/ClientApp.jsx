@@ -8,11 +8,12 @@ import {
   LogOut, User, Mail, Lock, Eye, EyeOff, Settings,
   Shield, Check, X, Menu, Undo, Trash2, Edit3, Heart, Navigation
 } from 'lucide-react';
-import {
-  LineChart, Line, XAxis, YAxis,
-  CartesianGrid, Tooltip, ResponsiveContainer,
-  AreaChart, Area, ReferenceLine
-} from 'recharts';
+import dynamic from 'next/dynamic';
+// Charts use recharts (~0.5MB). Lazy-load them so the library is fetched only
+// when a chart renders — keeping it off the initial bundle / first paint.
+const MiniLineChart = dynamic(() => import('./components/Charts').then(m => m.MiniLineChart), { ssr: false, loading: () => null });
+const PortfolioAreaChart = dynamic(() => import('./components/Charts').then(m => m.PortfolioAreaChart), { ssr: false, loading: () => null });
+const Sparkline = dynamic(() => import('./components/Charts').then(m => m.Sparkline), { ssr: false, loading: () => null });
 import { GoogleMap, useJsApiLoader, MarkerF, InfoWindowF, Autocomplete, PolygonF } from '@react-google-maps/api';
 
 const LIBRARIES = ['places', 'geometry'];
@@ -1177,14 +1178,7 @@ export default function App() {
               </div>
 
               <div style={{height: '200px'}}>
-                <ResponsiveContainer width="100%" height="100%">
-                  <LineChart data={chartData}>
-                    <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#e2e8f0" />
-                    <XAxis dataKey="name" axisLine={false} tickLine={false} dy={10} fontSize={12} fill="#64748b" />
-                    <Tooltip cursor={{ stroke: '#3b7a76', strokeWidth: 2 }} />
-                    <Line type="monotone" dataKey="value" stroke="#10b981" strokeWidth={3} dot={false} />
-                  </LineChart>
-                </ResponsiveContainer>
+                <MiniLineChart data={chartData} />
               </div>
             </div>
           </div>
@@ -1848,28 +1842,7 @@ export default function App() {
                 ))}
               </div>
               <div className="pf-chart-area">
-                <ResponsiveContainer width="100%" height={300}>
-                  <AreaChart data={displayData} margin={{ top: 10, right: 10, left: 0, bottom: 0 }}>
-                    <defs>
-                      <linearGradient id="portfolioGradient" x1="0" y1="0" x2="0" y2="1">
-                        <stop offset="5%" stopColor="#10b981" stopOpacity={0.25} />
-                        <stop offset="95%" stopColor="#10b981" stopOpacity={0.01} />
-                      </linearGradient>
-                    </defs>
-                    <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#e2e8f0" />
-                    <XAxis dataKey="month" axisLine={false} tickLine={false} dy={10} fontSize={11} fill="#94a3b8" interval={'preserveStartEnd'} />
-                    <YAxis domain={[chartMin, chartMax]} hide />
-                    <Tooltip
-                      formatter={chartTooltipFormatter}
-                      contentStyle={{ background: '#0f172a', border: 'none', borderRadius: '8px', color: '#fff', fontSize: '0.85rem', padding: '0.6rem 1rem' }}
-                      labelStyle={{ color: '#94a3b8', marginBottom: '0.25rem' }}
-                      itemStyle={{ color: '#10b981' }}
-                      cursor={{ stroke: '#10b981', strokeWidth: 1, strokeDasharray: '4 4' }}
-                    />
-                    <ReferenceLine y={investedBase} stroke="#94a3b8" strokeDasharray="6 4" strokeWidth={1} />
-                    <Area type="monotone" dataKey="value" stroke="#10b981" strokeWidth={2.5} fill="url(#portfolioGradient)" dot={false} activeDot={{ r: 5, fill: '#10b981', stroke: '#fff', strokeWidth: 2 }} />
-                  </AreaChart>
-                </ResponsiveContainer>
+                <PortfolioAreaChart data={displayData} chartMin={chartMin} chartMax={chartMax} investedBase={investedBase} tooltipFormatter={chartTooltipFormatter} />
               </div>
             </div>
             <div className="pf-chart-map">
@@ -1954,17 +1927,7 @@ export default function App() {
                     </div>
                   </div>
                   <div className="pf-holding-sparkline">
-                    <ResponsiveContainer width={100} height={40}>
-                      <AreaChart data={sparkData} margin={{top:4,right:0,left:0,bottom:4}}>
-                        <defs>
-                          <linearGradient id={`spark-${plot.id}`} x1="0" y1="0" x2="0" y2="1">
-                            <stop offset="5%" stopColor={isPositive ? '#10b981' : '#ef4444'} stopOpacity={0.3} />
-                            <stop offset="95%" stopColor={isPositive ? '#10b981' : '#ef4444'} stopOpacity={0} />
-                          </linearGradient>
-                        </defs>
-                        <Area type="monotone" dataKey="value" stroke={isPositive ? '#10b981' : '#ef4444'} strokeWidth={1.5} fill={`url(#spark-${plot.id})`} dot={false} />
-                      </AreaChart>
-                    </ResponsiveContainer>
+                    <Sparkline data={sparkData} id={plot.id} isPositive={isPositive} />
                   </div>
                   <div className="pf-holding-right">
                     <div className="pf-holding-current">{formatCurrency(plot.currentValue)}</div>
