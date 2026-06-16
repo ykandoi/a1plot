@@ -1,6 +1,6 @@
 import { initializeApp } from 'firebase/app';
 import { getAuth, GoogleAuthProvider } from 'firebase/auth';
-import { getFirestore } from 'firebase/firestore';
+import { initializeFirestore, getFirestore, persistentLocalCache, persistentMultipleTabManager } from 'firebase/firestore';
 import { getStorage } from 'firebase/storage';
 
 const cleanEnv = (val) => val ? String(val).replace(/\\r|\\n|\r|\n|\s/g, '') : undefined;
@@ -19,7 +19,21 @@ let app, auth, googleProvider, db, storage;
 if (firebaseConfig.apiKey && firebaseConfig.apiKey !== 'YOUR_FIREBASE_API_KEY') {
   app = initializeApp(firebaseConfig);
   auth = getAuth(app);
-  db = getFirestore(app, 'default');
+  // Enable on-device (IndexedDB) caching in the browser so listings load
+  // instantly from cache and the app keeps working with no internet.
+  // Falls back to the default in-memory store anywhere window isn't available.
+  if (typeof window !== 'undefined') {
+    try {
+      db = initializeFirestore(app, {
+        localCache: persistentLocalCache({ tabManager: persistentMultipleTabManager() })
+      }, 'default');
+    } catch (e) {
+      // Already initialized, or persistence unsupported (e.g. private mode) — use default.
+      db = getFirestore(app, 'default');
+    }
+  } else {
+    db = getFirestore(app, 'default');
+  }
   storage = getStorage(app);
   googleProvider = new GoogleAuthProvider();
   googleProvider.setCustomParameters({

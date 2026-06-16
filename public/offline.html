@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>A1Plot — Offline</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      min-height: 100vh; display: flex; flex-direction: column;
+      align-items: center; justify-content: center; text-align: center;
+      background: #0f172a; color: #e2e8f0; padding: 2rem;
+      font-family: 'Inter', 'Segoe UI', system-ui, sans-serif;
+    }
+    .logo { display: flex; align-items: center; gap: 10px; margin-bottom: 28px; }
+    .mark {
+      width: 44px; height: 44px; border-radius: 12px;
+      background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+      display: flex; align-items: center; justify-content: center;
+      box-shadow: 0 8px 24px rgba(16,185,129,0.35);
+    }
+    .name { font-size: 26px; font-weight: 800; letter-spacing: -0.5px; color: #fff; }
+    h1 { font-size: 20px; font-weight: 700; margin-bottom: 10px; color: #fff; }
+    p { color: #94a3b8; font-size: 14px; max-width: 360px; line-height: 1.6; margin-bottom: 24px; }
+    button {
+      background: #10b981; color: #fff; border: none; cursor: pointer;
+      padding: 12px 24px; border-radius: 10px; font-size: 15px; font-weight: 700;
+      font-family: inherit; transition: background .2s;
+    }
+    button:hover { background: #059669; }
+  </style>
+</head>
+<body>
+  <div class="logo">
+    <div class="mark">
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/>
+        <polyline points="9 22 9 12 15 12 15 22"/>
+      </svg>
+    </div>
+    <span class="name">A1Plot</span>
+  </div>
+  <h1>You're offline</h1>
+  <p>We couldn't reach the internet. Your recently viewed listings are still available — reconnect to see the latest.</p>
+  <button onclick="location.reload()">Try again</button>
+</body>
+</html>

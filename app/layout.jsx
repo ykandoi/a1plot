@@ -40,6 +40,31 @@ export default function RootLayout({ children }) {
         {/* Link to AI Sitemap/Context */}
         <link rel="llms-txt" type="text/markdown" href="/llms.txt" />
 
+        {/* PWA: installable + offline-capable */}
+        <link rel="manifest" href="/manifest.json" />
+        <meta name="theme-color" content="#10b981" />
+        <meta name="apple-mobile-web-app-capable" content="yes" />
+        <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+
+        {/* Warm up connections to third parties so they resolve faster */}
+        <link rel="preconnect" href="https://firestore.googleapis.com" crossOrigin="" />
+        <link rel="preconnect" href="https://firebasestorage.googleapis.com" crossOrigin="" />
+        <link rel="preconnect" href="https://maps.googleapis.com" crossOrigin="" />
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="" />
+        <link rel="dns-prefetch" href="https://connect.facebook.net" />
+        <link rel="dns-prefetch" href="https://www.googletagmanager.com" />
+
+        {/* Register the service worker (caches the app shell, enables offline) */}
+        <Script id="sw-register" strategy="afterInteractive">
+          {`
+            if ('serviceWorker' in navigator) {
+              window.addEventListener('load', function () {
+                navigator.serviceWorker.register('/sw.js', { updateViaCache: 'none' }).catch(function () {});
+              });
+            }
+          `}
+        </Script>
+
         {/* Meta Pixel Code */}
         <Script id="meta-pixel" strategy="afterInteractive">
           {`
