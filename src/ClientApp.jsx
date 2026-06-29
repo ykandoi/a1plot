@@ -958,37 +958,56 @@ export default function App() {
         if (typeof window !== 'undefined') {
           const parsePriceToNumeric = (priceStr) => {
             if (!priceStr) return 0;
-            let cleaned = priceStr.replace(/[₹,\s]/g, '').trim().toLowerCase();
-            let matches = cleaned.match(/^([\d.]+)\s*(crore|cr|lakh|l|k)?$/);
-            if (!matches) {
-              let numMatch = cleaned.match(/[\d.]+/);
-              return numMatch ? parseFloat(numMatch[0]) : 0;
+            try {
+              let cleaned = String(priceStr).replace(/[₹,\s]/g, '').trim().toLowerCase();
+              let matches = cleaned.match(/^([\d.]+)\s*(crore|cr|lakh|l|k)?$/);
+              if (!matches) {
+                let numMatch = cleaned.match(/[\d.]+/);
+                return numMatch ? parseFloat(numMatch[0]) : 0;
+              }
+              let val = parseFloat(matches[1]);
+              let unit = matches[2];
+              if (unit === 'crore' || unit === 'cr') return val * 10000000;
+              if (unit === 'lakh' || unit === 'l') return val * 100000;
+              if (unit === 'k') return val * 1000;
+              return val;
+            } catch (err) {
+              console.warn('Error parsing price in parsePriceToNumeric:', err);
+              return 0;
             }
-            let val = parseFloat(matches[1]);
-            let unit = matches[2];
-            if (unit === 'crore' || unit === 'cr') return val * 10000000;
-            if (unit === 'lakh' || unit === 'l') return val * 100000;
-            if (unit === 'k') return val * 1000;
-            return val;
           };
 
           const formData = {
             expected_price: parsePriceToNumeric(newPlot.price)
           };
 
-          if (window.fbq) {
-            window.fbq('track', 'CompleteRegistration', {
-              content_name: 'Property Listing Created',
-              currency: 'INR',
-              value: formData.expected_price, // the seller's asking price
-              status: 'listed'
-            });
+          try {
+            if (window.fbq) {
+              window.fbq('track', 'CompleteRegistration', {
+                content_name: 'Property Listing Created',
+                currency: 'INR',
+                value: formData.expected_price, // the seller's asking price
+                status: 'listed'
+              });
+              console.log('CompleteRegistration event tracked successfully with value:', formData.expected_price);
+            } else {
+              console.warn('window.fbq not defined during tracking attempt.');
+            }
+          } catch (err) {
+            console.error('Failed to track CompleteRegistration event:', err);
           }
 
-          if (window.gtag) {
-            window.gtag('event', 'sign_up', {
-              method: 'property_listing_form'
-            });
+          try {
+            if (window.gtag) {
+              window.gtag('event', 'sign_up', {
+                method: 'property_listing_form'
+              });
+              console.log('Google Analytics sign_up event tracked successfully.');
+            } else {
+              console.warn('window.gtag not defined during tracking attempt.');
+            }
+          } catch (err) {
+            console.error('Failed to track sign_up event:', err);
           }
         }
       }
@@ -1003,9 +1022,13 @@ export default function App() {
       
       if (view === 'direct-list') {
         showToast("Property successfully listed! Our admin team will verify it soon.");
-        navigate('home');
+        setTimeout(() => {
+          navigate('home');
+        }, 1500);
       } else {
-        navigate('seller-dashboard');
+        setTimeout(() => {
+          navigate('seller-dashboard');
+        }, 1500);
       }
     } catch (err) {
       console.error('Submit failed:', err);
