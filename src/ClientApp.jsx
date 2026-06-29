@@ -954,12 +954,42 @@ export default function App() {
         };
         await addPlot(plot);
 
-        // Conversion signal for the Leads ad campaign: fire when a NEW listing
-        // is submitted (e.g. via /quick-list). The Meta Pixel base code is
-        // loaded globally in layout.jsx, so window.fbq is available here.
+        // Conversion signal for the property listing form submission
         if (typeof window !== 'undefined') {
-          if (window.fbq) window.fbq('track', 'Lead');
-          if (window.gtag) window.gtag('event', 'generate_lead', { event_category: 'Seller', event_label: 'Quick List' });
+          const parsePriceToNumeric = (priceStr) => {
+            if (!priceStr) return 0;
+            let cleaned = priceStr.replace(/[₹,\s]/g, '').trim().toLowerCase();
+            let matches = cleaned.match(/^([\d.]+)\s*(crore|cr|lakh|l|k)?$/);
+            if (!matches) {
+              let numMatch = cleaned.match(/[\d.]+/);
+              return numMatch ? parseFloat(numMatch[0]) : 0;
+            }
+            let val = parseFloat(matches[1]);
+            let unit = matches[2];
+            if (unit === 'crore' || unit === 'cr') return val * 10000000;
+            if (unit === 'lakh' || unit === 'l') return val * 100000;
+            if (unit === 'k') return val * 1000;
+            return val;
+          };
+
+          const formData = {
+            expected_price: parsePriceToNumeric(newPlot.price)
+          };
+
+          if (window.fbq) {
+            window.fbq('track', 'CompleteRegistration', {
+              content_name: 'Property Listing Created',
+              currency: 'INR',
+              value: formData.expected_price, // the seller's asking price
+              status: 'listed'
+            });
+          }
+
+          if (window.gtag) {
+            window.gtag('event', 'sign_up', {
+              method: 'property_listing_form'
+            });
+          }
         }
       }
       setNewPlot({ title: '', location: '', price: '', size: '', features: '', visibility: 'public', khasraNumber: '', district: '', tehsil: '', village: '' });
