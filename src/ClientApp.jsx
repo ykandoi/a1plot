@@ -95,7 +95,19 @@ const INITIAL_PLOTS = [
     investedAmount: 700000000,
     currentValue: 700000000,
     purchaseDate: '2024-01-01',
-    priceHistory: []
+    priceHistory: [],
+    city: 'Jaipur',
+    transactionType: 'sale',
+    propertyType: 'land',
+    landType: 'converted',
+    landUse: 'institutional',
+    constructedType: 'flat',
+    constructionStatus: 'constructed',
+    budgetRange: '₹70 Crore',
+    facingDirection: 'East',
+    cornerProperty: true,
+    parkFacing: false,
+    roadFacing: true
   },
   {
     id: 2,
@@ -118,7 +130,19 @@ const INITIAL_PLOTS = [
     investedAmount: 72500000,
     currentValue: 72500000,
     purchaseDate: '2024-01-01',
-    priceHistory: []
+    priceHistory: [],
+    city: 'Kota',
+    transactionType: 'sale',
+    propertyType: 'land',
+    landType: 'agriculture',
+    landUse: 'residential',
+    constructedType: 'flat',
+    constructionStatus: 'constructed',
+    budgetRange: '₹7.25 Crore',
+    facingDirection: 'West',
+    cornerProperty: false,
+    parkFacing: false,
+    roadFacing: true
   },
   {
     id: 3,
@@ -140,7 +164,19 @@ const INITIAL_PLOTS = [
     investedAmount: 15000000,
     currentValue: 15000000,
     purchaseDate: '2024-01-01',
-    priceHistory: []
+    priceHistory: [],
+    city: 'Jaipur',
+    transactionType: 'sale',
+    propertyType: 'land',
+    landType: 'agriculture',
+    landUse: 'residential',
+    constructedType: 'flat',
+    constructionStatus: 'constructed',
+    budgetRange: '₹1.5 Crore',
+    facingDirection: 'North',
+    cornerProperty: false,
+    parkFacing: false,
+    roadFacing: false
   },
   {
     id: 4,
@@ -162,7 +198,19 @@ const INITIAL_PLOTS = [
     investedAmount: 220000000,
     currentValue: 220000000,
     purchaseDate: '2024-01-01',
-    priceHistory: []
+    priceHistory: [],
+    city: 'Jaipur',
+    transactionType: 'sale',
+    propertyType: 'land',
+    landType: 'converted',
+    landUse: 'commercial',
+    constructedType: 'flat',
+    constructionStatus: 'constructed',
+    budgetRange: '₹22 Crore',
+    facingDirection: 'South',
+    cornerProperty: true,
+    parkFacing: false,
+    roadFacing: true
   },
   {
     id: 5,
@@ -184,7 +232,19 @@ const INITIAL_PLOTS = [
     investedAmount: 200000000,
     currentValue: 200000000,
     purchaseDate: '2024-01-01',
-    priceHistory: []
+    priceHistory: [],
+    city: 'Bikaner',
+    transactionType: 'sale',
+    propertyType: 'land',
+    landType: 'agriculture',
+    landUse: 'residential',
+    constructedType: 'flat',
+    constructionStatus: 'constructed',
+    budgetRange: '₹20 Crore',
+    facingDirection: 'North',
+    cornerProperty: false,
+    parkFacing: false,
+    roadFacing: false
   }
 ];
 
@@ -290,9 +350,9 @@ export default function App() {
   const [leadPhone, setLeadPhone] = useState('');
   const [directStep, setDirectStep] = useState('landing');
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-  const [newPlot, setNewPlot] = useState({ title: '', location: '', price: '', size: '', features: '', visibility: 'public', khasraNumber: '', state: '', district: '', tehsil: '', village: '' });
+  const [newPlot, setNewPlot] = useState({ title: '', location: '', price: '', size: '', features: '', visibility: 'public', khasraNumber: '', state: '', district: '', tehsil: '', village: '', city: '', transactionType: 'sale', propertyType: 'land', landType: 'converted', landUse: 'residential', constructedType: 'flat', constructionStatus: 'constructed', budgetRange: '', facingDirection: 'East', cornerProperty: false, parkFacing: false, roadFacing: false });
   const [editingPlot, setEditingPlot] = useState(null);
-  const [adminNewPlot, setAdminNewPlot] = useState({ title: '', location: '', price: '', size: '', features: '', visibility: 'public', status: 'Verification Pending', media: [], documentsAvailable: [] });
+  const [adminNewPlot, setAdminNewPlot] = useState({ title: '', location: '', price: '', size: '', features: '', visibility: 'public', status: 'Verification Pending', media: [], documentsAvailable: [], khasraNumber: '', state: '', district: '', tehsil: '', village: '', city: '', transactionType: 'sale', propertyType: 'land', landType: 'converted', landUse: 'residential', constructedType: 'flat', constructionStatus: 'constructed', budgetRange: '', facingDirection: 'East', cornerProperty: false, parkFacing: false, roadFacing: false });
   const [adminEditingPlot, setAdminEditingPlot] = useState(null);
   const [adminTempPin, setAdminTempPin] = useState(null);
   // Store only the plot ID in localStorage to avoid stale cached data
@@ -1011,7 +1071,7 @@ export default function App() {
           }
         }
       }
-      setNewPlot({ title: '', location: '', price: '', size: '', features: '', visibility: 'public', khasraNumber: '', district: '', tehsil: '', village: '' });
+      setNewPlot({ title: '', location: '', price: '', size: '', features: '', visibility: 'public', khasraNumber: '', state: '', district: '', tehsil: '', village: '', city: '', transactionType: 'sale', propertyType: 'land', landType: 'converted', landUse: 'residential', constructedType: 'flat', constructionStatus: 'constructed', budgetRange: '', facingDirection: 'East', cornerProperty: false, parkFacing: false, roadFacing: false });
       setLeadEmail('');
       setLeadPhone('');
       setMediaFiles([]);
@@ -1046,7 +1106,24 @@ export default function App() {
       price: plot.price,
       size: plot.size,
       features: plot.features || '',
-      visibility: plot.visibility || 'public'
+      visibility: plot.visibility || 'public',
+      khasraNumber: plot.khasraNumber || '',
+      state: plot.state || '',
+      district: plot.district || '',
+      tehsil: plot.tehsil || '',
+      village: plot.village || '',
+      city: plot.city || '',
+      transactionType: plot.transactionType || 'sale',
+      propertyType: plot.propertyType || 'land',
+      landType: plot.landType || 'converted',
+      landUse: plot.landUse || 'residential',
+      constructedType: plot.constructedType || 'flat',
+      constructionStatus: plot.constructionStatus || 'constructed',
+      budgetRange: plot.budgetRange || '',
+      facingDirection: plot.facingDirection || 'East',
+      cornerProperty: plot.cornerProperty || false,
+      parkFacing: plot.parkFacing || false,
+      roadFacing: plot.roadFacing || false
     });
     setPlotLocation({ lat: plot.lat, lng: plot.lng });
     if (plot.polygonPath) {
@@ -1074,7 +1151,24 @@ export default function App() {
       visibility: plot.visibility || 'public',
       status: plot.status || 'Verification Pending',
       media: plot.media || (plot.image ? [plot.image] : []),
-      documentsAvailable: plot.documentsAvailable || []
+      documentsAvailable: plot.documentsAvailable || [],
+      khasraNumber: plot.khasraNumber || '',
+      state: plot.state || '',
+      district: plot.district || '',
+      tehsil: plot.tehsil || '',
+      village: plot.village || '',
+      city: plot.city || '',
+      transactionType: plot.transactionType || 'sale',
+      propertyType: plot.propertyType || 'land',
+      landType: plot.landType || 'converted',
+      landUse: plot.landUse || 'residential',
+      constructedType: plot.constructedType || 'flat',
+      constructionStatus: plot.constructionStatus || 'constructed',
+      budgetRange: plot.budgetRange || '',
+      facingDirection: plot.facingDirection || 'East',
+      cornerProperty: plot.cornerProperty || false,
+      parkFacing: plot.parkFacing || false,
+      roadFacing: plot.roadFacing || false
     });
     setPlotLocation({ lat: plot.lat, lng: plot.lng });
     if (plot.polygonPath) {
@@ -1130,11 +1224,55 @@ export default function App() {
         polygonPath: sortedPolygonPath.length > 0 ? sortedPolygonPath : null,
         media: finalMedia,
         image: staticMapUrl || (finalMedia.length > 0 ? finalMedia[0] : (adminEditingPlot.image || '')),
-        documentsAvailable: finalDocs
+        documentsAvailable: finalDocs,
+        state: adminNewPlot.state || '',
+        district: adminNewPlot.district || '',
+        tehsil: adminNewPlot.tehsil || '',
+        village: adminNewPlot.village || '',
+        khasraNumber: adminNewPlot.khasraNumber || '',
+        city: adminNewPlot.city || '',
+        transactionType: adminNewPlot.transactionType || 'sale',
+        propertyType: adminNewPlot.propertyType || 'land',
+        landType: adminNewPlot.landType || 'converted',
+        landUse: adminNewPlot.landUse || 'residential',
+        constructedType: adminNewPlot.constructedType || 'flat',
+        constructionStatus: adminNewPlot.constructionStatus || 'constructed',
+        budgetRange: adminNewPlot.budgetRange || '',
+        facingDirection: adminNewPlot.facingDirection || 'East',
+        cornerProperty: adminNewPlot.cornerProperty || false,
+        parkFacing: adminNewPlot.parkFacing || false,
+        roadFacing: adminNewPlot.roadFacing || false
       });
 
       setAdminEditingPlot(null);
-      setAdminNewPlot({ title: '', location: '', price: '', size: '', features: '', visibility: 'public', status: 'Verification Pending', media: [], documentsAvailable: [] });
+      setAdminNewPlot({
+        title: '',
+        location: '',
+        price: '',
+        size: '',
+        features: '',
+        visibility: 'public',
+        status: 'Verification Pending',
+        media: [],
+        documentsAvailable: [],
+        khasraNumber: '',
+        state: '',
+        district: '',
+        tehsil: '',
+        village: '',
+        city: '',
+        transactionType: 'sale',
+        propertyType: 'land',
+        landType: 'converted',
+        landUse: 'residential',
+        constructedType: 'flat',
+        constructionStatus: 'constructed',
+        budgetRange: '',
+        facingDirection: 'East',
+        cornerProperty: false,
+        parkFacing: false,
+        roadFacing: false
+      });
       setMediaFiles([]);
       setDocFiles([]);
       setPolygonPath([]);
@@ -1441,6 +1579,172 @@ export default function App() {
               value={newPlot.price}
               onChange={(e) => setNewPlot({...newPlot, price: e.target.value})}
             />
+          </div>
+
+          <div className="form-group mb-8">
+            <label>City Location <span style={{color: 'var(--accent-red)'}}>*</span></label>
+            <input
+              type="text"
+              placeholder="e.g. Bangalore, Jaipur, Indore"
+              className="form-input"
+              required
+              value={newPlot.city || ''}
+              onChange={(e) => setNewPlot({...newPlot, city: e.target.value})}
+            />
+          </div>
+
+          <div style={{display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '1.5rem', marginBottom: '1.5rem'}}>
+            <div className="form-group mb-8">
+              <label>Lease or Outright Purchase <span style={{color: 'var(--accent-red)'}}>*</span></label>
+              <select
+                className="form-input"
+                required
+                value={newPlot.transactionType}
+                onChange={(e) => setNewPlot({...newPlot, transactionType: e.target.value})}
+              >
+                <option value="sale">Outright Purchase</option>
+                <option value="lease">Lease</option>
+              </select>
+            </div>
+            <div className="form-group mb-8">
+              <label>Budget Range / Price range <span style={{color: 'var(--accent-red)'}}>*</span></label>
+              <input
+                type="text"
+                placeholder="e.g. ₹50 L - ₹70 L"
+                className="form-input"
+                required
+                value={newPlot.budgetRange || ''}
+                onChange={(e) => setNewPlot({...newPlot, budgetRange: e.target.value})}
+              />
+            </div>
+          </div>
+
+          <div style={{display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '1.5rem', marginBottom: '1.5rem'}}>
+            <div className="form-group mb-8">
+              <label>Property Type <span style={{color: 'var(--accent-red)'}}>*</span></label>
+              <select
+                className="form-input"
+                required
+                value={newPlot.propertyType}
+                onChange={(e) => setNewPlot({...newPlot, propertyType: e.target.value})}
+              >
+                <option value="land">Land</option>
+                <option value="constructed">Constructed Property</option>
+              </select>
+            </div>
+
+            {newPlot.propertyType === 'land' ? (
+              <div className="form-group mb-8">
+                <label>Land Classification <span style={{color: 'var(--accent-red)'}}>*</span></label>
+                <select
+                  className="form-input"
+                  required
+                  value={newPlot.landType}
+                  onChange={(e) => setNewPlot({...newPlot, landType: e.target.value})}
+                >
+                  <option value="converted">Land Converted</option>
+                  <option value="agriculture">Agriculture Land</option>
+                </select>
+              </div>
+            ) : (
+              <div className="form-group mb-8">
+                <label>Construction Status <span style={{color: 'var(--accent-red)'}}>*</span></label>
+                <select
+                  className="form-input"
+                  required
+                  value={newPlot.constructionStatus}
+                  onChange={(e) => setNewPlot({...newPlot, constructionStatus: e.target.value})}
+                >
+                  <option value="constructed">Constructed</option>
+                  <option value="under-construction">Under construction</option>
+                </select>
+              </div>
+            )}
+          </div>
+
+          {newPlot.propertyType === 'land' ? (
+            <div className="form-group mb-8">
+              <label>Land Use Zoning <span style={{color: 'var(--accent-red)'}}>*</span></label>
+              <select
+                className="form-input"
+                required
+                value={newPlot.landUse}
+                onChange={(e) => setNewPlot({...newPlot, landUse: e.target.value})}
+              >
+                <option value="residential">Residential</option>
+                <option value="commercial">Commercial</option>
+                <option value="institutional">Institutional</option>
+                <option value="resort">Resort</option>
+                <option value="industrial">Industrial</option>
+              </select>
+            </div>
+          ) : (
+            <div className="form-group mb-8">
+              <label>Property Subtype <span style={{color: 'var(--accent-red)'}}>*</span></label>
+              <select
+                className="form-input"
+                required
+                value={newPlot.constructedType}
+                onChange={(e) => setNewPlot({...newPlot, constructedType: e.target.value})}
+              >
+                <option value="flat">Flat / Apartment</option>
+                <option value="independent_house_villa">Independent House / Villa</option>
+                <option value="high_rise_apartment">High-rise Apartment</option>
+                <option value="g_plus_building">G+ Building</option>
+                <option value="residential_plot">Residential Plot</option>
+                <option value="commercial_plot">Commercial Plot</option>
+              </select>
+            </div>
+          )}
+
+          <div style={{display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '1.5rem', marginBottom: '1.5rem'}}>
+            <div className="form-group mb-8">
+              <label>Facing Direction <span style={{color: 'var(--accent-red)'}}>*</span></label>
+              <select
+                className="form-input"
+                required
+                value={newPlot.facingDirection}
+                onChange={(e) => setNewPlot({...newPlot, facingDirection: e.target.value})}
+              >
+                <option value="East">East Facing</option>
+                <option value="West">West Facing</option>
+                <option value="North">North Facing</option>
+                <option value="South">South Facing</option>
+              </select>
+            </div>
+            
+            <div className="form-group mb-8">
+              <label>Property Characteristics / Facing Tags</label>
+              <div style={{display: 'flex', gap: '1rem', marginTop: '0.75rem', flexWrap: 'wrap'}}>
+                <label style={{display: 'flex', alignItems: 'center', gap: '0.5rem', cursor: 'pointer', userSelect: 'none'}}>
+                  <input
+                    type="checkbox"
+                    checked={newPlot.cornerProperty || false}
+                    onChange={(e) => setNewPlot({...newPlot, cornerProperty: e.target.checked})}
+                    style={{width: '18px', height: '18px', cursor: 'pointer'}}
+                  />
+                  <span>Corner Property</span>
+                </label>
+                <label style={{display: 'flex', alignItems: 'center', gap: '0.5rem', cursor: 'pointer', userSelect: 'none'}}>
+                  <input
+                    type="checkbox"
+                    checked={newPlot.parkFacing || false}
+                    onChange={(e) => setNewPlot({...newPlot, parkFacing: e.target.checked})}
+                    style={{width: '18px', height: '18px', cursor: 'pointer'}}
+                  />
+                  <span>Park Facing</span>
+                </label>
+                <label style={{display: 'flex', alignItems: 'center', gap: '0.5rem', cursor: 'pointer', userSelect: 'none'}}>
+                  <input
+                    type="checkbox"
+                    checked={newPlot.roadFacing || false}
+                    onChange={(e) => setNewPlot({...newPlot, roadFacing: e.target.checked})}
+                    style={{width: '18px', height: '18px', cursor: 'pointer'}}
+                  />
+                  <span>Road Facing</span>
+                </label>
+              </div>
+            </div>
           </div>
           <div className="form-group mb-8">
             <label>Key Features</label>
@@ -1757,7 +2061,7 @@ export default function App() {
             {editingPlot && (
               <button type="button" className="btn btn-outline" style={{padding: '1rem 2rem'}} onClick={() => {
                 setEditingPlot(null);
-                setNewPlot({ title: '', location: '', price: '', size: '', features: '', visibility: 'public', khasraNumber: '', district: '', tehsil: '', village: '' });
+                setNewPlot({ title: '', location: '', price: '', size: '', features: '', visibility: 'public', khasraNumber: '', state: '', district: '', tehsil: '', village: '', city: '', transactionType: 'sale', propertyType: 'land', landType: 'converted', landUse: 'residential', constructedType: 'flat', constructionStatus: 'constructed', budgetRange: '', facingDirection: 'East', cornerProperty: false, parkFacing: false, roadFacing: false });
                 setMediaFiles([]);
                 setDocFiles([]);
                 navigate('seller-dashboard');
@@ -3061,6 +3365,172 @@ export default function App() {
             <label>Expected Price</label>
             <input type="text" className="form-input" required value={adminNewPlot.price} onChange={(e) => setAdminNewPlot({...adminNewPlot, price: e.target.value})} />
           </div>
+
+          <div className="form-group mb-8">
+            <label>City Location <span style={{color: 'var(--accent-red)'}}>*</span></label>
+            <input
+              type="text"
+              placeholder="e.g. Bangalore, Jaipur, Indore"
+              className="form-input"
+              required
+              value={adminNewPlot.city || ''}
+              onChange={(e) => setAdminNewPlot({...adminNewPlot, city: e.target.value})}
+            />
+          </div>
+
+          <div style={{display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '1.5rem', marginBottom: '1.5rem'}}>
+            <div className="form-group mb-8">
+              <label>Lease or Outright Purchase <span style={{color: 'var(--accent-red)'}}>*</span></label>
+              <select
+                className="form-input"
+                required
+                value={adminNewPlot.transactionType}
+                onChange={(e) => setAdminNewPlot({...adminNewPlot, transactionType: e.target.value})}
+              >
+                <option value="sale">Outright Purchase</option>
+                <option value="lease">Lease</option>
+              </select>
+            </div>
+            <div className="form-group mb-8">
+              <label>Budget Range / Price range <span style={{color: 'var(--accent-red)'}}>*</span></label>
+              <input
+                type="text"
+                placeholder="e.g. ₹50 L - ₹70 L"
+                className="form-input"
+                required
+                value={adminNewPlot.budgetRange || ''}
+                onChange={(e) => setAdminNewPlot({...adminNewPlot, budgetRange: e.target.value})}
+              />
+            </div>
+          </div>
+
+          <div style={{display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '1.5rem', marginBottom: '1.5rem'}}>
+            <div className="form-group mb-8">
+              <label>Property Type <span style={{color: 'var(--accent-red)'}}>*</span></label>
+              <select
+                className="form-input"
+                required
+                value={adminNewPlot.propertyType}
+                onChange={(e) => setAdminNewPlot({...adminNewPlot, propertyType: e.target.value})}
+              >
+                <option value="land">Land</option>
+                <option value="constructed">Constructed Property</option>
+              </select>
+            </div>
+
+            {adminNewPlot.propertyType === 'land' ? (
+              <div className="form-group mb-8">
+                <label>Land Classification <span style={{color: 'var(--accent-red)'}}>*</span></label>
+                <select
+                  className="form-input"
+                  required
+                  value={adminNewPlot.landType}
+                  onChange={(e) => setAdminNewPlot({...adminNewPlot, landType: e.target.value})}
+                >
+                  <option value="converted">Land Converted</option>
+                  <option value="agriculture">Agriculture Land</option>
+                </select>
+              </div>
+            ) : (
+              <div className="form-group mb-8">
+                <label>Construction Status <span style={{color: 'var(--accent-red)'}}>*</span></label>
+                <select
+                  className="form-input"
+                  required
+                  value={adminNewPlot.constructionStatus}
+                  onChange={(e) => setAdminNewPlot({...adminNewPlot, constructionStatus: e.target.value})}
+                >
+                  <option value="constructed">Constructed</option>
+                  <option value="under-construction">Under construction</option>
+                </select>
+              </div>
+            )}
+          </div>
+
+          {adminNewPlot.propertyType === 'land' ? (
+            <div className="form-group mb-8">
+              <label>Land Use Zoning <span style={{color: 'var(--accent-red)'}}>*</span></label>
+              <select
+                className="form-input"
+                required
+                value={adminNewPlot.landUse}
+                onChange={(e) => setAdminNewPlot({...adminNewPlot, landUse: e.target.value})}
+              >
+                <option value="residential">Residential</option>
+                <option value="commercial">Commercial</option>
+                <option value="institutional">Institutional</option>
+                <option value="resort">Resort</option>
+                <option value="industrial">Industrial</option>
+              </select>
+            </div>
+          ) : (
+            <div className="form-group mb-8">
+              <label>Property Subtype <span style={{color: 'var(--accent-red)'}}>*</span></label>
+              <select
+                className="form-input"
+                required
+                value={adminNewPlot.constructedType}
+                onChange={(e) => setAdminNewPlot({...adminNewPlot, constructedType: e.target.value})}
+              >
+                <option value="flat">Flat / Apartment</option>
+                <option value="independent_house_villa">Independent House / Villa</option>
+                <option value="high_rise_apartment">High-rise Apartment</option>
+                <option value="g_plus_building">G+ Building</option>
+                <option value="residential_plot">Residential Plot</option>
+                <option value="commercial_plot">Commercial Plot</option>
+              </select>
+            </div>
+          )}
+
+          <div style={{display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '1.5rem', marginBottom: '1.5rem'}}>
+            <div className="form-group mb-8">
+              <label>Facing Direction <span style={{color: 'var(--accent-red)'}}>*</span></label>
+              <select
+                className="form-input"
+                required
+                value={adminNewPlot.facingDirection}
+                onChange={(e) => setAdminNewPlot({...adminNewPlot, facingDirection: e.target.value})}
+              >
+                <option value="East">East Facing</option>
+                <option value="West">West Facing</option>
+                <option value="North">North Facing</option>
+                <option value="South">South Facing</option>
+              </select>
+            </div>
+            
+            <div className="form-group mb-8">
+              <label>Property Characteristics / Facing Tags</label>
+              <div style={{display: 'flex', gap: '1rem', marginTop: '0.75rem', flexWrap: 'wrap'}}>
+                <label style={{display: 'flex', alignItems: 'center', gap: '0.5rem', cursor: 'pointer', userSelect: 'none'}}>
+                  <input
+                    type="checkbox"
+                    checked={adminNewPlot.cornerProperty || false}
+                    onChange={(e) => setAdminNewPlot({...adminNewPlot, cornerProperty: e.target.checked})}
+                    style={{width: '18px', height: '18px', cursor: 'pointer'}}
+                  />
+                  <span>Corner Property</span>
+                </label>
+                <label style={{display: 'flex', alignItems: 'center', gap: '0.5rem', cursor: 'pointer', userSelect: 'none'}}>
+                  <input
+                    type="checkbox"
+                    checked={adminNewPlot.parkFacing || false}
+                    onChange={(e) => setAdminNewPlot({...adminNewPlot, parkFacing: e.target.checked})}
+                    style={{width: '18px', height: '18px', cursor: 'pointer'}}
+                  />
+                  <span>Park Facing</span>
+                </label>
+                <label style={{display: 'flex', alignItems: 'center', gap: '0.5rem', cursor: 'pointer', userSelect: 'none'}}>
+                  <input
+                    type="checkbox"
+                    checked={adminNewPlot.roadFacing || false}
+                    onChange={(e) => setAdminNewPlot({...adminNewPlot, roadFacing: e.target.checked})}
+                    style={{width: '18px', height: '18px', cursor: 'pointer'}}
+                  />
+                  <span>Road Facing</span>
+                </label>
+              </div>
+            </div>
+          </div>
           <div className="form-group mb-8">
             <label>Status</label>
             <select className="form-input" value={adminNewPlot.status} onChange={(e) => setAdminNewPlot({...adminNewPlot, status: e.target.value})}>
@@ -3510,6 +3980,104 @@ export default function App() {
                   <div style={{fontSize: '2.5rem', fontWeight: 800, color: 'var(--primary)', lineHeight: '1'}}>{plot.price}</div>
                   <div style={{fontSize: '1rem', color: 'var(--text-muted)', marginTop: '0.5rem'}}>Size: {plot.size}</div>
                 </div>
+              </div>
+
+              {/* Property Specifications Grid */}
+              <div style={{
+                marginTop: '2rem',
+                padding: '1.5rem',
+                background: '#f8fafc',
+                borderRadius: '0.75rem',
+                border: '1px solid #e2e8f0',
+                display: 'grid',
+                gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
+                gap: '1.5rem',
+                boxShadow: 'inset 0 1px 3px rgba(0,0,0,0.02)',
+                textAlign: 'left'
+              }}>
+                <div>
+                  <span style={{fontSize: '0.8rem', textTransform: 'uppercase', color: '#64748b', display: 'block', fontWeight: 600, letterSpacing: '0.05em', marginBottom: '0.25rem'}}>City Location</span>
+                  <span style={{fontSize: '1.05rem', fontWeight: 700, color: '#1e293b'}}>{plot.city || 'Not Specified'}</span>
+                </div>
+                <div>
+                  <span style={{fontSize: '0.8rem', textTransform: 'uppercase', color: '#64748b', display: 'block', fontWeight: 600, letterSpacing: '0.05em', marginBottom: '0.25rem'}}>Transaction Type</span>
+                  <span style={{fontSize: '1.05rem', fontWeight: 700, color: '#1e293b'}}>
+                    {plot.transactionType === 'lease' ? 'Lease' : 'Outright Purchase'}
+                  </span>
+                </div>
+                <div>
+                  <span style={{fontSize: '0.8rem', textTransform: 'uppercase', color: '#64748b', display: 'block', fontWeight: 600, letterSpacing: '0.05em', marginBottom: '0.25rem'}}>Property Classification</span>
+                  <span style={{fontSize: '1.05rem', fontWeight: 700, color: '#1e293b'}}>
+                    {plot.propertyType === 'constructed' ? 'Constructed Property' : 'Land Parcel'}
+                  </span>
+                </div>
+                {plot.propertyType === 'constructed' ? (
+                  <>
+                    <div>
+                      <span style={{fontSize: '0.8rem', textTransform: 'uppercase', color: '#64748b', display: 'block', fontWeight: 600, letterSpacing: '0.05em', marginBottom: '0.25rem'}}>Property Subtype</span>
+                      <span style={{fontSize: '1.05rem', fontWeight: 700, color: '#1e293b'}}>
+                        {plot.constructedType === 'flat' && 'Flat / Apartment'}
+                        {plot.constructedType === 'independent_house_villa' && 'Independent House / Villa'}
+                        {plot.constructedType === 'high_rise_apartment' && 'High-rise Apartment'}
+                        {plot.constructedType === 'g_plus_building' && 'G+ Building'}
+                        {plot.constructedType === 'residential_plot' && 'Residential Plot'}
+                        {plot.constructedType === 'commercial_plot' && 'Commercial Plot'}
+                        {!['flat', 'independent_house_villa', 'high_rise_apartment', 'g_plus_building', 'residential_plot', 'commercial_plot'].includes(plot.constructedType) && (plot.constructedType || 'Constructed')}
+                      </span>
+                    </div>
+                    <div>
+                      <span style={{fontSize: '0.8rem', textTransform: 'uppercase', color: '#64748b', display: 'block', fontWeight: 600, letterSpacing: '0.05em', marginBottom: '0.25rem'}}>Construction Status</span>
+                      <span style={{fontSize: '1.05rem', fontWeight: 700, color: '#1e293b'}}>
+                        {plot.constructionStatus === 'under-construction' ? 'Under Construction' : 'Constructed / Ready'}
+                      </span>
+                    </div>
+                  </>
+                ) : (
+                  <>
+                    <div>
+                      <span style={{fontSize: '0.8rem', textTransform: 'uppercase', color: '#64748b', display: 'block', fontWeight: 600, letterSpacing: '0.05em', marginBottom: '0.25rem'}}>Land Classification</span>
+                      <span style={{fontSize: '1.05rem', fontWeight: 700, color: '#1e293b'}}>
+                        {plot.landType === 'agriculture' ? 'Agriculture Land' : 'Land Converted'}
+                      </span>
+                    </div>
+                    <div>
+                      <span style={{fontSize: '0.8rem', textTransform: 'uppercase', color: '#64748b', display: 'block', fontWeight: 600, letterSpacing: '0.05em', marginBottom: '0.25rem'}}>Land Zoning / Use</span>
+                      <span style={{fontSize: '1.05rem', fontWeight: 700, color: '#1e293b', textTransform: 'capitalize'}}>
+                        {plot.landUse || 'Residential'}
+                      </span>
+                    </div>
+                  </>
+                )}
+                <div>
+                  <span style={{fontSize: '0.8rem', textTransform: 'uppercase', color: '#64748b', display: 'block', fontWeight: 600, letterSpacing: '0.05em', marginBottom: '0.25rem'}}>Budget / Asking Range</span>
+                  <span style={{fontSize: '1.05rem', fontWeight: 700, color: '#1e293b'}}>{plot.budgetRange || plot.price}</span>
+                </div>
+                <div>
+                  <span style={{fontSize: '0.8rem', textTransform: 'uppercase', color: '#64748b', display: 'block', fontWeight: 600, letterSpacing: '0.05em', marginBottom: '0.25rem'}}>Facing Direction</span>
+                  <span style={{fontSize: '1.05rem', fontWeight: 700, color: '#1e293b'}}>{plot.facingDirection || 'East'} Facing</span>
+                </div>
+                {(plot.cornerProperty || plot.parkFacing || plot.roadFacing) && (
+                  <div style={{gridColumn: '1 / -1'}}>
+                    <span style={{fontSize: '0.8rem', textTransform: 'uppercase', color: '#64748b', display: 'block', fontWeight: 600, letterSpacing: '0.05em', marginBottom: '0.5rem'}}>Property Tags</span>
+                    <div style={{display: 'flex', gap: '0.5rem', flexWrap: 'wrap'}}>
+                      {plot.cornerProperty && (
+                        <span style={{background: '#eff6ff', color: '#1d4ed8', border: '1px solid #bfdbfe', padding: '0.25rem 0.75rem', borderRadius: '2rem', fontSize: '0.85rem', fontWeight: 600}}>
+                          📐 Corner Property
+                        </span>
+                      )}
+                      {plot.parkFacing && (
+                        <span style={{background: '#f0fdf4', color: '#15803d', border: '1px solid #bbf7d0', padding: '0.25rem 0.75rem', borderRadius: '2rem', fontSize: '0.85rem', fontWeight: 600}}>
+                          🌳 Park Facing
+                        </span>
+                      )}
+                      {plot.roadFacing && (
+                        <span style={{background: '#fdf2f8', color: '#c01574', border: '1px solid #fbcfe8', padding: '0.25rem 0.75rem', borderRadius: '2rem', fontSize: '0.85rem', fontWeight: 600}}>
+                          🛣️ Road Facing
+                        </span>
+                      )}
+                    </div>
+                  </div>
+                )}
               </div>
 
               <div style={{display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '2rem', marginTop: '3rem'}}>
