@@ -464,6 +464,83 @@ export default function App() {
       localStorage.setItem('contacted_plots', JSON.stringify(contactedPlots));
     } catch (e) {}
   }, [contactedPlots]);
+
+  // Contact Agent form state
+  const [contactName, setContactName] = useState('');
+  const [contactEmail, setContactEmail] = useState('');
+  const [contactPhone, setContactPhone] = useState('');
+  const [contactMessage, setContactMessage] = useState('');
+  const [contactSubmitting, setContactSubmitting] = useState(false);
+  const [contactSuccess, setContactSuccess] = useState(false);
+
+  // Buy Request (docs request) form state
+  const [buyRequestQuery, setBuyRequestQuery] = useState('');
+  const [buyRequestSubmitting, setBuyRequestSubmitting] = useState(false);
+  const [buyRequestSuccess, setBuyRequestSuccess] = useState(false);
+  const [buyRequestDocs, setBuyRequestDocs] = useState(['titleDeed', 'ec']);
+
+  const handleContactSubmit = async (e) => {
+    e.preventDefault();
+    setContactSubmitting(true);
+    try {
+      await fetch('/api/send-email', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          formType: 'contact',
+          userName: contactName,
+          userEmail: contactEmail,
+          userPhone: contactPhone,
+          message: contactMessage,
+        }),
+      });
+      setContactSuccess(true);
+      setContactName(''); setContactEmail(''); setContactPhone(''); setContactMessage('');
+      setTimeout(() => { setContactSuccess(false); navigate('home'); }, 3000);
+    } catch (err) {
+      console.error('Contact form error:', err);
+    } finally {
+      setContactSubmitting(false);
+    }
+  };
+
+  const handleBuyRequestSubmit = async (e) => {
+    e.preventDefault();
+    if (!legalAgreed) return;
+    setBuyRequestSubmitting(true);
+    const docLabels = {
+      titleDeed: 'Title Deed',
+      ec: 'Encumbrance Certificate (EC)',
+      layoutPlan: 'Layout Plan',
+      khata: 'Khata Certificate',
+    };
+    const selectedDocs = buyRequestDocs.map(d => docLabels[d] || d).join(', ');
+    try {
+      await fetch('/api/send-email', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          formType: 'buyRequest',
+          userName: user?.displayName || user?.email?.split('@')[0] || 'Buyer',
+          userEmail: user?.email || '',
+          plotId: requestingDocsFor?.id,
+          plotTitle: requestingDocsFor?.title,
+          plotLocation: requestingDocsFor?.location,
+          plotPrice: requestingDocsFor?.price,
+          plotSize: requestingDocsFor?.size,
+          requestedDocs: selectedDocs,
+          specificQuery: buyRequestQuery,
+        }),
+      });
+      setBuyRequestSuccess(true);
+      setBuyRequestQuery('');
+      setTimeout(() => { setBuyRequestSuccess(false); navigate('interested'); }, 3000);
+    } catch (err) {
+      console.error('Buy request form error:', err);
+    } finally {
+      setBuyRequestSubmitting(false);
+    }
+  };
   const { interestedPlots, addInterest, removeInterest } = useInterests(user?.uid);
   const [authLoading, setAuthLoading] = useState(true);
   const [authMode, setAuthMode] = useState('login'); // 'login' or 'signup'
@@ -2628,25 +2705,35 @@ export default function App() {
           <h2 className="section-title">Contact Our Agent</h2>
           <p className="text-muted">Leave your details and our team will get back to you within 24 hours.</p>
         </div>
-        <form className="listing-form" onSubmit={(e) => { e.preventDefault(); alert('Message sent! Our agent will contact you shortly.'); navigate('home'); }}>
-          <div className="form-group mb-8">
-            <label>Full Name</label>
-            <input type="text" className="form-input" placeholder="Your full name" required />
+        {contactSuccess ? (
+          <div style={{background: '#f0fdf4', border: '1px solid #bbf7d0', borderRadius: '0.75rem', padding: '2rem', textAlign: 'center'}}>
+            <div style={{fontSize: '2.5rem', marginBottom: '0.75rem'}}>✅</div>
+            <h3 style={{color: '#166534', fontWeight: 700, marginBottom: '0.5rem'}}>Message Sent!</h3>
+            <p style={{color: '#15803d'}}>Our agent will contact you within 24 hours. Redirecting you home…</p>
           </div>
-          <div className="form-group mb-8">
-            <label>Email Address</label>
-            <input type="email" className="form-input" placeholder="you@example.com" required />
-          </div>
-          <div className="form-group mb-8">
-            <label>Phone Number</label>
-            <input type="tel" className="form-input" placeholder="+91 98765 43210" />
-          </div>
-          <div className="form-group mb-12">
-            <label>Message</label>
-            <textarea className="form-input" rows="4" placeholder="I'm interested in investing in land parcels..."></textarea>
-          </div>
-          <button type="submit" className="btn btn-primary w-full" style={{padding: '1rem'}}>Send Message</button>
-        </form>
+        ) : (
+          <form className="listing-form" onSubmit={handleContactSubmit}>
+            <div className="form-group mb-8">
+              <label>Full Name <span style={{color: 'var(--accent-red)'}}>*</span></label>
+              <input type="text" className="form-input" placeholder="Your full name" required value={contactName} onChange={e => setContactName(e.target.value)} />
+            </div>
+            <div className="form-group mb-8">
+              <label>Email Address <span style={{color: 'var(--accent-red)'}}>*</span></label>
+              <input type="email" className="form-input" placeholder="you@example.com" required value={contactEmail} onChange={e => setContactEmail(e.target.value)} />
+            </div>
+            <div className="form-group mb-8">
+              <label>Phone Number</label>
+              <input type="tel" className="form-input" placeholder="+91 98765 43210" value={contactPhone} onChange={e => setContactPhone(e.target.value)} />
+            </div>
+            <div className="form-group mb-12">
+              <label>Message</label>
+              <textarea className="form-input" rows="4" placeholder="I'm interested in investing in land parcels..." value={contactMessage} onChange={e => setContactMessage(e.target.value)}></textarea>
+            </div>
+            <button type="submit" className="btn btn-primary w-full" style={{padding: '1rem', opacity: contactSubmitting ? 0.7 : 1}} disabled={contactSubmitting}>
+              {contactSubmitting ? 'Sending…' : 'Send Message'}
+            </button>
+          </form>
+        )}
       </div>
     </section>
   );
@@ -2996,44 +3083,60 @@ export default function App() {
           </div>
         </div>
 
-        <form className="listing-form" onSubmit={(e) => { e.preventDefault(); alert('Request sent! Our buying agent will prepare the documents for you.'); navigate('interested'); }}>
-          <div className="form-group mb-8">
-            <label>Select Documents Needed</label>
-            <div className="flex gap-4" style={{flexWrap: 'wrap', marginTop: '0.5rem'}}>
-              <label className="flex items-center gap-2" style={{cursor: 'pointer'}}><input type="checkbox" defaultChecked /> Title Deed</label>
-              <label className="flex items-center gap-2" style={{cursor: 'pointer'}}><input type="checkbox" defaultChecked /> Encumbrance Certificate (EC)</label>
-              <label className="flex items-center gap-2" style={{cursor: 'pointer'}}><input type="checkbox" /> Layout Plan</label>
-              <label className="flex items-center gap-2" style={{cursor: 'pointer'}}><input type="checkbox" /> Khata Certificate</label>
+        {buyRequestSuccess ? (
+          <div style={{background: '#f0fdf4', border: '1px solid #bbf7d0', borderRadius: '0.75rem', padding: '2rem', textAlign: 'center', marginTop: '1.5rem'}}>
+            <div style={{fontSize: '2.5rem', marginBottom: '0.75rem'}}>✅</div>
+            <h3 style={{color: '#166534', fontWeight: 700, marginBottom: '0.5rem'}}>Request Sent!</h3>
+            <p style={{color: '#15803d'}}>Our buying agent has been notified and will prepare the documents for you. Redirecting…</p>
+          </div>
+        ) : (
+          <form className="listing-form" onSubmit={handleBuyRequestSubmit}>
+            <div className="form-group mb-8">
+              <label>Select Documents Needed</label>
+              <div className="flex gap-4" style={{flexWrap: 'wrap', marginTop: '0.5rem'}}>
+                <label className="flex items-center gap-2" style={{cursor: 'pointer'}}>
+                  <input type="checkbox" checked={buyRequestDocs.includes('titleDeed')} onChange={e => setBuyRequestDocs(prev => e.target.checked ? [...prev, 'titleDeed'] : prev.filter(d => d !== 'titleDeed'))} /> Title Deed
+                </label>
+                <label className="flex items-center gap-2" style={{cursor: 'pointer'}}>
+                  <input type="checkbox" checked={buyRequestDocs.includes('ec')} onChange={e => setBuyRequestDocs(prev => e.target.checked ? [...prev, 'ec'] : prev.filter(d => d !== 'ec'))} /> Encumbrance Certificate (EC)
+                </label>
+                <label className="flex items-center gap-2" style={{cursor: 'pointer'}}>
+                  <input type="checkbox" checked={buyRequestDocs.includes('layoutPlan')} onChange={e => setBuyRequestDocs(prev => e.target.checked ? [...prev, 'layoutPlan'] : prev.filter(d => d !== 'layoutPlan'))} /> Layout Plan
+                </label>
+                <label className="flex items-center gap-2" style={{cursor: 'pointer'}}>
+                  <input type="checkbox" checked={buyRequestDocs.includes('khata')} onChange={e => setBuyRequestDocs(prev => e.target.checked ? [...prev, 'khata'] : prev.filter(d => d !== 'khata'))} /> Khata Certificate
+                </label>
+              </div>
             </div>
-          </div>
-          <div className="form-group mb-12">
-            <label>Any Specific Queries?</label>
-            <textarea className="form-input" rows="3" placeholder="Is the property bank approved? What are the payment terms?"></textarea>
-          </div>
+            <div className="form-group mb-12">
+              <label>Any Specific Queries?</label>
+              <textarea className="form-input" rows="3" placeholder="Is the property bank approved? What are the payment terms?" value={buyRequestQuery} onChange={e => setBuyRequestQuery(e.target.value)}></textarea>
+            </div>
 
-          {/* Legal Agreement */}
-          <div className="legal-agreement-box">
-            <label className="legal-agreement-label">
-              <input
-                type="checkbox"
-                checked={legalAgreed}
-                onChange={e => setLegalAgreed(e.target.checked)}
-                style={{flexShrink: 0, marginTop: '2px'}}
-              />
-              <span>
-                I agree that any transaction for this property will be conducted <strong>exclusively through A1Plot</strong>.
-                I understand that bypassing the platform may result in legal action and a penalty fee as per the platform's terms.
-              </span>
-            </label>
-          </div>
+            {/* Legal Agreement */}
+            <div className="legal-agreement-box">
+              <label className="legal-agreement-label">
+                <input
+                  type="checkbox"
+                  checked={legalAgreed}
+                  onChange={e => setLegalAgreed(e.target.checked)}
+                  style={{flexShrink: 0, marginTop: '2px'}}
+                />
+                <span>
+                  I agree that any transaction for this property will be conducted <strong>exclusively through A1Plot</strong>.
+                  I understand that bypassing the platform may result in legal action and a penalty fee as per the platform's terms.
+                </span>
+              </label>
+            </div>
 
-          <div className="flex gap-4">
-            <button type="button" className="btn btn-outline" onClick={() => navigate('interested')}>Back</button>
-            <button type="submit" className="btn btn-primary" style={{flex: 1, opacity: legalAgreed ? 1 : 0.5, cursor: legalAgreed ? 'pointer' : 'not-allowed'}} disabled={!legalAgreed}>
-              Submit Request to Buying Agent
-            </button>
-          </div>
-        </form>
+            <div className="flex gap-4">
+              <button type="button" className="btn btn-outline" onClick={() => navigate('interested')}>Back</button>
+              <button type="submit" className="btn btn-primary" style={{flex: 1, opacity: legalAgreed && !buyRequestSubmitting ? 1 : 0.5, cursor: legalAgreed && !buyRequestSubmitting ? 'pointer' : 'not-allowed'}} disabled={!legalAgreed || buyRequestSubmitting}>
+                {buyRequestSubmitting ? 'Submitting…' : 'Submit Request to Buying Agent'}
+              </button>
+            </div>
+          </form>
+        )}
       </div>
     </section>
   );
