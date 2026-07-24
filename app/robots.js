@@ -9,7 +9,7 @@ export default function robots() {
   return {
     rules: [
       // Keep auth-gated / private app screens out of the index.
-      { userAgent: '*', allow: '/', disallow: ['/admin', '/admin_edit', '/admin_map', '/dashboard', '/edit_property', '/login', '/interests', '/broker-dashboard'] },
+      { userAgent: '*', allow: '/', disallow: ['/admin', '/admin_edit', '/admin_map', '/dashboard', '/edit_property', '/login', '/interests', '/buy_request'] },
       ...aiAgents.map(userAgent => ({ userAgent, allow: '/' })),
     ],
     sitemap: `${BASE}/sitemap.xml`,

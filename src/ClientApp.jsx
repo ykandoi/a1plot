@@ -326,7 +326,12 @@ const autocompleteOptions = {
   types: ['geocode', 'establishment']
 };
 
-export default function App() {
+// `hideChrome` — used when this component is mounted as a client island inside
+// a real server-rendered page (see e.g. app/list_property/page.jsx): the outer
+// SSR page already provides a real <nav>/<footer> for crawlers, so ClientApp
+// must not render its OWN copy on top of it. Purely additive — doesn't touch
+// any of the actual form/business logic below.
+export default function App({ hideChrome = false } = {}) {
   // Clear any stale localStorage keys from old code versions
   try { localStorage.removeItem('selected_property_detail'); } catch(e) {}
 
@@ -4579,33 +4584,37 @@ export default function App() {
       display: 'flex',
       flexDirection: 'column'
     }}>
-      {/* Minimal branded header — no nav links */}
-      <header style={{
-        borderBottom: '1px solid var(--border-color)',
-        backgroundColor: 'var(--surface)',
-        padding: '1rem 2rem',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        position: 'sticky',
-        top: 0,
-        zIndex: 50,
-        boxShadow: 'var(--shadow-sm)'
-      }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
-          <img src="/assets/logo.png" alt="A1Plot" style={{ height: '44px', width: 'auto', objectFit: 'contain' }} onError={e => { e.target.style.display = 'none'; }} />
-          <span style={{ fontSize: '1.6rem', fontWeight: 800, color: 'var(--primary)', letterSpacing: '-0.02em' }}>A1Plot</span>
-          <span style={{
-            backgroundColor: 'rgba(16, 185, 129, 0.1)',
-            color: 'var(--accent-green)',
-            border: '1px solid rgba(16, 185, 129, 0.2)',
-            fontSize: '0.72rem',
-            fontWeight: 600,
-            padding: '0.2rem 0.65rem',
-            borderRadius: 'var(--radius-full)'
-          }}>Direct Listing — No Sign-In Required</span>
-        </div>
-      </header>
+      {/* Minimal branded header — no nav links. Suppressed when mounted inside
+          a real SSR page shell, which already provides a real header for
+          crawlers (see e.g. app/direct-list/page.jsx). */}
+      {!hideChrome && (
+        <header style={{
+          borderBottom: '1px solid var(--border-color)',
+          backgroundColor: 'var(--surface)',
+          padding: '1rem 2rem',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          position: 'sticky',
+          top: 0,
+          zIndex: 50,
+          boxShadow: 'var(--shadow-sm)'
+        }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+            <img src="/assets/logo.png" alt="A1Plot" style={{ height: '44px', width: 'auto', objectFit: 'contain' }} onError={e => { e.target.style.display = 'none'; }} />
+            <span style={{ fontSize: '1.6rem', fontWeight: 800, color: 'var(--primary)', letterSpacing: '-0.02em' }}>A1Plot</span>
+            <span style={{
+              backgroundColor: 'rgba(16, 185, 129, 0.1)',
+              color: 'var(--accent-green)',
+              border: '1px solid rgba(16, 185, 129, 0.2)',
+              fontSize: '0.72rem',
+              fontWeight: 600,
+              padding: '0.2rem 0.65rem',
+              borderRadius: 'var(--radius-full)'
+            }}>Direct Listing — No Sign-In Required</span>
+          </div>
+        </header>
+      )}
 
       {/* The full seller form — exact same as main site */}
       <main style={{ flex: 1 }}>
@@ -4613,17 +4622,19 @@ export default function App() {
       </main>
 
       {/* Simple footer */}
-      <footer style={{
-        borderTop: '1px solid var(--border-color)',
-        backgroundColor: 'var(--surface)',
-        padding: '2rem 1rem',
-        textAlign: 'center',
-        color: 'var(--text-muted)',
-        fontSize: '0.82rem'
-      }}>
-        <p>\u00A9 {new Date().getFullYear()} A1Plot \u2014 India's Premium Land Investment Platform</p>
-        <p style={{ marginTop: '0.4rem', fontSize: '0.75rem' }}>Your listing is reviewed and verified by our admin team before going live.</p>
-      </footer>
+      {!hideChrome && (
+        <footer style={{
+          borderTop: '1px solid var(--border-color)',
+          backgroundColor: 'var(--surface)',
+          padding: '2rem 1rem',
+          textAlign: 'center',
+          color: 'var(--text-muted)',
+          fontSize: '0.82rem'
+        }}>
+          <p>&copy; {new Date().getFullYear()} A1Plot — India's Premium Land Investment Platform</p>
+          <p style={{ marginTop: '0.4rem', fontSize: '0.75rem' }}>Your listing is reviewed and verified by our admin team before going live.</p>
+        </footer>
+      )}
     </div>
   );
 
@@ -4651,7 +4662,10 @@ export default function App() {
 
   return (
     <>
-      {/* Navbar — matches the site-wide SiteChrome header (logo + search + CTA) */}
+      {/* Navbar — matches the site-wide SiteChrome header (logo + search + CTA).
+          Suppressed when mounted as a client island inside a real SSR page
+          shell, which already renders its own real <nav> for crawlers. */}
+      {!hideChrome && (
       <nav className="navbar sc-navbar">
         <div className="container sc-navbar-inner">
           <a href="/" className="navbar-brand sc-brand" aria-label="A1Plot home">
@@ -4770,6 +4784,7 @@ export default function App() {
           </div>
         )}
       </nav>
+      )}
 
       <main>
         {view === 'home' && renderHome()}
@@ -4823,7 +4838,7 @@ export default function App() {
           </div>
         </div>
       )}
-      {view !== 'login' && (
+      {!hideChrome && view !== 'login' && (
         <footer>
           <div className="container">
             <div className="footer-grid">

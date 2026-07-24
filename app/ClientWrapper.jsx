@@ -32,6 +32,6 @@ const ClientApp = dynamic(() => import('../src/ClientApp'), {
   loading: () => <AppLoader />,
 });
 
-export default function ClientWrapper() {
-  return <ClientApp />;
+export default function ClientWrapper({ hideChrome = false } = {}) {
+  return <ClientApp hideChrome={hideChrome} />;
 }
