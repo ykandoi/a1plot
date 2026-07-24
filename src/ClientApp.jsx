@@ -1703,12 +1703,19 @@ export default function App({ hideChrome = false } = {}) {
      SELLER: LISTING FORM
      ============================================ */
   const renderSellerForm = () => (
-    <section className="section bg-white" style={{paddingTop: view === 'direct-list' ? '2rem' : '6rem'}}>
+    <section className="section bg-white" style={{paddingTop: hideChrome ? '1.5rem' : (view === 'direct-list' ? '2rem' : '6rem')}}>
       <div className="container" style={{maxWidth: '800px'}}>
-        <div className="section-header" style={view === 'direct-list' ? {marginBottom: '1.75rem'} : undefined}>
-          <h2 className="section-title">{editingPlot ? 'Edit Land Details' : (view === 'direct-list' ? 'List Your Land Free' : 'List Your Land Parcel')}</h2>
-          <p className="text-muted">{editingPlot ? 'Update your property details below.' : (view === 'direct-list' ? 'List your land directly on A1Plot and reach verified buyers across India — zero brokerage, a 50-point legal check, and your listing live within 24 hours. Just fill in the short form below to get started.' : 'Fill in the details below to start the verification process.')}</p>
-        </div>
+        {/* Skip this heading when mounted inside a real SSR page shell for a
+            NEW listing (list_property / direct-list / quick-list / meta-ads)
+            — those pages already show their own real heading server-side, so
+            this would just duplicate it. Editing keeps its own heading
+            regardless, since /edit_property's SSR shell has none of its own. */}
+        {!(hideChrome && !editingPlot) && (
+          <div className="section-header" style={view === 'direct-list' ? {marginBottom: '1.75rem'} : undefined}>
+            <h2 className="section-title">{editingPlot ? 'Edit Land Details' : (view === 'direct-list' ? 'List Your Land Free' : 'List Your Land Parcel')}</h2>
+            <p className="text-muted">{editingPlot ? 'Update your property details below.' : (view === 'direct-list' ? 'List your land directly on A1Plot and reach verified buyers across India — zero brokerage, a 50-point legal check, and your listing live within 24 hours. Just fill in the short form below to get started.' : 'Fill in the details below to start the verification process.')}</p>
+          </div>
+        )}
         <form className="listing-form" onSubmit={handleListProperty}>
           {view === 'direct-list' && (
             <div style={{display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '1.5rem', marginBottom: '1.5rem'}}>
