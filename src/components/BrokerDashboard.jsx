@@ -20,7 +20,7 @@ const timeAgo = (ts) => {
  * in ClientApp via useRequirements('broker')); we filter it client-side against
  * the broker's own cities so no composite Firestore index is needed.
  */
-export default function BrokerDashboard({ user, navigate, showToast, myBrokerProfile, requirements, loading }) {
+export default function BrokerDashboard({ user, navigate, showToast, myBrokerProfile, profileLoading = false, requirements, loading }) {
   const [cityFilter, setCityFilter] = useState('all');
   const [revealed, setRevealed] = useState({}); // requirementId -> true once "Contact" clicked
 
@@ -59,6 +59,19 @@ export default function BrokerDashboard({ user, navigate, showToast, myBrokerPro
     } catch (_) {}
     showToast && showToast('Buyer contact details revealed. Reach out to them directly!');
   };
+
+  // Still figuring out who's asking (auth resolving, or their broker profile
+  // hasn't loaded yet) — show a neutral placeholder instead of guessing wrong
+  // (e.g. flashing "you're not registered" for an already-approved broker).
+  if (profileLoading) {
+    return (
+      <section className="section" style={{ paddingTop: '1.5rem' }}><div className="container" style={{ maxWidth: 560, textAlign: 'center' }}>
+        <div className="listing-form">
+          <p style={{ color: 'var(--text-muted)', padding: '2rem 0' }}>Loading your broker dashboard…</p>
+        </div>
+      </div></section>
+    );
+  }
 
   // Not signed in.
   if (!user) {

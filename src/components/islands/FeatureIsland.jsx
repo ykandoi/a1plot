@@ -32,13 +32,19 @@ const PATHS = {
  */
 export default function FeatureIsland({ feature, initialPlots = [] }) {
   const [user, setUser] = useState(null);
+  // Firebase auth takes a moment to resolve even for an already-signed-in
+  // session (it has to check persisted state first) — without tracking this,
+  // `user` reads as null during that window and looks identical to "signed
+  // out", causing screens like BrokerDashboard to briefly show the wrong state.
+  const [authReady, setAuthReady] = useState(false);
   const [toast, setToast] = useState(null);
 
   useEffect(() => {
     if (auth && typeof auth.onAuthStateChanged === 'function') {
-      const unsub = onAuthStateChanged(auth, setUser);
+      const unsub = onAuthStateChanged(auth, (u) => { setUser(u); setAuthReady(true); });
       return () => unsub();
     }
+    setAuthReady(true);
   }, []);
 
   useEffect(() => {
@@ -59,12 +65,17 @@ export default function FeatureIsland({ feature, initialPlots = [] }) {
 
   const showToast = (msg) => setToast(msg);
 
-  const { myBrokerProfile, saveBroker } = useBrokers(feature === 'broker-register' || feature === 'broker-dashboard' ? user?.uid : null);
+  const { myBrokerProfile, myBrokerProfileLoading, saveBroker } = useBrokers(feature === 'broker-register' || feature === 'broker-dashboard' ? user?.uid : null);
   // Only subscribe to buyer requirements once the broker is APPROVED — a
   // pending/rejected broker would just get permission-denied from the rules.
   const reqMode = feature === 'broker-dashboard' && myBrokerProfile?.status === 'approved' ? 'broker' : 'none';
   const { requirements, loading: reqLoading, addRequirement } = useRequirements(reqMode, user?.uid);
   const { plots } = usePlots(initialPlots, feature === 'search');
+
+  // Combined "still figuring out who's asking" signal for BrokerDashboard —
+  // either auth hasn't resolved yet, or (once we know there IS a user) their
+  // broker profile hasn't loaded yet.
+  const brokerProfileStillResolving = !authReady || (!!user && myBrokerProfileLoading);
 
   const shared = { user, navigate, showToast };
 
@@ -72,7 +83,7 @@ export default function FeatureIsland({ feature, initialPlots = [] }) {
     <>
       {feature === 'broker-register' && <BrokerRegister {...shared} myBrokerProfile={myBrokerProfile} saveBroker={saveBroker} />}
       {feature === 'post-requirement' && <PostRequirement {...shared} addRequirement={addRequirement} />}
-      {feature === 'broker-dashboard' && <BrokerDashboard {...shared} myBrokerProfile={myBrokerProfile} requirements={requirements} loading={reqLoading} />}
+      {feature === 'broker-dashboard' && <BrokerDashboard {...shared} myBrokerProfile={myBrokerProfile} profileLoading={brokerProfileStillResolving} requirements={requirements} loading={reqLoading} />}
       {feature === 'search' && <SearchResults plots={plots} navigate={navigate} user={user} showToast={showToast} onOpenProperty={openProperty} />}
 
       {toast && (

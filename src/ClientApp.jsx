@@ -604,7 +604,7 @@ export default function App({ hideChrome = false } = {}) {
   // Broker network + buyer-requirement data. On the admin panel, load ALL
   // brokers (the approval queue). Only APPROVED brokers subscribe to buyer
   // requirements — pending/rejected would just get permission-denied.
-  const { myBrokerProfile, allBrokers, saveBroker, approveBroker, rejectBroker } =
+  const { myBrokerProfile, myBrokerProfileLoading, allBrokers, saveBroker, approveBroker, rejectBroker } =
     useBrokers(user?.uid, ADMIN_EMAILS.includes(user?.email) && view === 'admin');
   const requirementsMode = view === 'broker-dashboard' && myBrokerProfile?.status === 'approved' ? 'broker' : 'none';
   const { requirements, loading: requirementsLoading, addRequirement } = useRequirements(requirementsMode, user?.uid);
@@ -4819,7 +4819,7 @@ export default function App({ hideChrome = false } = {}) {
           <BrokerRegister user={user} navigate={navigate} showToast={showToast} myBrokerProfile={myBrokerProfile} saveBroker={saveBroker} />
         )}
         {view === 'broker-dashboard' && (
-          <BrokerDashboard user={user} navigate={navigate} showToast={showToast} myBrokerProfile={myBrokerProfile} requirements={requirements} loading={requirementsLoading} />
+          <BrokerDashboard user={user} navigate={navigate} showToast={showToast} myBrokerProfile={myBrokerProfile} profileLoading={!!user && myBrokerProfileLoading} requirements={requirements} loading={requirementsLoading} />
         )}
       </main>
 

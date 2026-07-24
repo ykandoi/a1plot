@@ -22,16 +22,24 @@ export const normalizeCity = (c) => String(c || '').trim().toLowerCase();
  */
 export function useBrokers(uid, loadAll = false) {
   const [myBrokerProfile, setMyBrokerProfile] = useState(null);
+  // Distinguishes "still checking Firestore" from "genuinely not registered" —
+  // both start out as myBrokerProfile === null, and without this flag callers
+  // can't tell them apart, causing a "you're not registered" flash on every
+  // load even for an already-approved broker (see BrokerDashboard.jsx).
+  const [myBrokerProfileLoading, setMyBrokerProfileLoading] = useState(!!uid);
   const [allBrokers, setAllBrokers] = useState([]);
 
   // Live subscription to the signed-in user's own broker profile.
   useEffect(() => {
-    if (!isDbReady() || !uid) { setMyBrokerProfile(null); return; }
+    if (!isDbReady() || !uid) { setMyBrokerProfile(null); setMyBrokerProfileLoading(false); return; }
+    setMyBrokerProfileLoading(true);
     const ref = doc(db, 'brokers', uid);
     const unsubscribe = onSnapshot(ref, (snap) => {
       setMyBrokerProfile(snap.exists() ? { ...snap.data(), uid: snap.id } : null);
+      setMyBrokerProfileLoading(false);
     }, (error) => {
       console.error('Error fetching broker profile:', error);
+      setMyBrokerProfileLoading(false);
     });
     return () => unsubscribe();
   }, [uid]);
@@ -99,5 +107,5 @@ export function useBrokers(uid, loadAll = false) {
     await withTimeout(deleteDoc(doc(db, 'brokers', brokerUid)));
   };
 
-  return { myBrokerProfile, allBrokers, saveBroker, approveBroker, rejectBroker, deleteBroker };
+  return { myBrokerProfile, myBrokerProfileLoading, allBrokers, saveBroker, approveBroker, rejectBroker, deleteBroker };
 }
