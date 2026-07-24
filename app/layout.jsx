@@ -35,7 +35,7 @@ export const metadata = {
 
 export default function RootLayout({ children }) {
   return (
-    <html lang="en">
+    <html lang="en" suppressHydrationWarning>
       <head>
         {/* Link to AI Sitemap/Context */}
         <link rel="llms-txt" type="text/markdown" href="/llms.txt" />
@@ -43,6 +43,7 @@ export default function RootLayout({ children }) {
         {/* PWA: installable + offline-capable */}
         <link rel="manifest" href="/manifest.json" />
         <meta name="theme-color" content="#10b981" />
+        <meta name="mobile-web-app-capable" content="yes" />
         <meta name="apple-mobile-web-app-capable" content="yes" />
         <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
 
@@ -218,7 +219,7 @@ export default function RootLayout({ children }) {
           }}
         />
       </head>
-      <body>
+      <body suppressHydrationWarning>
         {children}
 
         {/* Register the service worker (caches the app shell, enables offline) */}

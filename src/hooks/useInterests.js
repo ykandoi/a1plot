@@ -4,11 +4,15 @@ import { db } from '../firebase';
 
 const isDbReady = () => db && db.type === 'firestore';
 
-export function useInterests(userId) {
+// `enabled: false` skips the live subscription — used by pages (like the
+// seller dashboard / listing form) that render this hook unconditionally
+// (rules of hooks) but never actually display interests data, so they don't
+// pay for a listener they don't need.
+export function useInterests(userId, enabled = true) {
   const [interestedPlots, setInterestedPlots] = useState([]);
 
   useEffect(() => {
-    if (!isDbReady() || !userId) {
+    if (!isDbReady() || !userId || !enabled) {
       Promise.resolve().then(() => {
         setInterestedPlots(prev => prev.length === 0 ? prev : []);
       });
@@ -28,7 +32,7 @@ export function useInterests(userId) {
     });
 
     return () => unsubscribe();
-  }, [userId]);
+  }, [userId, enabled]);
 
   const addInterest = async (plot) => {
     if (!isDbReady() || !userId) return;

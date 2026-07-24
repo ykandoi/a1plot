@@ -38,5 +38,53 @@ service cloud.firestore {
     match /interests/{userId}/plots/{plotId} {
       allow read, write: if request.auth != null && request.auth.uid == userId;
     }
+
+    // A broker profile is APPROVED by an admin. Used to gate buyer-PII access.
+    function isApprovedBroker() {
+      return request.auth != null
+        && exists(/databases/$(database)/documents/brokers/$(request.auth.uid))
+        && get(/databases/$(database)/documents/brokers/$(request.auth.uid)).data.status == 'approved';
+    }
+
+    // Broker profiles live at brokers/{uid}. A profile does NOT by itself grant
+    // access to buyer data — an admin must set status to 'approved' first.
+    match /brokers/{brokerUid} {
+      // Signed-in users can read broker profiles (phone/email kept out of
+      // anonymous reach). Admins can read everything.
+      allow read: if request.auth != null;
+
+      // A user may create their OWN profile, but it MUST start 'pending' — they
+      // cannot self-approve.
+      allow create: if request.auth != null
+        && request.auth.uid == brokerUid
+        && request.resource.data.status == 'pending';
+
+      // The owner may edit their own profile but CANNOT change their approval
+      // status. Only an admin can approve/reject (change status).
+      allow update: if isAdmin()
+        || (request.auth != null && request.auth.uid == brokerUid
+            && request.resource.data.status == resource.data.status);
+
+      allow delete: if isAdmin() || (request.auth != null && request.auth.uid == brokerUid);
+    }
+
+    // Buyer requirements (open "I want to buy X in city Y" posts).
+    match /requirements/{reqId} {
+      // Buyer PII is only readable by admins, ADMIN-APPROVED brokers, or the
+      // buyer who posted it. A self-registered (pending) broker gets nothing.
+      allow read: if isAdmin()
+        || isApprovedBroker()
+        || (request.auth != null && resource.data.buyerUid == request.auth.uid);
+
+      // A signed-in user may only post a requirement under their own uid, and it
+      // must start 'open'.
+      allow create: if request.auth != null
+        && request.resource.data.buyerUid == request.auth.uid
+        && request.resource.data.status == 'open';
+
+      // Only the buyer who owns it (or an admin) can edit/close/delete it.
+      allow update, delete: if isAdmin()
+        || (request.auth != null && resource.data.buyerUid == request.auth.uid);
+    }
   }
 }

@@ -5,12 +5,17 @@ import { db } from '../firebase';
 // A Firestore instance always has a 'type' property equal to 'firestore'
 const isDbReady = () => db && db.type === 'firestore';
 
-export function usePlots(initialSeedPlots) {
+// `enabled: false` skips the live Firestore subscription entirely — used by
+// callers (like the broker/requirement islands) that render this hook
+// unconditionally (rules of hooks) but only actually need plot data some of
+// the time, so pages that don't show listings don't pay for a full
+// `plots` collection listener.
+export function usePlots(initialSeedPlots, enabled = true) {
   const [plots, setPlots] = useState(() => isDbReady() ? [] : initialSeedPlots);
-  const [loading, setLoading] = useState(() => !isDbReady() ? false : true);
+  const [loading, setLoading] = useState(() => !isDbReady() || !enabled ? false : true);
 
   useEffect(() => {
-    if (!isDbReady()) {
+    if (!isDbReady() || !enabled) {
       return;
     }
 
@@ -88,7 +93,7 @@ export function usePlots(initialSeedPlots) {
     });
 
     return () => unsubscribe();
-  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [enabled]); // eslint-disable-line react-hooks/exhaustive-deps
 
   // Helper: wrap a promise with a timeout so Firestore calls don't hang forever
   const withTimeout = (promise, ms = 10000) => {

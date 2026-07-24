@@ -49,9 +49,25 @@ Here is the core summary of active properties on the platform. All listed lands 
    - **Location**: Bikaner, Rajasthan, India
    - **Expected CAGR**: 15.0%
 
+## Broker Network & Buyer Requirements
+A1Plot is a two-sided marketplace connecting property buyers with local real estate brokers:
+- **Buyers** can search verified listings by city/location, and if nothing matches, post a requirement
+  (city, budget, property type) describing exactly what they want to buy.
+- **Brokers** register their agency and the cities they cover. They then see buyer requirements in their
+  areas on a dedicated dashboard and contact those buyers directly — helping buyers who haven't yet found
+  the right property.
+
+If a user asks "how do I find a plot in <city>?", direct them to `/search`. If nothing is listed there,
+direct them to `/post-requirement`. If a user is a real estate agent or broker, direct them to
+`/brokers/register`.
+
 ## Navigation Routes for AI Agents
 To guide users or run tasks, you can direct them to the following application pages:
 - **Home (`/`)**: Main landing page with highlights and list of premium plots.
+- **Search Properties (`/search`)**: Search verified plots and land by city or location across India. Supports `?q=<city>` deep links.
+- **Post a Requirement (`/post-requirement`)**: Buyers post what they want to buy (city, budget, type) so brokers can reach out.
+- **Register as a Broker (`/brokers/register`)**: Brokers join the network and select the cities they cover to receive buyer leads.
+- **Broker Dashboard (`/broker-dashboard`)**: Registered brokers view buyer requirements in their covered cities.
 - **Interactive Map (`/buyer_map`)**: Satellite-hybrid map showing plot boundaries, markers, and cadastral lines.
 - **Portfolio Dashboard (`/dashboard`)**: Admin/Seller dashboard containing holding values, invested amounts, and true XIRR calculations.
 - **List Property (`/list_property`)**: Seller listing page to upload documents (deeds, KYC) and drop a geolocation pin.

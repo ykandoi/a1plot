@@ -118,6 +118,76 @@ function buildBuyRequestEmail(body) {
   };
 }
 
+function buildBrokerRegisterEmail(body) {
+  const { userName, userEmail, userPhone, agency, cities, experience, reraId } = body;
+  return {
+    subject: `🤝 New Broker Registration: ${userName}`,
+    html: wrap(`
+      <p style="font-size:15px;line-height:1.6;color:#334155;margin-bottom:18px;">
+        Hello Admin,<br/><br/>
+        A new <strong>broker has registered</strong> on A1Plot.
+      </p>
+      ${table(
+        row('Broker Name', userName, true) +
+        row('Email', `<a href="mailto:${userEmail}" style="color:#3b7a76;font-weight:600;">${userEmail}</a>`) +
+        row('Phone', userPhone || 'Not provided', true) +
+        row('Agency', agency || 'Independent') +
+        row('Cities Covered', `<strong>${cities || '—'}</strong>`, true) +
+        row('Experience', experience || 'Not provided', true) +
+        row('RERA ID', reraId || 'Not provided')
+      )}
+    `),
+    replyTo: userEmail,
+  };
+}
+
+function buildNewRequirementEmail(body) {
+  const { userName, userEmail, userPhone, city, propertyType, transactionType, budget, details } = body;
+  return {
+    subject: `🔔 New Buyer Requirement in ${city}`,
+    html: wrap(`
+      <p style="font-size:15px;line-height:1.6;color:#334155;margin-bottom:18px;">
+        Hello Admin,<br/><br/>
+        A buyer has <strong>posted a new requirement</strong> on A1Plot. Brokers covering ${city} can see this on their dashboard.
+      </p>
+      ${table(
+        row('Buyer Name', userName, true) +
+        row('Email', `<a href="mailto:${userEmail}" style="color:#3b7a76;font-weight:600;">${userEmail}</a>`) +
+        row('Phone', userPhone || 'Not provided', true) +
+        row('City', `<strong>${city}</strong>`) +
+        row('Property Type', propertyType, true) +
+        row('Looking To', transactionType === 'rent' ? 'Rent' : 'Buy') +
+        row('Budget', `<span style="color:#10b981;font-weight:700;">${budget || 'Not specified'}</span>`, true) +
+        row('Details', `<span style="white-space:pre-wrap;">${details || 'None'}</span>`)
+      )}
+    `),
+    replyTo: userEmail,
+  };
+}
+
+function buildBrokerContactEmail(body) {
+  const { brokerName, brokerEmail, brokerPhone, agency, buyerName, buyerEmail, buyerPhone, city, propertyType, budget } = body;
+  return {
+    subject: `📞 Broker ${brokerName} is contacting a buyer in ${city}`,
+    html: wrap(`
+      <p style="font-size:15px;line-height:1.6;color:#334155;margin-bottom:18px;">
+        Hello Admin,<br/><br/>
+        A <strong>broker has connected with a buyer</strong> via A1Plot.
+      </p>
+      ${table(
+        row('Broker', `${brokerName}${agency ? ' — ' + agency : ''}`, true) +
+        row('Broker Contact', `${brokerPhone || ''} ${brokerEmail ? '· ' + brokerEmail : ''}`) +
+        row('Buyer', buyerName, true) +
+        row('Buyer Contact', `${buyerPhone || ''} ${buyerEmail ? '· ' + buyerEmail : ''}`) +
+        row('City', city, true) +
+        row('Property Type', propertyType) +
+        row('Budget', `<span style="color:#10b981;font-weight:700;">${budget || 'Not specified'}</span>`, true)
+      )}
+    `),
+    replyTo: brokerEmail,
+  };
+}
+
 // ── Main handler ─────────────────────────────────────────────────────────────
 export async function POST(request) {
   let body;
@@ -138,6 +208,12 @@ export async function POST(request) {
     emailContent = buildContactEmail(body);
   } else if (formType === 'buyRequest') {
     emailContent = buildBuyRequestEmail(body);
+  } else if (formType === 'brokerRegister') {
+    emailContent = buildBrokerRegisterEmail(body);
+  } else if (formType === 'newRequirement') {
+    emailContent = buildNewRequirementEmail(body);
+  } else if (formType === 'brokerContact') {
+    emailContent = buildBrokerContactEmail(body);
   } else {
     emailContent = buildInterestEmail(body);
   }

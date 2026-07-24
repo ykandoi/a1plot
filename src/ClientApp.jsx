@@ -6,7 +6,8 @@ import {
   Smartphone, Clock, CheckCircle2,
   ChevronRight, ChevronDown, Building, Upload,
   LogOut, User, Mail, Lock, Eye, EyeOff, Settings,
-  Shield, Check, X, Menu, Undo, Trash2, Edit3, Heart, Navigation
+  Shield, Check, X, Menu, Undo, Trash2, Edit3, Heart, Navigation,
+  Home, Tag, UserCheck
 } from 'lucide-react';
 import dynamic from 'next/dynamic';
 // Charts use recharts (~0.5MB). Lazy-load them so the library is fetched only
@@ -14,6 +15,11 @@ import dynamic from 'next/dynamic';
 const MiniLineChart = dynamic(() => import('./components/Charts').then(m => m.MiniLineChart), { ssr: false, loading: () => null });
 const PortfolioAreaChart = dynamic(() => import('./components/Charts').then(m => m.PortfolioAreaChart), { ssr: false, loading: () => null });
 const Sparkline = dynamic(() => import('./components/Charts').then(m => m.Sparkline), { ssr: false, loading: () => null });
+// Broker + buyer-requirement features — lazy-loaded so they stay off the initial bundle.
+const BrokerRegister = dynamic(() => import('./components/BrokerRegister'), { ssr: false, loading: () => null });
+const PostRequirement = dynamic(() => import('./components/PostRequirement'), { ssr: false, loading: () => null });
+const BrokerDashboard = dynamic(() => import('./components/BrokerDashboard'), { ssr: false, loading: () => null });
+const SearchResults = dynamic(() => import('./components/SearchResults'), { ssr: false, loading: () => null });
 import { GoogleMap, useJsApiLoader, MarkerF, InfoWindowF, Autocomplete, PolygonF } from '@react-google-maps/api';
 
 const LIBRARIES = ['places', 'geometry'];
@@ -22,6 +28,8 @@ import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 import { signInWithPopup, signInWithEmailAndPassword, createUserWithEmailAndPassword, onAuthStateChanged, signOut } from 'firebase/auth';
 import { usePlots } from './hooks/usePlots';
 import { useInterests } from './hooks/useInterests';
+import { useBrokers } from './hooks/useBrokers';
+import { useRequirements } from './hooks/useRequirements';
 
 const GOOGLE_MAPS_API_KEY = (typeof process !== 'undefined' && process.env && process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY) ? process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY : '';
 
@@ -280,7 +288,11 @@ const viewToPath = {
   'property-detail': '/property',
   'login': '/login',
   'about': '/about_us',
-  'direct-list': '/direct-list'
+  'direct-list': '/direct-list',
+  'search': '/search',
+  'post-requirement': '/post-requirement',
+  'broker-register': '/brokers/register',
+  'broker-dashboard': '/broker-dashboard'
 };
 
 const pathToView = {
@@ -302,7 +314,11 @@ const pathToView = {
   '/about_us': 'about',
   '/direct-list': 'direct-list',
   '/quick-list': 'direct-list',
-  '/meta-ads': 'direct-list'
+  '/meta-ads': 'direct-list',
+  '/search': 'search',
+  '/post-requirement': 'post-requirement',
+  '/brokers/register': 'broker-register',
+  '/broker-dashboard': 'broker-dashboard'
 };
 
 const autocompleteOptions = {
@@ -340,12 +356,23 @@ export default function App() {
       '/about_us': 'about',
       '/direct-list': 'direct-list',
       '/quick-list': 'direct-list',
-      '/meta-ads': 'direct-list'
+      '/meta-ads': 'direct-list',
+      '/search': 'search',
+      '/post-requirement': 'post-requirement',
+      '/brokers/register': 'broker-register',
+      '/broker-dashboard': 'broker-dashboard'
     };
     return pathToViewMap[window.location.pathname] || 'home';
   };
   const [view, setView] = useState(getInitialView);
-  const [redirectTarget, setRedirectTarget] = useState(null);
+  // Supports /login?redirect=/brokers/register style deep links (e.g. the
+  // header's "Broker" link) — falls back to the normal requireAuth() flow
+  // when no query param is present.
+  const [redirectTarget, setRedirectTarget] = useState(() => {
+    if (typeof window === 'undefined') return null;
+    const redirectPath = new URLSearchParams(window.location.search).get('redirect');
+    return redirectPath && pathToView[redirectPath] ? pathToView[redirectPath] : null;
+  });
   const [leadEmail, setLeadEmail] = useState('');
   const [leadPhone, setLeadPhone] = useState('');
   const [directStep, setDirectStep] = useState('landing');
@@ -391,7 +418,12 @@ export default function App() {
 
   // Auth State
   const [user, setUser] = useState(null);
-  const { plots, loading: plotsLoading, addPlot, updatePlot, deletePlot } = usePlots(INITIAL_PLOTS);
+  // Only these views actually read the plots array — everywhere else (listing
+  // form, broker pages, login, interests, contact, admin auth screens, etc.)
+  // was paying for a live full-collection Firestore listener it never used.
+  const NEEDS_PLOTS_VIEWS = ['home', 'buyer-map', 'seller-dashboard', 'seller-edit', 'admin', 'admin-edit', 'admin-map', 'property-detail', 'search'];
+  const needsPlotsList = NEEDS_PLOTS_VIEWS.includes(view);
+  const { plots, loading: plotsLoading, addPlot, updatePlot, deletePlot } = usePlots(INITIAL_PLOTS, needsPlotsList);
 
   const [toastMessage, setToastMessage] = useState(null);
   
@@ -472,18 +504,21 @@ export default function App() {
   const [contactMessage, setContactMessage] = useState('');
   const [contactSubmitting, setContactSubmitting] = useState(false);
   const [contactSuccess, setContactSuccess] = useState(false);
+  const [contactError, setContactError] = useState('');
 
   // Buy Request (docs request) form state
   const [buyRequestQuery, setBuyRequestQuery] = useState('');
   const [buyRequestSubmitting, setBuyRequestSubmitting] = useState(false);
   const [buyRequestSuccess, setBuyRequestSuccess] = useState(false);
+  const [buyRequestError, setBuyRequestError] = useState('');
   const [buyRequestDocs, setBuyRequestDocs] = useState(['titleDeed', 'ec']);
 
   const handleContactSubmit = async (e) => {
     e.preventDefault();
     setContactSubmitting(true);
+    setContactError('');
     try {
-      await fetch('/api/send-email', {
+      const res = await fetch('/api/send-email', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -494,11 +529,18 @@ export default function App() {
           message: contactMessage,
         }),
       });
+      // fetch() only rejects on a network failure — a 500 response still
+      // resolves "successfully", so the actual result has to be checked here.
+      const data = await res.json().catch(() => null);
+      if (!res.ok || !data?.success) {
+        throw new Error(data?.details || data?.error || 'The message could not be sent. Please try again.');
+      }
       setContactSuccess(true);
       setContactName(''); setContactEmail(''); setContactPhone(''); setContactMessage('');
       setTimeout(() => { setContactSuccess(false); navigate('home'); }, 3000);
     } catch (err) {
       console.error('Contact form error:', err);
+      setContactError('Sorry, something went wrong sending your message. Please try again, or email us directly at support@a1plot.com.');
     } finally {
       setContactSubmitting(false);
     }
@@ -515,8 +557,9 @@ export default function App() {
       khata: 'Khata Certificate',
     };
     const selectedDocs = buyRequestDocs.map(d => docLabels[d] || d).join(', ');
+    setBuyRequestError('');
     try {
-      await fetch('/api/send-email', {
+      const res = await fetch('/api/send-email', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -532,16 +575,34 @@ export default function App() {
           specificQuery: buyRequestQuery,
         }),
       });
+      // fetch() only rejects on a network failure — a 500 response still
+      // resolves "successfully", so the actual result has to be checked here.
+      const data = await res.json().catch(() => null);
+      if (!res.ok || !data?.success) {
+        throw new Error(data?.details || data?.error || 'The request could not be sent. Please try again.');
+      }
       setBuyRequestSuccess(true);
       setBuyRequestQuery('');
       setTimeout(() => { setBuyRequestSuccess(false); navigate('interested'); }, 3000);
     } catch (err) {
       console.error('Buy request form error:', err);
+      setBuyRequestError('Sorry, something went wrong sending your request. Please try again, or email us directly at support@a1plot.com.');
     } finally {
       setBuyRequestSubmitting(false);
     }
   };
-  const { interestedPlots, addInterest, removeInterest } = useInterests(user?.uid);
+  // Only these views ever show a "liked/interested" heart or the Interests
+  // list — everywhere else (dashboard, admin, listing form, login, etc.) was
+  // paying for a live per-user Firestore listener it never rendered.
+  const needsInterests = ['home', 'buyer-map', 'interested', 'property-detail'].includes(view);
+  const { interestedPlots, addInterest, removeInterest } = useInterests(user?.uid, needsInterests);
+  // Broker network + buyer-requirement data. On the admin panel, load ALL
+  // brokers (the approval queue). Only APPROVED brokers subscribe to buyer
+  // requirements — pending/rejected would just get permission-denied.
+  const { myBrokerProfile, allBrokers, saveBroker, approveBroker, rejectBroker } =
+    useBrokers(user?.uid, ADMIN_EMAILS.includes(user?.email) && view === 'admin');
+  const requirementsMode = view === 'broker-dashboard' && myBrokerProfile?.status === 'approved' ? 'broker' : 'none';
+  const { requirements, loading: requirementsLoading, addRequirement } = useRequirements(requirementsMode, user?.uid);
   const [authLoading, setAuthLoading] = useState(true);
   const [authMode, setAuthMode] = useState('login'); // 'login' or 'signup'
   const [authEmail, setAuthEmail] = useState('');
@@ -549,6 +610,9 @@ export default function App() {
   const [showPassword, setShowPassword] = useState(false);
   const [authError, setAuthError] = useState('');
   const [profileOpen, setProfileOpen] = useState(false);
+  // Google's photoURL sometimes fails to load with a bare <img> (referrer
+  // policy) — falls back to the placeholder icon instead of a broken image.
+  const [avatarError, setAvatarError] = useState(false);
 
   // Admin check
   const isAdmin = ADMIN_EMAILS.includes(user?.email);
@@ -566,6 +630,18 @@ export default function App() {
       setAuthLoading(false);
     }
   }, []);
+
+  // If someone lands on /login?redirect=... while already signed in (e.g.
+  // clicking "Broker" in the header when already logged in), skip the login
+  // form entirely and go straight to the intended destination.
+  useEffect(() => {
+    if (!authLoading && view === 'login' && user && redirectTarget) {
+      navigate(redirectTarget);
+      setRedirectTarget(null);
+    }
+  }, [authLoading, view, user, redirectTarget]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  useEffect(() => { setAvatarError(false); }, [user?.photoURL]);
 
   const handleGoogleSignIn = async () => {
     if (!auth || !auth.app) { setAuthError('Firebase not configured. Check .env file.'); return; }
@@ -991,6 +1067,26 @@ export default function App() {
 
   const handleRejectPlot = async (plotId) => {
     await updatePlot(plotId, { status: 'Rejected', badge: 'Rejected' });
+  };
+
+  // Admin: approve / reject a broker application.
+  const handleApproveBroker = async (broker) => {
+    try {
+      await approveBroker(broker.uid);
+      showToast(`Approved broker: ${broker.name || broker.email || broker.uid}`);
+    } catch (e) {
+      showToast('Failed to approve broker. Please try again.');
+    }
+  };
+  const handleRejectBroker = async (broker) => {
+    const ok = window.confirm(`Reject broker "${broker.name || broker.email || 'this applicant'}"? They will lose access to buyer requirements.`);
+    if (!ok) return;
+    try {
+      await rejectBroker(broker.uid);
+      showToast(`Rejected broker: ${broker.name || broker.email || broker.uid}`);
+    } catch (e) {
+      showToast('Failed to reject broker. Please try again.');
+    }
   };
 
   const handleDeletePlot = async (plot) => {
@@ -2713,6 +2809,9 @@ export default function App() {
           </div>
         ) : (
           <form className="listing-form" onSubmit={handleContactSubmit}>
+            {contactError && (
+              <div style={{background: '#fef2f2', border: '1px solid #fecaca', color: '#b91c1c', padding: '0.75rem 1rem', borderRadius: 8, marginBottom: '1.25rem', fontSize: '0.9rem'}}>{contactError}</div>
+            )}
             <div className="form-group mb-8">
               <label>Full Name <span style={{color: 'var(--accent-red)'}}>*</span></label>
               <input type="text" className="form-input" placeholder="Your full name" required value={contactName} onChange={e => setContactName(e.target.value)} />
@@ -3091,6 +3190,9 @@ export default function App() {
           </div>
         ) : (
           <form className="listing-form" onSubmit={handleBuyRequestSubmit}>
+            {buyRequestError && (
+              <div style={{background: '#fef2f2', border: '1px solid #fecaca', color: '#b91c1c', padding: '0.75rem 1rem', borderRadius: 8, marginBottom: '1.25rem', fontSize: '0.9rem'}}>{buyRequestError}</div>
+            )}
             <div className="form-group mb-8">
               <label>Select Documents Needed</label>
               <div className="flex gap-4" style={{flexWrap: 'wrap', marginTop: '0.5rem'}}>
@@ -3156,7 +3258,7 @@ export default function App() {
       <div className="auth-container">
         {/* Left panel - branding */}
         <div className="auth-branding">
-          <img src="/assets/logo.png" alt="A1Plot" style={{height: '56px', marginBottom: '2rem'}} />
+          <img src="/assets/logo.png" alt="A1Plot" style={{height: '56px', width: 'auto', marginBottom: '2rem', alignSelf: 'flex-start', objectFit: 'contain'}} />
           <h1 style={{fontSize: '2.5rem', fontWeight: 800, lineHeight: 1.1, marginBottom: '1.5rem'}}>Invest in Land.<br/><span style={{color: '#10b981'}}>Build Wealth.</span></h1>
           <p style={{color: '#94a3b8', fontSize: '1.1rem', lineHeight: 1.7, marginBottom: '2.5rem'}}>Join thousands of smart investors who trust A1Plot for verified, transparent land investments.</p>
           <div className="flex gap-8">
@@ -4008,6 +4110,59 @@ export default function App() {
               </table>
             </div>
           )}
+
+          {/* ── Broker Applications ─────────────────────────────────────── */}
+          <div style={{ marginTop: '3.5rem' }}>
+            <div className="flex items-center gap-2" style={{ marginBottom: '0.25rem' }}>
+              <UserCheck size={22} className="text-primary" />
+              <h2 className="section-title" style={{ marginBottom: 0, fontSize: '1.6rem' }}>Broker Applications</h2>
+            </div>
+            <p className="text-muted" style={{ marginBottom: '1.5rem' }}>
+              Approve or reject brokers. Only <strong>approved</strong> brokers can see buyer requirements &amp; contact details.
+            </p>
+
+            {(!allBrokers || allBrokers.length === 0) ? (
+              <div className="text-center" style={{ padding: '2.5rem 2rem', background: 'white', border: '1px solid var(--border-color)', borderRadius: 'var(--radius-lg)' }}>
+                <p className="text-muted">No broker applications yet.</p>
+              </div>
+            ) : (
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(320px, 1fr))', gap: '1.25rem' }}>
+                {allBrokers.map(b => {
+                  const status = b.status || 'pending';
+                  const statusColor = status === 'approved' ? '#166534' : status === 'rejected' ? '#991b1b' : '#92400e';
+                  const statusBg = status === 'approved' ? '#dcfce7' : status === 'rejected' ? '#fee2e2' : '#fef3c7';
+                  return (
+                    <div key={b.uid} style={{ background: 'white', border: '1px solid var(--border-color)', borderRadius: 'var(--radius-lg)', padding: '1.25rem', boxShadow: 'var(--shadow-sm)' }}>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '0.75rem', gap: '0.5rem' }}>
+                        <div style={{ fontWeight: 700, fontSize: '1.05rem', color: 'var(--text-main)' }}>{b.name || 'Unnamed Broker'}</div>
+                        <span style={{ padding: '0.2rem 0.6rem', borderRadius: 999, fontSize: '0.72rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '.03em', background: statusBg, color: statusColor }}>{status}</span>
+                      </div>
+                      <div style={{ fontSize: '0.88rem', color: 'var(--text-muted)', lineHeight: 1.7 }}>
+                        {b.agency && <div>🏢 {b.agency}</div>}
+                        {b.phone && <div>📞 <a href={`tel:${b.phone}`} style={{ color: 'var(--primary)' }}>{b.phone}</a></div>}
+                        {b.email && <div>✉️ <a href={`mailto:${b.email}`} style={{ color: 'var(--primary)' }}>{b.email}</a></div>}
+                        <div>📍 {(b.citiesDisplay || b.cities || []).join(', ') || '—'}</div>
+                        {b.experience && <div>💼 {b.experience}</div>}
+                        <div>🆔 RERA: <strong>{b.reraId ? b.reraId : 'Not provided'}</strong></div>
+                      </div>
+                      <div style={{ display: 'flex', gap: '0.5rem', marginTop: '1rem', flexWrap: 'wrap' }}>
+                        {status !== 'approved' && (
+                          <button className="admin-btn admin-btn-verify" onClick={() => handleApproveBroker(b)}>
+                            <Check size={14} /> Approve
+                          </button>
+                        )}
+                        {status !== 'rejected' && (
+                          <button className="admin-btn admin-btn-reject" onClick={() => handleRejectBroker(b)}>
+                            <X size={14} /> Reject
+                          </button>
+                        )}
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            )}
+          </div>
         </div>
       </section>
     );
@@ -4496,35 +4651,39 @@ export default function App() {
 
   return (
     <>
-      {/* Navbar */}
-      <nav className="navbar">
-        <div className="container flex items-center justify-between">
-          <div style={{display: 'flex', alignItems: 'center'}}>
-            <button type="button" className="mobile-menu-toggle" onClick={() => setMobileMenuOpen(!mobileMenuOpen)} style={{ marginRight: '0.5rem' }}>
-              {mobileMenuOpen ? <X size={22} /> : <Menu size={22} />}
-            </button>
-            <div className="navbar-brand" onClick={() => navigate('home')} style={{cursor: 'pointer'}}>
-              <img src="/assets/logo.png" alt="A1Plot Logo" className="logo-img" />
+      {/* Navbar — matches the site-wide SiteChrome header (logo + search + CTA) */}
+      <nav className="navbar sc-navbar">
+        <div className="container sc-navbar-inner">
+          <a href="/" className="navbar-brand sc-brand" aria-label="A1Plot home">
+            <img src="/assets/logo.png" alt="A1Plot Logo" className="logo-img" width="120" height="52" />
+          </a>
+
+          <form action="/search" method="get" className="sc-header-search" role="search">
+            <div className="sc-header-search-box">
+              <Search size={18} />
+              <input type="text" name="q" placeholder="Search property…" aria-label="Search properties by city or location" />
+              <button type="submit">Search</button>
             </div>
-          </div>
-          <div className="nav-links">
-            <a className={`nav-link ${view === 'home' ? 'active' : ''}`} onClick={() => navigate('home')}>Explore Plots</a>
-            <a className={`nav-link ${view === 'seller-list' || view === 'seller-edit' ? 'active' : ''}`} onClick={() => requireAuth('seller-list')}>Sell Your Land</a>
-            <a className={`nav-link ${view === 'buyer-map' ? 'active' : ''}`} onClick={() => navigate('buyer-map')}>Buy Land</a>
-            <a className={`nav-link ${view === 'contact' ? 'active' : ''}`} onClick={() => navigate('contact')}>Contact</a>
-            <a className={`nav-link ${view === 'about' ? 'active' : ''}`} onClick={() => navigate('about')}>About Us</a>
+          </form>
+
+          <div className="sc-text-links">
+            <a className="nav-link" href="/buyer_map" title="Buy or Rent Land"><Home size={15} /> Buy</a>
+            <a className="nav-link" href="/list_property" title="Sell Your Land"><Tag size={15} /> Sell</a>
+            <a className="nav-link" href="/login?redirect=/brokers/register" title="Register Yourself as a Broker"><UserCheck size={15} /> Broker</a>
             {isAdmin && (
-              <a className={`nav-link ${view === 'admin' ? 'active' : ''}`} onClick={() => navigate('admin')} style={{color: view === 'admin' ? 'var(--primary)' : '#e11d48', fontWeight: 600}}>
+              <a className="nav-link" href="/admin" style={{color: '#e11d48', fontWeight: 600}}>
                 <Shield size={14} style={{display: 'inline', verticalAlign: 'middle', marginRight: '0.2rem'}} />Admin
               </a>
             )}
           </div>
-          <div className="nav-actions">
+
+          <div className="sc-nav-actions">
+            <a className="btn btn-accent sc-cta-post" href="/post-requirement">Post Requirement</a>
             {user ? (
               <div className="profile-dropdown-wrapper">
                 <button className="profile-trigger" onClick={() => setProfileOpen(!profileOpen)}>
-                  {user.photoURL ? (
-                    <img src={user.photoURL} alt="" className="user-avatar" />
+                  {user.photoURL && !avatarError ? (
+                    <img src={user.photoURL} alt="" className="user-avatar" referrerPolicy="no-referrer" onError={() => setAvatarError(true)} />
                   ) : (
                     <div className="user-avatar-placeholder"><User size={16} /></div>
                   )}
@@ -4536,8 +4695,8 @@ export default function App() {
                     <div className="profile-dropdown-backdrop" onClick={() => setProfileOpen(false)} />
                     <div className="profile-dropdown">
                       <div className="profile-dropdown-header">
-                        {user.photoURL ? (
-                          <img src={user.photoURL} alt="" className="profile-dropdown-avatar" />
+                        {user.photoURL && !avatarError ? (
+                          <img src={user.photoURL} alt="" className="profile-dropdown-avatar" referrerPolicy="no-referrer" onError={() => setAvatarError(true)} />
                         ) : (
                           <div className="profile-dropdown-avatar-placeholder"><User size={20} /></div>
                         )}
@@ -4547,11 +4706,27 @@ export default function App() {
                         </div>
                       </div>
                       <div className="profile-dropdown-divider" />
+
+                      {/* Mobile-only: full site navigation, merged in since no separate hamburger exists once signed in */}
+                      <div className="profile-dropdown-mobile-links">
+                        <a className="profile-dropdown-item" href="/buyer_map">Buy Land</a>
+                        <a className="profile-dropdown-item" href="/search">Search Properties</a>
+                        <a className="profile-dropdown-item" href="/post-requirement">Post a Requirement</a>
+                        <a className="profile-dropdown-item" href="/list_property">Sell Your Land</a>
+                        <a className="profile-dropdown-item" href="/brokers/register">Register as a Broker</a>
+                        <a className="profile-dropdown-item" href="/about_us">About Us</a>
+                        <a className="profile-dropdown-item" href="/contact">Contact</a>
+                        <div className="profile-dropdown-divider" />
+                      </div>
+
                       <button className="profile-dropdown-item" onClick={() => { setProfileOpen(false); navigate('seller-dashboard'); }}>
                         <Building size={16} /> My Lands
                       </button>
                       <button className="profile-dropdown-item" onClick={() => { setProfileOpen(false); navigate('interested'); }}>
                         <MapPin size={16} /> My Interests
+                      </button>
+                      <button className="profile-dropdown-item" onClick={() => { setProfileOpen(false); navigate('broker-dashboard'); }}>
+                        <User size={16} /> {myBrokerProfile ? 'Broker Dashboard' : 'Become a Broker'}
                       </button>
                       {isAdmin && (
                         <button className="profile-dropdown-item" onClick={() => { setProfileOpen(false); navigate('admin'); }} style={{color: '#e11d48'}}>
@@ -4567,25 +4742,30 @@ export default function App() {
                 )}
               </div>
             ) : (
-              <button className="btn btn-primary" onClick={() => { setAuthMode('login'); navigate('login'); }}>Log In</button>
+              <>
+                <a className="btn btn-outline sc-login-btn" href="/login">Log In</a>
+                {/* Only exists in the DOM when signed out — once logged in, the
+                    avatar dropdown above is the single mobile menu trigger. */}
+                <button type="button" className="mobile-menu-toggle sc-mobile-toggle-btn" onClick={() => setMobileMenuOpen(!mobileMenuOpen)} aria-label="Open menu">
+                  {mobileMenuOpen ? <X size={22} /> : <Menu size={22} />}
+                </button>
+              </>
             )}
           </div>
         </div>
 
-        {/* Mobile Navigation Dropdown */}
-        {mobileMenuOpen && (
+        {/* Mobile Navigation Dropdown — signed-out only (see above) */}
+        {!user && mobileMenuOpen && (
           <div className="mobile-menu">
             <div className="mobile-menu-links">
-              <a className={`mobile-menu-link ${view === 'home' ? 'active' : ''}`} onClick={() => navigate('home')}>Explore Plots</a>
-              <a className={`mobile-menu-link ${view === 'seller-list' || view === 'seller-edit' ? 'active' : ''}`} onClick={() => requireAuth('seller-list')}>Sell Your Land</a>
-              <a className={`mobile-menu-link ${view === 'buyer-map' ? 'active' : ''}`} onClick={() => navigate('buyer-map')}>Buy Land</a>
-              <a className={`mobile-menu-link ${view === 'contact' ? 'active' : ''}`} onClick={() => navigate('contact')}>Contact</a>
-              <a className={`mobile-menu-link ${view === 'about' ? 'active' : ''}`} onClick={() => navigate('about')}>About Us</a>
-              {isAdmin && (
-                <a className={`mobile-menu-link ${view === 'admin' ? 'active' : ''}`} onClick={() => navigate('admin')} style={{color: '#e11d48', fontWeight: 600}}>
-                  <Shield size={14} style={{display: 'inline', verticalAlign: 'middle', marginRight: '0.2rem'}} />Admin Panel
-                </a>
-              )}
+              <a className="mobile-menu-link" href="/buyer_map">Buy Land</a>
+              <a className="mobile-menu-link" href="/search">Search Properties</a>
+              <a className="mobile-menu-link" href="/post-requirement">Post a Requirement</a>
+              <a className="mobile-menu-link" href="/list_property">Sell Your Land</a>
+              <a className="mobile-menu-link" href="/brokers/register">Register as a Broker</a>
+              <a className="mobile-menu-link" href="/about_us">About Us</a>
+              <a className="mobile-menu-link" href="/contact">Contact</a>
+              <a className="mobile-menu-link" href="/login">Log In</a>
             </div>
           </div>
         )}
@@ -4608,6 +4788,24 @@ export default function App() {
         {view === 'privacy' && renderPrivacy()}
         {view === 'terms' && renderTerms()}
         {view === 'about' && renderAbout()}
+        {view === 'search' && (
+          <SearchResults
+            plots={plots}
+            navigate={navigate}
+            user={user}
+            showToast={showToast}
+            onOpenProperty={(plot) => { setSelectedPropertyDetail(plot); navigate('property-detail'); }}
+          />
+        )}
+        {view === 'post-requirement' && (
+          <PostRequirement user={user} navigate={navigate} showToast={showToast} addRequirement={addRequirement} />
+        )}
+        {view === 'broker-register' && (
+          <BrokerRegister user={user} navigate={navigate} showToast={showToast} myBrokerProfile={myBrokerProfile} saveBroker={saveBroker} />
+        )}
+        {view === 'broker-dashboard' && (
+          <BrokerDashboard user={user} navigate={navigate} showToast={showToast} myBrokerProfile={myBrokerProfile} requirements={requirements} loading={requirementsLoading} />
+        )}
       </main>
 
       {/* Footer */}
@@ -4641,8 +4839,10 @@ export default function App() {
                 <h4>Platform</h4>
                 <ul>
                   <li><a onClick={() => navigate('buyer-map')}>Browse Plots</a></li>
-                  <li><a onClick={() => navigate('home')}>How it Works</a></li>
-                  <li><a onClick={() => navigate('interested')}>Interested Plots</a></li>
+                  <li><a onClick={() => navigate('search')}>Search Properties</a></li>
+                  <li><a onClick={() => navigate('post-requirement')}>Post a Requirement</a></li>
+                  <li><a onClick={() => navigate('broker-register')}>Register as a Broker</a></li>
+                  <li><a onClick={() => navigate('broker-dashboard')}>Broker Dashboard</a></li>
                   <li><a onClick={() => requireAuth('seller-list')}>List Land</a></li>
                 </ul>
               </div>
