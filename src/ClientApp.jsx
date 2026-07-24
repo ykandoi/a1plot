@@ -4683,7 +4683,7 @@ export default function App({ hideChrome = false } = {}) {
           <div className="sc-text-links">
             <a className="nav-link" href="/buyer_map" title="Buy or Rent Land"><Home size={15} /> Buy</a>
             <a className="nav-link" href="/list_property" title="Sell Your Land"><Tag size={15} /> Sell</a>
-            <a className="nav-link" href="/login?redirect=/brokers/register" title="Register Yourself as a Broker"><UserCheck size={15} /> Broker</a>
+            <a className="nav-link" href={user ? (myBrokerProfile ? '/broker-dashboard' : '/brokers/register') : '/login?redirect=/brokers/register'} title={user && myBrokerProfile ? 'Go to Your Broker Dashboard' : 'Register Yourself as a Broker'}><UserCheck size={15} /> Broker</a>
             {isAdmin && (
               <a className="nav-link" href="/admin" style={{color: '#e11d48', fontWeight: 600}}>
                 <Shield size={14} style={{display: 'inline', verticalAlign: 'middle', marginRight: '0.2rem'}} />Admin
