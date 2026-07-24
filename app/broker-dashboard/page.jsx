@@ -31,9 +31,13 @@ export default function Page() {
       <section className="section" style={{ paddingBottom: 0 }}>
         <div className="container" style={{ maxWidth: 820, textAlign: 'center' }}>
           <h1 className="section-title">Broker Dashboard</h1>
+          {/* Kept purely descriptive (no "register" CTA) — this text is static
+              server-rendered copy with no way to know if the viewer already
+              has a broker profile. The dashboard below already shows the
+              correct status-specific action (register / pending / live
+              requirements) once it loads. */}
           <p style={{ color: 'var(--text-muted)', fontSize: '1.05rem', margin: '0.75rem auto 0', maxWidth: 640 }}>
-            See buyers who are actively looking for land and property in the cities you cover. Not a broker yet?{' '}
-            <a href="/brokers/register" style={{ color: 'var(--primary)', fontWeight: 600 }}>Register free</a> to start receiving leads.
+            See buyers who are actively looking for land and property in the cities you cover.
           </p>
         </div>
       </section>
