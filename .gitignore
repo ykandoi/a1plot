@@ -26,9 +26,11 @@ dist-ssr
 .vercel
 
 # Environment variables — never commit these!
+# Match every .env variant (.env.test, .env.production, …), not just .env and
+# .env.local — `vercel env pull` and `vercel build` drop secrets into these.
 .env
-.env.local
-.env.*.local
+.env.*
+!.env.example
 . c a c h e /  
  
 # Next.js build output
