@@ -17,7 +17,7 @@ export const metadata = {
 const FAQS = [
   { q: 'Is it really free to list my land?', a: 'Yes. Listing your land, plot or property on A1Plot is completely free, with zero brokerage charged to sellers.' },
   { q: 'How long until my listing goes live?', a: 'Every listing goes through our 50-point legal verification. Once approved by our team, it goes live and becomes visible to verified buyers — typically within 24 hours.' },
-  { q: 'Do I need to create an account?', a: 'Yes, a free account lets you manage your listing, track buyer interest, and update details any time from your dashboard.' },
+  { q: 'Do I need to create an account?', a: 'No. You can list your property without signing up — just add your email address and phone number so buyers and our verification team can reach you. Creating a free account is optional, and lets you manage your listing and track buyer interest from your dashboard.' },
 ];
 
 export default function Page() {

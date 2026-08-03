@@ -1,6 +1,6 @@
 "use client";
 import React, { useState, useMemo } from 'react';
-import { MapPin, Phone, Mail, IndianRupee, Home, Clock, UserCheck, Inbox, Filter } from 'lucide-react';
+import { MapPin, Phone, Mail, IndianRupee, Home, Clock, UserCheck, Inbox, Filter, Upload, Building } from 'lucide-react';
 import { normalizeCity } from '../hooks/useBrokers';
 
 const timeAgo = (ts) => {
@@ -20,7 +20,7 @@ const timeAgo = (ts) => {
  * in ClientApp via useRequirements('broker')); we filter it client-side against
  * the broker's own cities so no composite Firestore index is needed.
  */
-export default function BrokerDashboard({ user, navigate, showToast, myBrokerProfile, profileLoading = false, requirements, loading }) {
+export default function BrokerDashboard({ user, navigate, showToast, myBrokerProfile, profileLoading = false, requirements, loading, plots = [], plotsLoading = false, onViewPlot }) {
   const [cityFilter, setCityFilter] = useState('all');
   const [revealed, setRevealed] = useState({}); // requirementId -> true once "Contact" clicked
 
@@ -28,6 +28,16 @@ export default function BrokerDashboard({ user, navigate, showToast, myBrokerPro
     () => (myBrokerProfile?.cities || []).map(normalizeCity),
     [myBrokerProfile]
   );
+
+  // Listings this broker uploaded. Matches on the new `uploadedBy.uid` and also
+  // the older `ownerUid`, so anything they listed before this dashboard section
+  // existed still shows up here.
+  const myListings = useMemo(() => {
+    if (!user?.uid) return [];
+    return (plots || [])
+      .filter(p => p.uploadedBy?.uid === user.uid || p.ownerUid === user.uid)
+      .sort((a, b) => (Number(b.createdAt) || 0) - (Number(a.createdAt) || 0));
+  }, [plots, user?.uid]);
 
   const matched = useMemo(() => {
     let rows = (requirements || []).filter(r => (r.status || 'open') === 'open');
@@ -73,20 +83,24 @@ export default function BrokerDashboard({ user, navigate, showToast, myBrokerPro
     );
   }
 
-  // Not signed in.
-  if (!user) {
+  // No session at all and no broker profile — registering is what creates one
+  // (no login required), so point them there rather than at a login screen.
+  if (!user && !myBrokerProfile) {
     return (
       <section className="section" style={{ paddingTop: '1.5rem' }}><div className="container" style={{ maxWidth: 560, textAlign: 'center' }}>
         <div className="listing-form">
           <UserCheck size={40} style={{ color: 'var(--primary)', margin: '0 auto 1rem' }} />
-          <p style={{ color: 'var(--text-muted)', margin: '0.5rem 0 1.5rem' }}>Please log in to access your broker dashboard.</p>
-          <button className="btn btn-primary" onClick={() => navigate('login')}>Log In</button>
+          <h2 className="section-title">Register as a Broker</h2>
+          <p style={{ color: 'var(--text-muted)', margin: '0.5rem 0 1.5rem' }}>
+            Add your name, email and phone number to start receiving buyer requirements in the cities you cover. No account needed.
+          </p>
+          <button className="btn btn-primary" onClick={() => navigate('broker-register')}>Register as Broker</button>
         </div>
       </div></section>
     );
   }
 
-  // Signed in but not a registered broker yet.
+  // Has a session but hasn't registered a broker profile yet.
   if (!myBrokerProfile) {
     return (
       <section className="section" style={{ paddingTop: '1.5rem' }}><div className="container" style={{ maxWidth: 560, textAlign: 'center' }}>
@@ -132,12 +146,21 @@ export default function BrokerDashboard({ user, navigate, showToast, myBrokerPro
 
   return (
     <section className="section" style={{ paddingTop: '1.5rem' }}><div className="container">
-      <div className="section-header" style={{ marginBottom: '1.5rem' }}>
-        <h1 className="section-title">Buyer Requirements in Your Area</h1>
-        <p style={{ color: 'var(--text-muted)', margin: '0.35rem 0 0' }}>
-          Covering: <strong>{(myBrokerProfile.citiesDisplay || myBrokerProfile.cities || []).join(', ') || '—'}</strong>
-          {' · '}<a onClick={() => navigate('broker-register')} style={{ color: 'var(--primary)', cursor: 'pointer' }}>Edit areas</a>
-        </p>
+      <div className="section-header" style={{ marginBottom: '1.5rem', display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: '1rem', flexWrap: 'wrap' }}>
+        <div>
+          <h1 className="section-title">Buyer Requirements in Your Area</h1>
+          <p style={{ color: 'var(--text-muted)', margin: '0.35rem 0 0' }}>
+            Covering: <strong>{(myBrokerProfile.citiesDisplay || myBrokerProfile.cities || []).join(', ') || '—'}</strong>
+            {' · '}<a onClick={() => navigate('broker-register')} style={{ color: 'var(--primary)', cursor: 'pointer' }}>Edit areas</a>
+          </p>
+        </div>
+        <button
+          className="btn btn-primary"
+          style={{ display: 'inline-flex', alignItems: 'center', gap: '0.5rem' }}
+          onClick={() => navigate('seller-list')}
+        >
+          <Upload size={17} /> Upload Property
+        </button>
       </div>
 
       {brokerCities.length > 1 && (
@@ -206,6 +229,81 @@ export default function BrokerDashboard({ user, navigate, showToast, myBrokerPro
           })}
         </div>
       )}
+
+      {/* ── Properties this broker has uploaded ───────────────────────────── */}
+      <div style={{ marginTop: '3.5rem' }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: '1rem', flexWrap: 'wrap', marginBottom: '1.25rem' }}>
+          <div>
+            <h2 className="section-title" style={{ fontSize: '1.6rem', marginBottom: '0.25rem', display: 'flex', alignItems: 'center', gap: 8 }}>
+              <Building size={22} style={{ color: 'var(--primary)' }} /> My Listings
+              {myListings.length > 0 && <span style={{ color: 'var(--text-muted)', fontSize: '1rem', fontWeight: 500 }}>({myListings.length})</span>}
+            </h2>
+            <p style={{ color: 'var(--text-muted)', margin: 0 }}>
+              Properties you've uploaded. Each one is reviewed by our team before it goes live.
+            </p>
+          </div>
+          <button
+            className="btn btn-outline"
+            style={{ display: 'inline-flex', alignItems: 'center', gap: '0.5rem', background: 'white' }}
+            onClick={() => navigate('seller-list')}
+          >
+            <Upload size={16} /> Add Another
+          </button>
+        </div>
+
+        {plotsLoading ? (
+          <p style={{ color: 'var(--text-muted)', textAlign: 'center', padding: '2.5rem 0' }}>Loading your listings…</p>
+        ) : myListings.length === 0 ? (
+          <div style={{ textAlign: 'center', padding: '3rem 1rem', background: 'white', border: '1px solid var(--border-color)', borderRadius: 'var(--radius-lg)' }}>
+            <Building size={40} style={{ margin: '0 auto 1rem', opacity: 0.4, color: 'var(--primary)' }} />
+            <p style={{ color: 'var(--text-muted)', margin: '0 0 1.25rem' }}>
+              You haven't uploaded any properties yet. List one to start matching it against buyer requirements.
+            </p>
+            <button className="btn btn-primary" style={{ display: 'inline-flex', alignItems: 'center', gap: '0.5rem' }} onClick={() => navigate('seller-list')}>
+              <Upload size={17} /> Upload Your First Property
+            </button>
+          </div>
+        ) : (
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: '1.25rem' }}>
+            {myListings.map(plot => {
+              const status = ['Verification Pending', 'Rejected'].includes(plot.status) ? plot.status : 'Verified';
+              const statusColor = status === 'Verified' ? '#166534' : status === 'Rejected' ? '#991b1b' : '#92400e';
+              const statusBg = status === 'Verified' ? '#dcfce7' : status === 'Rejected' ? '#fee2e2' : '#fef3c7';
+              return (
+                <div
+                  key={plot.id}
+                  onClick={() => onViewPlot && onViewPlot(plot)}
+                  style={{ background: 'white', border: '1px solid var(--border-color)', borderRadius: 'var(--radius-lg)', overflow: 'hidden', boxShadow: 'var(--shadow-sm)', cursor: onViewPlot ? 'pointer' : 'default' }}
+                >
+                  {plot.image && (
+                    <img src={plot.image} alt="" style={{ width: '100%', height: 150, objectFit: 'cover', display: 'block' }} />
+                  )}
+                  <div style={{ padding: '1.1rem' }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: '0.5rem', marginBottom: '0.5rem' }}>
+                      <h3 style={{ fontSize: '1rem', margin: 0, color: 'var(--text-main)' }}>{plot.title || 'Untitled listing'}</h3>
+                      <span style={{ padding: '0.15rem 0.55rem', borderRadius: 999, fontSize: '0.68rem', fontWeight: 700, whiteSpace: 'nowrap', background: statusBg, color: statusColor }}>
+                        {status}
+                      </span>
+                    </div>
+                    <p style={{ display: 'flex', alignItems: 'center', gap: 5, color: 'var(--text-muted)', fontSize: '0.85rem', margin: '0 0 0.5rem' }}>
+                      <MapPin size={13} /> {plot.location || '—'}
+                    </p>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: '0.9rem' }}>
+                      <span style={{ fontWeight: 700, color: '#10b981' }}>{plot.price || 'Price on request'}</span>
+                      <span style={{ color: 'var(--text-muted)' }}>{plot.size || ''}</span>
+                    </div>
+                    {plot.createdAt && (
+                      <p style={{ display: 'flex', alignItems: 'center', gap: 4, color: 'var(--text-muted)', fontSize: '0.75rem', margin: '0.6rem 0 0' }}>
+                        <Clock size={12} /> Listed {timeAgo(plot.createdAt)}
+                      </p>
+                    )}
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        )}
+      </div>
     </div></section>
   );
 }

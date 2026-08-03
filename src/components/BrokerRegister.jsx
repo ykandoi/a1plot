@@ -1,15 +1,20 @@
 "use client";
 import React, { useState, useEffect } from 'react';
-import { UserCheck, Building2, Phone, MapPin, Briefcase, CheckCircle2, LogIn, ShieldCheck } from 'lucide-react';
+import { UserCheck, Building2, Mail, MapPin, Briefcase, CheckCircle2, ShieldCheck } from 'lucide-react';
+import PhoneField, { isValidPhone } from './PhoneField';
 
 /**
- * BrokerRegister — lets an authenticated user register/update a broker profile.
- * Saved to brokers/{uid}; the existence of that doc is what marks the user as a
- * broker (and unlocks the Broker Dashboard). Cities are matched to buyer
+ * BrokerRegister — registers/updates a broker profile.
+ *
+ * Registering does NOT require signing in: we collect a mandatory email +
+ * phone instead, and `ensureAuth` (passed from ClientApp) quietly creates an
+ * anonymous Firebase session so the brokers/{uid} write still satisfies
+ * firestore.rules. The existence of that doc is what marks someone as a broker
+ * (and unlocks the Broker Dashboard). Cities are matched to buyer
  * requirements, so brokers only see leads in areas they actually work.
  */
-export default function BrokerRegister({ user, navigate, showToast, myBrokerProfile, saveBroker }) {
-  const [form, setForm] = useState({ name: '', phone: '', agency: '', cities: '', areas: '', experience: '', hasRera: 'no', reraId: '' });
+export default function BrokerRegister({ user, navigate, showToast, myBrokerProfile, saveBroker, ensureAuth }) {
+  const [form, setForm] = useState({ name: '', email: '', phone: '', agency: '', cities: '', areas: '', experience: '', hasRera: 'no', reraId: '' });
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState('');
   const [done, setDone] = useState(false);
@@ -19,6 +24,7 @@ export default function BrokerRegister({ user, navigate, showToast, myBrokerProf
     if (myBrokerProfile) {
       setForm({
         name: myBrokerProfile.name || '',
+        email: myBrokerProfile.email || '',
         phone: myBrokerProfile.phone || '',
         agency: myBrokerProfile.agency || '',
         cities: (myBrokerProfile.citiesDisplay || myBrokerProfile.cities || []).join(', '),
@@ -27,8 +33,13 @@ export default function BrokerRegister({ user, navigate, showToast, myBrokerProf
         hasRera: myBrokerProfile.reraId ? 'yes' : 'no',
         reraId: myBrokerProfile.reraId || '',
       });
-    } else if (user) {
-      setForm(f => ({ ...f, name: f.name || user.displayName || '', }));
+    } else if (user && !user.isAnonymous) {
+      // Signed in with a real account — seed what we already know, still editable.
+      setForm(f => ({
+        ...f,
+        name: f.name || user.displayName || '',
+        email: f.email || user.email || '',
+      }));
     }
   }, [myBrokerProfile, user]);
 
@@ -38,15 +49,24 @@ export default function BrokerRegister({ user, navigate, showToast, myBrokerProf
     e.preventDefault();
     setError('');
     const cityList = form.cities.split(',').map(c => c.trim()).filter(Boolean);
-    if (!form.name || !form.phone || cityList.length === 0) {
-      setError('Please fill your name, phone, and at least one city you cover.');
+    if (!form.name || !form.email.trim() || !form.phone.trim() || cityList.length === 0) {
+      setError('Please fill your name, email, phone number, and at least one city you cover.');
+      return;
+    }
+    if (!isValidPhone(form.phone)) {
+      setError('Please enter a valid phone number, including the country code.');
       return;
     }
     setSubmitting(true);
     try {
-      await saveBroker(user.uid, {
+      // No sign-in required — this creates an invisible guest session when the
+      // visitor isn't logged in, so the Firestore write still has a principal.
+      const authedUser = user || (ensureAuth ? await ensureAuth() : null);
+      if (!authedUser?.uid) throw new Error('Could not start a session. Please try again.');
+
+      await saveBroker(authedUser.uid, {
         name: form.name,
-        email: user.email || '',
+        email: form.email.trim(),
         phone: form.phone,
         agency: form.agency,
         cities: cityList,
@@ -63,7 +83,7 @@ export default function BrokerRegister({ user, navigate, showToast, myBrokerProf
           body: JSON.stringify({
             formType: 'brokerRegister',
             userName: form.name,
-            userEmail: user.email || '',
+            userEmail: form.email.trim(),
             userPhone: form.phone,
             agency: form.agency,
             cities: cityList.join(', '),
@@ -88,23 +108,6 @@ export default function BrokerRegister({ user, navigate, showToast, myBrokerProf
     }
   };
 
-  // Signed-out state — prompt to log in first.
-  if (!user) {
-    return (
-      <section className="section" style={{ paddingTop: '1.5rem' }}><div className="container" style={{ maxWidth: 560 }}>
-        <div className="listing-form" style={{ textAlign: 'center' }}>
-          <UserCheck size={40} style={{ color: 'var(--primary)', margin: '0 auto 1rem' }} />
-          <p style={{ color: 'var(--text-muted)', marginBottom: '1.5rem' }}>
-            Please log in or create an account to register as a broker and start receiving buyer leads in your area.
-          </p>
-          <button className="btn btn-primary" onClick={() => navigate('login')}>
-            <LogIn size={16} style={{ marginRight: 6 }} /> Log In / Sign Up
-          </button>
-        </div>
-      </div></section>
-    );
-  }
-
   return (
     <section className="section" style={{ paddingTop: '1.5rem' }}><div className="container" style={{ maxWidth: 680 }}>
       {myBrokerProfile && (
@@ -122,9 +125,20 @@ export default function BrokerRegister({ user, navigate, showToast, myBrokerProf
             <input className="form-input" value={form.name} onChange={set('name')} placeholder="e.g. Rahul Sharma" />
           </div>
           <div className="form-group">
-            <label><Phone size={14} style={{ display: 'inline', marginRight: 5 }} />Phone Number *</label>
-            <input className="form-input" value={form.phone} onChange={set('phone')} placeholder="e.g. 98765 43210" />
+            <label><Mail size={14} style={{ display: 'inline', marginRight: 5 }} />Email Address *</label>
+            <input type="email" className="form-input" value={form.email} onChange={set('email')} placeholder="e.g. name@domain.com" />
           </div>
+        </div>
+
+        <div style={{ marginTop: '1.25rem' }}>
+          <PhoneField
+            id="broker-phone"
+            value={form.phone}
+            onChange={(v) => setForm(f => ({ ...f, phone: v }))}
+          />
+          <p style={{ fontSize: '0.82rem', color: 'var(--text-muted)', margin: '0.35rem 0 0' }}>
+            No account needed — buyers and our team use these to reach you.
+          </p>
         </div>
 
         <div className="form-group" style={{ marginTop: '1.25rem' }}>

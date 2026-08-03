@@ -25,11 +25,13 @@ import { GoogleMap, useJsApiLoader, MarkerF, InfoWindowF, Autocomplete, PolygonF
 const LIBRARIES = ['places', 'geometry'];
 import { auth, googleProvider, storage } from './firebase';
 import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
-import { signInWithPopup, signInWithEmailAndPassword, createUserWithEmailAndPassword, onAuthStateChanged, signOut } from 'firebase/auth';
+import { signInWithPopup, signInWithEmailAndPassword, createUserWithEmailAndPassword, onAuthStateChanged, signOut, signInAnonymously } from 'firebase/auth';
 import { usePlots } from './hooks/usePlots';
 import { useInterests } from './hooks/useInterests';
 import { useBrokers } from './hooks/useBrokers';
 import { useRequirements } from './hooks/useRequirements';
+import { useUsers } from './hooks/useUsers';
+import PhoneField, { isValidPhone } from './components/PhoneField';
 
 const GOOGLE_MAPS_API_KEY = (typeof process !== 'undefined' && process.env && process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY) ? process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY : '';
 
@@ -426,7 +428,7 @@ export default function App({ hideChrome = false } = {}) {
   // Only these views actually read the plots array — everywhere else (listing
   // form, broker pages, login, interests, contact, admin auth screens, etc.)
   // was paying for a live full-collection Firestore listener it never used.
-  const NEEDS_PLOTS_VIEWS = ['home', 'buyer-map', 'seller-dashboard', 'seller-edit', 'admin', 'admin-edit', 'admin-map', 'property-detail', 'search'];
+  const NEEDS_PLOTS_VIEWS = ['home', 'buyer-map', 'seller-dashboard', 'seller-edit', 'admin', 'admin-edit', 'admin-map', 'property-detail', 'search', 'broker-dashboard'];
   const needsPlotsList = NEEDS_PLOTS_VIEWS.includes(view);
   const { plots, loading: plotsLoading, addPlot, updatePlot, deletePlot } = usePlots(INITIAL_PLOTS, needsPlotsList);
 
@@ -608,6 +610,10 @@ export default function App({ hideChrome = false } = {}) {
     useBrokers(user?.uid, ADMIN_EMAILS.includes(user?.email) && view === 'admin');
   const requirementsMode = view === 'broker-dashboard' && myBrokerProfile?.status === 'approved' ? 'broker' : 'none';
   const { requirements, loading: requirementsLoading, addRequirement } = useRequirements(requirementsMode, user?.uid);
+  // Mirrors the signed-in user into the `users` collection on every sign-in, and
+  // (admins only, on the admin panel) loads the whole signed-in-user directory.
+  const { allUsers, loading: usersLoading } =
+    useUsers(user, ADMIN_EMAILS.includes(user?.email) && view === 'admin');
   const [authLoading, setAuthLoading] = useState(true);
   const [authMode, setAuthMode] = useState('login'); // 'login' or 'signup'
   const [authEmail, setAuthEmail] = useState('');
@@ -647,6 +653,19 @@ export default function App({ hideChrome = false } = {}) {
   }, [authLoading, view, user, redirectTarget]); // eslint-disable-line react-hooks/exhaustive-deps
 
   useEffect(() => { setAvatarError(false); }, [user?.photoURL]);
+
+  // Listing/broker forms always ask for a contact email + phone. When we
+  // already know them (real account, or an existing broker profile), prefill
+  // rather than making the person retype — they stay editable either way.
+  useEffect(() => {
+    if (user && !user.isAnonymous && user.email) {
+      setLeadEmail(prev => prev || user.email);
+    }
+  }, [user]);
+
+  useEffect(() => {
+    if (myBrokerProfile?.phone) setLeadPhone(prev => prev || myBrokerProfile.phone);
+  }, [myBrokerProfile?.phone]);
 
   const handleGoogleSignIn = async () => {
     if (!auth || !auth.app) { setAuthError('Firebase not configured. Check .env file.'); return; }
@@ -731,6 +750,39 @@ export default function App({ hideChrome = false } = {}) {
       navigate('login');
     } else {
       navigate(targetView);
+    }
+  };
+
+  // A "real" account — i.e. Google/email sign-in, not the invisible anonymous
+  // session we create for people who list without logging in. Used to decide
+  // whether we still need to ASK for an email address.
+  const isRealAccount = !!user && !user.isAnonymous;
+
+  /**
+   * ensureAuth — guarantees there's SOME Firebase principal before a Firestore
+   * write, without ever showing a sign-in screen.
+   *
+   * Listing a property and registering as a broker no longer require signing
+   * in; we collect an email + phone instead. But firestore.rules still demand
+   * `request.auth != null` on create — that's what stops anyone on the internet
+   * from writing unlimited junk into `plots`/`brokers`. Anonymous auth squares
+   * the two: the visitor sees no login step, while the rules keep working.
+   *
+   * Requires the Anonymous provider to be enabled in
+   * Firebase Console → Authentication → Sign-in method.
+   */
+  const ensureAuth = async () => {
+    if (user) return user;
+    if (!auth || !auth.app) throw new Error('Authentication is unavailable. Please try again later.');
+    try {
+      const cred = await signInAnonymously(auth);
+      return cred.user;
+    } catch (err) {
+      console.error('Anonymous sign-in failed:', err);
+      if (err?.code === 'auth/operation-not-allowed') {
+        throw new Error('Guest listing is not enabled yet. Please enable Anonymous sign-in in the Firebase console, or log in to continue.');
+      }
+      throw new Error('Could not start a guest session. Please check your connection and try again.');
     }
   };
 
@@ -1105,22 +1157,104 @@ export default function App({ hideChrome = false } = {}) {
     }
   };
 
-  // Format the time a property was listed for the admin table.
-  const formatListedTime = (plot) => {
-    let ts = plot.createdAt;
+  // Render an epoch-ms (or Firestore Timestamp) as a readable IST date.
+  const formatTimestamp = (ts) => {
     if (ts && typeof ts === 'object' && typeof ts.toDate === 'function') ts = ts.toDate().getTime(); // Firestore Timestamp
-    if (!ts && /^\d{13}$/.test(String(plot.id))) ts = Number(plot.id); // legacy: id was Date.now()
     if (!ts) return '—';
     const d = new Date(Number(ts));
     if (isNaN(d.getTime())) return '—';
     return d.toLocaleString('en-IN', { day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' });
   };
 
+  // Format the time a property was listed for the admin table.
+  const formatListedTime = (plot) => {
+    let ts = plot.createdAt;
+    if (ts && typeof ts === 'object' && typeof ts.toDate === 'function') ts = ts.toDate().getTime();
+    if (!ts && /^\d{13}$/.test(String(plot.id))) ts = Number(plot.id); // legacy: id was Date.now()
+    return formatTimestamp(ts);
+  };
+
+  // Resolve who uploaded a listing for the admin table. New listings carry a
+  // structured `uploadedBy`; anything created before that field existed is
+  // reconstructed from the ownerEmail/ownerUid/developer columns it did have,
+  // so historical rows still show a real person instead of a blank cell.
+  const resolveUploader = (plot) => {
+    if (plot.uploadedBy?.name || plot.uploadedBy?.email) {
+      return {
+        name: plot.uploadedBy.name || plot.uploadedBy.email.split('@')[0],
+        email: plot.uploadedBy.email || '',
+        role: plot.uploadedBy.role || 'user',
+      };
+    }
+    if (plot.ownerUid === 'admin') return { name: 'A1Plot (seed)', email: '', role: 'admin' };
+    if (plot.ownerUid === 'meta-ad') return { name: 'Meta Ads Lead', email: plot.ownerEmail || '', role: 'lead' };
+    if (plot.ownerEmail) {
+      return {
+        name: plot.ownerEmail.split('@')[0],
+        email: plot.ownerEmail,
+        role: ADMIN_EMAILS.includes(plot.ownerEmail) ? 'admin' : 'user',
+      };
+    }
+    return { name: 'Unknown', email: '', role: 'unknown' };
+  };
+
+  const UPLOADER_ROLE_STYLES = {
+    admin:   { bg: '#ede9fe', color: '#5b21b6' },
+    broker:  { bg: '#dbeafe', color: '#1e40af' },
+    user:    { bg: '#dcfce7', color: '#166534' },
+    lead:    { bg: '#fef3c7', color: '#92400e' },
+    unknown: { bg: '#f1f5f9', color: '#475569' },
+  };
+
+  const renderUploadedBy = (plot) => {
+    const u = resolveUploader(plot);
+    const style = UPLOADER_ROLE_STYLES[u.role] || UPLOADER_ROLE_STYLES.unknown;
+    return (
+      <div style={{ display: 'flex', flexDirection: 'column', gap: '0.2rem', minWidth: 140 }}>
+        <span style={{ fontWeight: 600, color: 'var(--text-main)' }}>{u.name}</span>
+        {u.email && (
+          <a
+            href={`mailto:${u.email}`}
+            onClick={(e) => e.stopPropagation()}
+            style={{ fontSize: '0.75rem', color: 'var(--primary)' }}
+          >
+            {u.email}
+          </a>
+        )}
+        <span style={{
+          alignSelf: 'flex-start', padding: '0.1rem 0.45rem', borderRadius: 999,
+          fontSize: '0.65rem', fontWeight: 700, textTransform: 'uppercase',
+          letterSpacing: '.03em', background: style.bg, color: style.color,
+        }}>
+          {u.role}
+        </span>
+      </div>
+    );
+  };
+
   const handleListProperty = async (e) => {
     e.preventDefault();
     setSubmitError('');
+
+    // Listing no longer requires an account, but we DO require a way to reach
+    // the seller. Checked here too (not just via `required` on the inputs) so
+    // the phone number is actually validated, not merely non-empty.
+    if (!editingPlot) {
+      if (!leadEmail.trim() || !leadPhone.trim()) {
+        setSubmitError('Please enter both your email address and phone number so buyers can reach you.');
+        return;
+      }
+      if (!isValidPhone(leadPhone)) {
+        setSubmitError('Please enter a valid phone number, including the country code.');
+        return;
+      }
+    }
+
     setIsSubmitting(true);
     try {
+      // Creates an invisible guest session when nobody is signed in, so the
+      // Firestore write still satisfies `request.auth != null`.
+      const authedUser = await ensureAuth();
       let staticMapUrl = null;
       if (sortedPolygonPath.length >= 3 && window.google?.maps?.geometry?.encoding) {
         const latLngs = sortedPolygonPath.map(p => new window.google.maps.LatLng(p.lat, p.lng));
@@ -1168,16 +1302,43 @@ export default function App({ hideChrome = false } = {}) {
           ...uploadedMediaUrls,
         ];
 
+        // Contact details: a signed-in account supplies its own email, a guest
+        // typed one into the form. Phone always comes from the form — Google
+        // sign-in never gives us one.
+        const contactEmail = (isRealAccount ? user.email : leadEmail.trim()) || leadEmail.trim() || '';
+        const contactPhone = leadPhone.trim() || myBrokerProfile?.phone || '';
+        // Who to credit. A registered broker's profile name wins — it's the
+        // name they gave us — then the account display name, then the email.
+        const uploaderName =
+          myBrokerProfile?.name
+          || (isRealAccount ? (user.displayName || user.email?.split('@')[0]) : '')
+          || (contactEmail ? contactEmail.split('@')[0] : '')
+          || 'Guest Lister';
+        const uploaderRole = isAdmin ? 'admin' : (myBrokerProfile ? 'broker' : (isRealAccount ? 'user' : 'guest'));
+
         const plot = {
           ...newPlot,
           id: Date.now().toString(),
           createdAt: Date.now(),
-          ownerUid: user?.uid || 'meta-ad',
-          ownerEmail: user?.email || leadEmail || '',
-          ownerPhone: leadPhone || '',
+          ownerUid: authedUser?.uid || 'meta-ad',
+          ownerEmail: contactEmail,
+          ownerPhone: contactPhone,
+          // Who actually submitted this listing. ownerUid/ownerEmail already
+          // exist but are bare identifiers — this keeps the human-readable name
+          // and the role they held at submission time, so the admin panel can
+          // show "uploaded by X (broker)" without a second lookup.
+          uploadedBy: {
+            uid: authedUser?.uid || null,
+            name: uploaderName,
+            email: contactEmail,
+            phone: contactPhone,
+            role: uploaderRole,
+            agency: myBrokerProfile?.agency || '',
+            at: Date.now(),
+          },
           status: 'Verification Pending',
           cagr: 'TBD',
-          developer: user ? 'Self Listed' : 'Meta Ads Lead',
+          developer: myBrokerProfile ? (myBrokerProfile.agency || 'Broker Listed') : (isRealAccount ? 'Self Listed' : 'Guest Listed'),
           badge: 'New',
           image: finalMedia[0] || fallbackImage,
           media: finalMedia,
@@ -1489,7 +1650,7 @@ export default function App({ hideChrome = false } = {}) {
               <button className="btn btn-primary" onClick={() => navigate('buyer-map')}>
                 Explore Plots <ArrowRight size={18} />
               </button>
-              <button className="btn btn-secondary" onClick={() => requireAuth('seller-list')}>
+              <button className="btn btn-secondary" onClick={() => navigate('seller-list')}>
                 List Your Land
               </button>
             </div>
@@ -1717,30 +1878,33 @@ export default function App({ hideChrome = false } = {}) {
           </div>
         )}
         <form className="listing-form" onSubmit={handleListProperty}>
-          {view === 'direct-list' && (
-            <div style={{display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '1.5rem', marginBottom: '1.5rem'}}>
-              <div className="form-group mb-8">
-                <label>Contact Email Address <span style={{color: 'var(--accent-red)'}}>*</span></label>
-                <input
-                  type="email"
-                  placeholder="e.g. name@domain.com"
-                  className="form-input"
-                  required
-                  value={leadEmail}
-                  onChange={(e) => setLeadEmail(e.target.value)}
-                />
-              </div>
-              <div className="form-group mb-8">
-                <label>Contact Phone Number <span style={{color: 'var(--accent-red)'}}>*</span></label>
-                <input
-                  type="tel"
-                  placeholder="e.g. +91 98765 43210"
-                  className="form-input"
-                  required
+          {/* Contact details. Listing does NOT require an account, so we always
+              collect a reachable email + phone — the only exception is editing,
+              where the listing already carries the seller's details. */}
+          {!editingPlot && (
+            <div style={{marginBottom: '1.5rem'}}>
+              <div style={{display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '1.5rem'}}>
+                <div className="form-group mb-8">
+                  <label>Contact Email Address <span style={{color: 'var(--accent-red)'}}>*</span></label>
+                  <input
+                    type="email"
+                    placeholder="e.g. name@domain.com"
+                    className="form-input"
+                    required
+                    value={leadEmail}
+                    onChange={(e) => setLeadEmail(e.target.value)}
+                  />
+                </div>
+                <PhoneField
+                  id="listing-phone"
+                  label="Contact Phone Number"
                   value={leadPhone}
-                  onChange={(e) => setLeadPhone(e.target.value)}
+                  onChange={setLeadPhone}
                 />
               </div>
+              <p style={{fontSize: '0.82rem', color: 'var(--text-muted)', margin: '0.35rem 0 0'}}>
+                No account needed — we only use these to reach you about this listing.
+              </p>
             </div>
           )}
           <div className="form-group mb-8">
@@ -4034,6 +4198,7 @@ export default function App({ hideChrome = false } = {}) {
                 <thead>
                   <tr>
                     <th>Property</th>
+                    <th>Uploaded By</th>
                     <th>Location</th>
                     <th>Price</th>
                     <th>Size</th>
@@ -4053,6 +4218,7 @@ export default function App({ hideChrome = false } = {}) {
                           <span>{plot.title}</span>
                         </div>
                       </td>
+                      <td>{renderUploadedBy(plot)}</td>
                       <td className="text-muted">{plot.location}</td>
                       <td className="font-semibold">{plot.price}</td>
                       <td>{plot.size}</td>
@@ -4172,6 +4338,87 @@ export default function App({ hideChrome = false } = {}) {
                     </div>
                   );
                 })}
+              </div>
+            )}
+          </div>
+
+          {/* ── Signed-In Users ──────────────────────────────────────────── */}
+          <div style={{ marginTop: '3.5rem' }}>
+            <div className="flex items-center gap-2" style={{ marginBottom: '0.25rem' }}>
+              <User size={22} className="text-primary" />
+              <h2 className="section-title" style={{ marginBottom: 0, fontSize: '1.6rem' }}>
+                Signed-In Users {allUsers.length > 0 && <span className="text-muted" style={{ fontSize: '1rem', fontWeight: 500 }}>({allUsers.length})</span>}
+              </h2>
+            </div>
+            <p className="text-muted" style={{ marginBottom: '1.5rem' }}>
+              Everyone who has signed in to A1Plot, most recent first. Listings counted per user.
+            </p>
+
+            {usersLoading ? (
+              <div className="text-center" style={{ padding: '2.5rem 2rem', background: 'white', border: '1px solid var(--border-color)', borderRadius: 'var(--radius-lg)' }}>
+                <p className="text-muted">Loading users…</p>
+              </div>
+            ) : allUsers.length === 0 ? (
+              <div className="text-center" style={{ padding: '2.5rem 2rem', background: 'white', border: '1px solid var(--border-color)', borderRadius: 'var(--radius-lg)' }}>
+                <p className="text-muted">No users recorded yet. Users appear here the next time they sign in.</p>
+              </div>
+            ) : (
+              <div className="admin-table-wrap">
+                <table className="admin-table">
+                  <thead>
+                    <tr>
+                      <th>User</th>
+                      <th>Email</th>
+                      <th>Sign-in Method</th>
+                      <th>Role</th>
+                      <th>Listings</th>
+                      <th>Sign-ins</th>
+                      <th>Last Seen</th>
+                      <th>Joined</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {allUsers.map(u => {
+                      const isUserAdmin = ADMIN_EMAILS.includes(u.email);
+                      const brokerProfile = (allBrokers || []).find(b => b.uid === u.uid);
+                      const role = isUserAdmin ? 'admin' : brokerProfile ? 'broker' : 'user';
+                      const roleStyle = UPLOADER_ROLE_STYLES[role];
+                      const listingCount = plots.filter(
+                        p => p.uploadedBy?.uid === u.uid || p.ownerUid === u.uid
+                      ).length;
+                      const providers = (u.providers || [])
+                        .map(p => (p === 'google.com' ? 'Google' : p === 'password' ? 'Email' : p))
+                        .join(', ');
+                      return (
+                        <tr key={u.uid}>
+                          <td>
+                            <div className="admin-plot-title">
+                              {u.photoURL
+                                ? <img src={u.photoURL} alt="" className="admin-plot-thumb" style={{ borderRadius: '50%' }} referrerPolicy="no-referrer" />
+                                : <span className="admin-plot-thumb" style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', borderRadius: '50%', background: '#e2e8f0' }}><User size={16} style={{ color: '#64748b' }} /></span>}
+                              <span>{u.displayName || u.email?.split('@')[0] || 'Unnamed'}</span>
+                            </div>
+                          </td>
+                          <td>{u.email ? <a href={`mailto:${u.email}`} style={{ color: 'var(--primary)' }}>{u.email}</a> : <span className="text-muted">—</span>}</td>
+                          <td className="text-muted" style={{ fontSize: '0.85rem' }}>{providers || '—'}</td>
+                          <td>
+                            <span style={{
+                              padding: '0.15rem 0.5rem', borderRadius: 999, fontSize: '0.7rem',
+                              fontWeight: 700, textTransform: 'uppercase', letterSpacing: '.03em',
+                              background: roleStyle.bg, color: roleStyle.color,
+                            }}>
+                              {role}{brokerProfile && brokerProfile.status !== 'approved' ? ` · ${brokerProfile.status}` : ''}
+                            </span>
+                          </td>
+                          <td className="font-semibold">{listingCount}</td>
+                          <td className="text-muted">{u.signInCount || 1}</td>
+                          <td className="text-muted" style={{ whiteSpace: 'nowrap', fontSize: '0.8rem' }}>{formatTimestamp(u.lastSeenAt)}</td>
+                          <td className="text-muted" style={{ whiteSpace: 'nowrap', fontSize: '0.8rem' }}>{formatTimestamp(u.createdAt)}</td>
+                        </tr>
+                      );
+                    })}
+                  </tbody>
+                </table>
               </div>
             )}
           </div>
@@ -4796,7 +5043,11 @@ export default function App({ hideChrome = false } = {}) {
       <main>
         {view === 'home' && renderHome()}
         {view === 'login' && renderAuth()}
-        {(view === 'seller-list' || view === 'seller-edit') && (user ? renderSellerForm() : renderAuth())}
+        {/* Listing a NEW property needs no account — the form collects a
+            mandatory email + phone instead. Editing an EXISTING listing still
+            requires a session, since that's the owner changing their own data. */}
+        {view === 'seller-list' && renderSellerForm()}
+        {view === 'seller-edit' && (user ? renderSellerForm() : renderAuth())}
         {view === 'direct-list' && renderSellerForm()}
         {view === 'seller-dashboard' && (user ? renderSellerDashboard() : renderAuth())}
         {view === 'buyer-map' && renderBuyerMap()}
@@ -4823,10 +5074,10 @@ export default function App({ hideChrome = false } = {}) {
           <PostRequirement user={user} navigate={navigate} showToast={showToast} addRequirement={addRequirement} />
         )}
         {view === 'broker-register' && (
-          <BrokerRegister user={user} navigate={navigate} showToast={showToast} myBrokerProfile={myBrokerProfile} saveBroker={saveBroker} />
+          <BrokerRegister user={user} navigate={navigate} showToast={showToast} myBrokerProfile={myBrokerProfile} saveBroker={saveBroker} ensureAuth={ensureAuth} />
         )}
         {view === 'broker-dashboard' && (
-          <BrokerDashboard user={user} navigate={navigate} showToast={showToast} myBrokerProfile={myBrokerProfile} profileLoading={!!user && myBrokerProfileLoading} requirements={requirements} loading={requirementsLoading} />
+          <BrokerDashboard user={user} navigate={navigate} showToast={showToast} myBrokerProfile={myBrokerProfile} profileLoading={!!user && myBrokerProfileLoading} requirements={requirements} loading={requirementsLoading} plots={plots} plotsLoading={plotsLoading} onViewPlot={handleViewProperty} />
         )}
       </main>
 
@@ -4865,7 +5116,7 @@ export default function App({ hideChrome = false } = {}) {
                   <li><a onClick={() => navigate('post-requirement')}>Post a Requirement</a></li>
                   <li><a onClick={() => navigate('broker-register')}>Register as a Broker</a></li>
                   <li><a onClick={() => navigate('broker-dashboard')}>Broker Dashboard</a></li>
-                  <li><a onClick={() => requireAuth('seller-list')}>List Land</a></li>
+                  <li><a onClick={() => navigate('seller-list')}>List Land</a></li>
                 </ul>
               </div>
               <div className="footer-links">

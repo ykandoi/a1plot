@@ -49,9 +49,11 @@ service cloud.firestore {
     // Broker profiles live at brokers/{uid}. A profile does NOT by itself grant
     // access to buyer data — an admin must set status to 'approved' first.
     match /brokers/{brokerUid} {
-      // Signed-in users can read broker profiles (phone/email kept out of
-      // anonymous reach). Admins can read everything.
-      allow read: if request.auth != null;
+      // A broker's phone/email is PII. Registering no longer requires a real
+      // account (anonymous sessions are handed out freely to guest listers), so
+      // "any signed-in user" is no longer a meaningful bar — narrowed to the
+      // admin and the broker themselves, which is all the app actually reads.
+      allow read: if isAdmin() || (request.auth != null && request.auth.uid == brokerUid);
 
       // A user may create their OWN profile, but it MUST start 'pending' — they
       // cannot self-approve.
@@ -66,6 +68,28 @@ service cloud.firestore {
             && request.resource.data.status == resource.data.status);
 
       allow delete: if isAdmin() || (request.auth != null && request.auth.uid == brokerUid);
+    }
+
+    // Signed-in user directory (see src/hooks/useUsers.js). The client SDK
+    // can't enumerate Firebase Auth accounts, so each user mirrors their own
+    // profile here on sign-in and the admin panel reads the collection.
+    match /users/{userId} {
+      // Only an admin can see the whole directory; a user can read their own
+      // record. Nobody else can read anyone's email/photo.
+      allow read: if isAdmin() || (request.auth != null && request.auth.uid == userId);
+
+      // A user may only ever write their OWN document, and only the profile
+      // fields the mirror actually needs — this stops someone from parking
+      // arbitrary data (or a fake 'role') under their uid.
+      allow create, update: if request.auth != null
+        && request.auth.uid == userId
+        && request.resource.data.uid == userId
+        && request.resource.data.keys().hasOnly([
+             'uid', 'email', 'displayName', 'photoURL',
+             'providers', 'lastSeenAt', 'signInCount', 'createdAt'
+           ]);
+
+      allow delete: if isAdmin();
     }
 
     // Buyer requirements (open "I want to buy X in city Y" posts).
