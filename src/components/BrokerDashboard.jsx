@@ -1,7 +1,11 @@
 "use client";
 import React, { useState, useMemo } from 'react';
-import { MapPin, Phone, Mail, IndianRupee, Home, Clock, UserCheck, Inbox, Filter, Upload, Building } from 'lucide-react';
+import { MapPin, Phone, Mail, IndianRupee, Home, Clock, UserCheck, Inbox, Filter, Upload, Building, BookOpen, Share2, Link2, FileText, Edit3, Trash2, Plus } from 'lucide-react';
 import { normalizeCity } from '../hooks/useBrokers';
+import CatalogBuilder from './CatalogBuilder';
+
+const CATALOG_URL = (id) =>
+  `${typeof window !== 'undefined' ? window.location.origin : 'https://a1plot.com'}/catalog?id=${id}`;
 
 const timeAgo = (ts) => {
   if (!ts) return '';
@@ -20,9 +24,18 @@ const timeAgo = (ts) => {
  * in ClientApp via useRequirements('broker')); we filter it client-side against
  * the broker's own cities so no composite Firestore index is needed.
  */
-export default function BrokerDashboard({ user, navigate, showToast, myBrokerProfile, profileLoading = false, requirements, loading, plots = [], plotsLoading = false, onViewPlot }) {
+export default function BrokerDashboard({
+  user, navigate, showToast, myBrokerProfile, profileLoading = false, requirements, loading,
+  plots = [], plotsLoading = false, onViewPlot,
+  catalogs = [], catalogsLoading = false, createCatalog, updateCatalog, deleteCatalog,
+}) {
   const [cityFilter, setCityFilter] = useState('all');
   const [revealed, setRevealed] = useState({}); // requirementId -> true once "Contact" clicked
+  // 'dashboard' | 'builder' — the builder takes over the whole view so brokers
+  // can browse the full property list without a cramped modal.
+  const [mode, setMode] = useState('dashboard');
+  const [editingCatalog, setEditingCatalog] = useState(null);
+  const [copiedId, setCopiedId] = useState(null);
 
   const brokerCities = useMemo(
     () => (myBrokerProfile?.cities || []).map(normalizeCity),
@@ -45,6 +58,63 @@ export default function BrokerDashboard({ user, navigate, showToast, myBrokerPro
     if (cityFilter !== 'all') rows = rows.filter(r => normalizeCity(r.city) === cityFilter);
     return rows;
   }, [requirements, brokerCities, cityFilter]);
+
+  const openBuilder = (catalog = null) => {
+    setEditingCatalog(catalog);
+    setMode('builder');
+    if (typeof window !== 'undefined') window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
+  const handleSaveCatalog = async (data) => {
+    if (editingCatalog) {
+      await updateCatalog(editingCatalog.id, data);
+      showToast && showToast('Catalog updated.');
+    } else {
+      const id = await createCatalog(data);
+      // Put the link on the clipboard immediately — creating a catalog is
+      // almost always followed by sending it to someone.
+      try { await navigator.clipboard.writeText(CATALOG_URL(id)); } catch (_) {}
+      showToast && showToast('Catalog created — share link copied to your clipboard.');
+    }
+    setEditingCatalog(null);
+    setMode('dashboard');
+  };
+
+  const handleCopyLink = async (id) => {
+    const url = CATALOG_URL(id);
+    try {
+      await navigator.clipboard.writeText(url);
+      setCopiedId(id);
+      setTimeout(() => setCopiedId(null), 2200);
+    } catch (_) {
+      window.prompt('Copy this catalog link:', url);
+    }
+  };
+
+  const handleShareCatalog = async (catalog) => {
+    const url = CATALOG_URL(catalog.id);
+    const text = `${catalog.title} — ${(catalog.plotIds?.length || 0) + (catalog.customItems?.length || 0)} properties`;
+    if (typeof navigator !== 'undefined' && navigator.share) {
+      try {
+        await navigator.share({ title: catalog.title, text, url });
+        return;
+      } catch (err) {
+        if (err?.name === 'AbortError') return; // user dismissed the sheet
+      }
+    }
+    handleCopyLink(catalog.id);
+  };
+
+  const handleDeleteCatalog = async (catalog) => {
+    const ok = window.confirm(`Delete the catalog "${catalog.title}"? Anyone you've already sent the link to will no longer be able to open it.`);
+    if (!ok) return;
+    try {
+      await deleteCatalog(catalog.id);
+      showToast && showToast('Catalog deleted.');
+    } catch (_) {
+      showToast && showToast('Could not delete that catalog. Please try again.');
+    }
+  };
 
   const handleContact = async (req) => {
     setRevealed(prev => ({ ...prev, [req.id]: true }));
@@ -144,6 +214,24 @@ export default function BrokerDashboard({ user, navigate, showToast, myBrokerPro
     );
   }
 
+  // The catalog builder replaces the dashboard body while it's open.
+  if (mode === 'builder') {
+    return (
+      <section className="section" style={{ paddingTop: '1.5rem' }}><div className="container">
+        <CatalogBuilder
+          user={user}
+          plots={plots}
+          plotsLoading={plotsLoading}
+          myBrokerProfile={myBrokerProfile}
+          showToast={showToast}
+          editing={editingCatalog}
+          onSave={handleSaveCatalog}
+          onCancel={() => { setEditingCatalog(null); setMode('dashboard'); }}
+        />
+      </div></section>
+    );
+  }
+
   return (
     <section className="section" style={{ paddingTop: '1.5rem' }}><div className="container">
       <div className="section-header" style={{ marginBottom: '1.5rem', display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: '1rem', flexWrap: 'wrap' }}>
@@ -154,13 +242,22 @@ export default function BrokerDashboard({ user, navigate, showToast, myBrokerPro
             {' · '}<a onClick={() => navigate('broker-register')} style={{ color: 'var(--primary)', cursor: 'pointer' }}>Edit areas</a>
           </p>
         </div>
-        <button
-          className="btn btn-primary"
-          style={{ display: 'inline-flex', alignItems: 'center', gap: '0.5rem' }}
-          onClick={() => navigate('seller-list')}
-        >
-          <Upload size={17} /> Upload Property
-        </button>
+        <div style={{ display: 'flex', gap: '0.6rem', flexWrap: 'wrap' }}>
+          <button
+            className="btn btn-outline"
+            style={{ display: 'inline-flex', alignItems: 'center', gap: '0.5rem', background: 'white' }}
+            onClick={() => navigate('seller-list')}
+          >
+            <Upload size={17} /> Upload Property
+          </button>
+          <button
+            className="btn btn-primary"
+            style={{ display: 'inline-flex', alignItems: 'center', gap: '0.5rem' }}
+            onClick={() => openBuilder()}
+          >
+            <BookOpen size={17} /> Make a Catalog
+          </button>
+        </div>
       </div>
 
       {brokerCities.length > 1 && (
@@ -229,6 +326,79 @@ export default function BrokerDashboard({ user, navigate, showToast, myBrokerPro
           })}
         </div>
       )}
+
+      {/* ── Shareable catalogs ────────────────────────────────────────────── */}
+      <div style={{ marginTop: '3.5rem' }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: '1rem', flexWrap: 'wrap', marginBottom: '1.25rem' }}>
+          <div>
+            <h2 className="section-title" style={{ fontSize: '1.6rem', marginBottom: '0.25rem', display: 'flex', alignItems: 'center', gap: 8 }}>
+              <BookOpen size={22} style={{ color: 'var(--primary)' }} /> My Catalogs
+              {catalogs.length > 0 && <span style={{ color: 'var(--text-muted)', fontSize: '1rem', fontWeight: 500 }}>({catalogs.length})</span>}
+            </h2>
+            <p style={{ color: 'var(--text-muted)', margin: 0 }}>
+              Handpicked property sets you can send to a client as a link or a PDF.
+            </p>
+          </div>
+          <button className="btn btn-outline" style={{ display: 'inline-flex', alignItems: 'center', gap: '0.5rem', background: 'white' }} onClick={() => openBuilder()}>
+            <Plus size={16} /> New Catalog
+          </button>
+        </div>
+
+        {catalogsLoading ? (
+          <p style={{ color: 'var(--text-muted)', textAlign: 'center', padding: '2.5rem 0' }}>Loading catalogs…</p>
+        ) : catalogs.length === 0 ? (
+          <div style={{ textAlign: 'center', padding: '3rem 1rem', background: 'white', border: '1px solid var(--border-color)', borderRadius: 'var(--radius-lg)' }}>
+            <BookOpen size={40} style={{ margin: '0 auto 1rem', opacity: 0.4, color: 'var(--primary)' }} />
+            <p style={{ color: 'var(--text-muted)', margin: '0 0 1.25rem' }}>
+              No catalogs yet. Build one by picking properties from the platform and adding your own.
+            </p>
+            <button className="btn btn-primary" style={{ display: 'inline-flex', alignItems: 'center', gap: '0.5rem' }} onClick={() => openBuilder()}>
+              <BookOpen size={17} /> Make Your First Catalog
+            </button>
+          </div>
+        ) : (
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))', gap: '1.25rem' }}>
+            {catalogs.map(cat => {
+              const count = (cat.plotIds?.length || 0) + (cat.customItems?.length || 0);
+              const url = CATALOG_URL(cat.id);
+              return (
+                <div key={cat.id} style={{ background: 'white', border: '1px solid var(--border-color)', borderRadius: 'var(--radius-lg)', padding: '1.25rem', boxShadow: 'var(--shadow-sm)' }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: '0.5rem', marginBottom: '0.4rem' }}>
+                    <h3 style={{ fontSize: '1.05rem', margin: 0, color: 'var(--text-main)' }}>{cat.title}</h3>
+                    <span style={{ background: 'rgba(59,122,118,0.1)', color: 'var(--primary)', fontWeight: 700, fontSize: '0.72rem', padding: '0.2rem 0.55rem', borderRadius: 999, whiteSpace: 'nowrap' }}>
+                      {count} {count === 1 ? 'property' : 'properties'}
+                    </span>
+                  </div>
+                  {cat.clientName && (
+                    <p style={{ color: 'var(--text-muted)', fontSize: '0.88rem', margin: '0 0 0.35rem' }}>For <strong>{cat.clientName}</strong></p>
+                  )}
+                  <p style={{ display: 'flex', alignItems: 'center', gap: 4, color: 'var(--text-muted)', fontSize: '0.78rem', margin: '0 0 0.9rem' }}>
+                    <Clock size={12} /> Updated {timeAgo(cat.updatedAt || cat.createdAt)}
+                  </p>
+
+                  <div style={{ display: 'flex', gap: '0.4rem', flexWrap: 'wrap' }}>
+                    <button className="admin-btn" style={{ background: 'var(--primary)', color: 'white', border: '1px solid var(--primary)' }} onClick={() => handleShareCatalog(cat)}>
+                      <Share2 size={14} /> Share
+                    </button>
+                    <button className="admin-btn" style={{ background: '#e2e8f0', color: '#1e293b', border: '1px solid #cbd5e1' }} onClick={() => handleCopyLink(cat.id)}>
+                      <Link2 size={14} /> {copiedId === cat.id ? 'Copied!' : 'Copy link'}
+                    </button>
+                    <a className="admin-btn" href={url} target="_blank" rel="noopener noreferrer" style={{ background: '#e2e8f0', color: '#1e293b', border: '1px solid #cbd5e1', textDecoration: 'none' }}>
+                      <FileText size={14} /> Open / PDF
+                    </a>
+                    <button className="admin-btn" style={{ background: '#e2e8f0', color: '#1e293b', border: '1px solid #cbd5e1' }} onClick={() => openBuilder(cat)}>
+                      <Edit3 size={14} /> Edit
+                    </button>
+                    <button className="admin-btn" style={{ background: '#fee2e2', color: '#991b1b', border: '1px solid #fecaca' }} onClick={() => handleDeleteCatalog(cat)}>
+                      <Trash2 size={14} /> Delete
+                    </button>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        )}
+      </div>
 
       {/* ── Properties this broker has uploaded ───────────────────────────── */}
       <div style={{ marginTop: '3.5rem' }}>

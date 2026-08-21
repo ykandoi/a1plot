@@ -31,6 +31,7 @@ import { useInterests } from './hooks/useInterests';
 import { useBrokers } from './hooks/useBrokers';
 import { useRequirements } from './hooks/useRequirements';
 import { useUsers } from './hooks/useUsers';
+import { useCatalogs } from './hooks/useCatalogs';
 import PhoneField, { isValidPhone } from './components/PhoneField';
 
 const GOOGLE_MAPS_API_KEY = (typeof process !== 'undefined' && process.env && process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY) ? process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY : '';
@@ -614,6 +615,9 @@ export default function App({ hideChrome = false } = {}) {
   // (admins only, on the admin panel) loads the whole signed-in-user directory.
   const { allUsers, loading: usersLoading } =
     useUsers(user, ADMIN_EMAILS.includes(user?.email) && view === 'admin');
+  // A broker's shareable client catalogs — only subscribed on their dashboard.
+  const { catalogs, loading: catalogsLoading, createCatalog, updateCatalog, deleteCatalog } =
+    useCatalogs(user?.uid, view === 'broker-dashboard');
   const [authLoading, setAuthLoading] = useState(true);
   const [authMode, setAuthMode] = useState('login'); // 'login' or 'signup'
   const [authEmail, setAuthEmail] = useState('');
@@ -5077,7 +5081,7 @@ export default function App({ hideChrome = false } = {}) {
           <BrokerRegister user={user} navigate={navigate} showToast={showToast} myBrokerProfile={myBrokerProfile} saveBroker={saveBroker} ensureAuth={ensureAuth} />
         )}
         {view === 'broker-dashboard' && (
-          <BrokerDashboard user={user} navigate={navigate} showToast={showToast} myBrokerProfile={myBrokerProfile} profileLoading={!!user && myBrokerProfileLoading} requirements={requirements} loading={requirementsLoading} plots={plots} plotsLoading={plotsLoading} onViewPlot={handleViewProperty} />
+          <BrokerDashboard user={user} navigate={navigate} showToast={showToast} myBrokerProfile={myBrokerProfile} profileLoading={!!user && myBrokerProfileLoading} requirements={requirements} loading={requirementsLoading} plots={plots} plotsLoading={plotsLoading} onViewPlot={handleViewProperty} catalogs={catalogs} catalogsLoading={catalogsLoading} createCatalog={createCatalog} updateCatalog={updateCatalog} deleteCatalog={deleteCatalog} />
         )}
       </main>
 

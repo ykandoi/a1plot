@@ -9,7 +9,9 @@ export default function robots() {
   return {
     rules: [
       // Keep auth-gated / private app screens out of the index.
-      { userAgent: '*', allow: '/', disallow: ['/admin', '/admin_edit', '/admin_map', '/dashboard', '/edit_property', '/login', '/interests', '/buy_request'] },
+      // /catalog is a private document a broker sends to one client — it also
+      // carries a noindex tag, but keep crawlers off the path entirely.
+      { userAgent: '*', allow: '/', disallow: ['/admin', '/admin_edit', '/admin_map', '/dashboard', '/edit_property', '/login', '/interests', '/buy_request', '/catalog'] },
       ...aiAgents.map(userAgent => ({ userAgent, allow: '/' })),
     ],
     sitemap: `${BASE}/sitemap.xml`,

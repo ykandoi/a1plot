@@ -70,6 +70,31 @@ service cloud.firestore {
       allow delete: if isAdmin() || (request.auth != null && request.auth.uid == brokerUid);
     }
 
+    // Broker-built property catalogs (see src/hooks/useCatalogs.js). A catalog
+    // is a hand-picked set of listings a broker shares with one client.
+    match /catalogs/{catalogId} {
+      // World-readable BY DESIGN: the whole point is a link a broker can send
+      // to a client who has no account. Secrecy rests on the doc ID being an
+      // unguessable 20-char Firestore auto-ID, not on auth. Brokers are warned
+      // in the UI not to put anything confidential in a catalog.
+      allow read: if true;
+
+      // Only a signed-in principal can create one, and only under their own
+      // uid — so a catalog can never be attributed to another broker.
+      allow create: if request.auth != null
+        && request.resource.data.brokerUid == request.auth.uid;
+
+      // Only the owning broker (or an admin) may edit or remove it, and
+      // ownership itself can't be reassigned on update.
+      allow update: if isAdmin()
+        || (request.auth != null
+            && resource.data.brokerUid == request.auth.uid
+            && request.resource.data.brokerUid == resource.data.brokerUid);
+
+      allow delete: if isAdmin()
+        || (request.auth != null && resource.data.brokerUid == request.auth.uid);
+    }
+
     // Signed-in user directory (see src/hooks/useUsers.js). The client SDK
     // can't enumerate Firebase Auth accounts, so each user mirrors their own
     // profile here on sign-in and the admin panel reads the collection.
