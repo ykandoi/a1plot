@@ -1,27 +1,37 @@
 "use client";
 import React, { useState, useMemo, useRef } from 'react';
-import { Search, Check, Plus, Trash2, ArrowLeft, Save, Image as ImageIcon, X } from 'lucide-react';
+import { Search, Check, Plus, ArrowLeft, ArrowRight, Image as ImageIcon, X, Share2, Link2, FileText, MessageCircle } from 'lucide-react';
 import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 import { storage } from '../firebase';
 
 const EMPTY_CUSTOM = { title: '', location: '', price: '', size: '', description: '', image: '' };
 
+export const catalogUrl = (id) =>
+  `${typeof window !== 'undefined' ? window.location.origin : 'https://a1plot.com'}/catalog?id=${id}`;
+
+// Catalogs have no user-supplied name — brokers just pick properties and send.
+// This is the label the dashboard list uses so entries stay tellable apart.
+export const autoLabel = (count) =>
+  `${count} ${count === 1 ? 'property' : 'properties'} · ${new Date().toLocaleDateString('en-IN', { day: '2-digit', month: 'short' })}`;
+
 /**
- * CatalogBuilder — assembles a shareable catalog for one client.
+ * CatalogBuilder — two steps, deliberately: pick properties, then send.
  *
- * Two sources of properties, deliberately stored differently:
- *  - platform listings are kept as `plotIds` only, so the client always sees
- *    the live price/status when they open the link rather than a stale copy;
- *  - properties the broker types in themselves are stored inline as
- *    `customItems`, because they exist nowhere else.
+ * Step 1 is the whole job (choose what to show), step 2 is purely the share
+ * surface. There is no title/client/description form: brokers said that's
+ * friction, and the catalog is identified by its link, not by metadata.
+ *
+ * Platform listings are stored as `plotIds` only, so a client opening the link
+ * always sees the current price and status rather than a snapshot. Properties
+ * the broker types in are stored inline as `customItems` — they exist nowhere
+ * else.
  */
 export default function CatalogBuilder({
   user, plots = [], plotsLoading, myBrokerProfile, showToast,
   editing, onSave, onCancel,
 }) {
-  const [title, setTitle] = useState(editing?.title || '');
-  const [clientName, setClientName] = useState(editing?.clientName || '');
-  const [note, setNote] = useState(editing?.note || '');
+  const [step, setStep] = useState('select'); // 'select' | 'send'
+  const [savedId, setSavedId] = useState(editing?.id || null);
   const [selectedIds, setSelectedIds] = useState(() => new Set(editing?.plotIds || []));
   const [customItems, setCustomItems] = useState(editing?.customItems || []);
   const [search, setSearch] = useState('');
@@ -30,10 +40,12 @@ export default function CatalogBuilder({
   const [uploading, setUploading] = useState(false);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState('');
+  const [copied, setCopied] = useState(false);
   const fileRef = useRef(null);
 
-  // Only properties a client should ever be shown: publicly visible and not
-  // still awaiting (or failing) verification.
+  // Only what a client should ever be shown: publicly visible, not rejected.
+  // Pending listings are included so a broker can share something they've just
+  // uploaded while it's still being verified.
   const shareable = useMemo(
     () => (plots || []).filter(p => p.visibility !== 'private' && p.status !== 'Rejected'),
     [plots]
@@ -92,17 +104,15 @@ export default function CatalogBuilder({
 
   const totalCount = selectedIds.size + customItems.length;
 
-  const handleSave = async () => {
+  // Step 1 → 2. Saving happens here so the share step always has a real link.
+  const handleNext = async () => {
     setError('');
-    if (!title.trim()) { setError('Give your catalog a title so your client knows what they\'re looking at.'); return; }
-    if (totalCount === 0) { setError('Add at least one property to the catalog.'); return; }
+    if (totalCount === 0) { setError('Select at least one property to put in the catalog.'); return; }
 
     setSaving(true);
     try {
-      await onSave({
-        title: title.trim(),
-        clientName: clientName.trim(),
-        note: note.trim(),
+      const payload = {
+        title: autoLabel(totalCount),
         plotIds: [...selectedIds],
         customItems,
         brokerUid: user.uid,
@@ -110,14 +120,100 @@ export default function CatalogBuilder({
         brokerPhone: myBrokerProfile?.phone || '',
         brokerEmail: myBrokerProfile?.email || user.email || '',
         brokerAgency: myBrokerProfile?.agency || '',
-      });
+      };
+      const id = await onSave(payload, savedId);
+      setSavedId(id);
+      setStep('send');
+      if (typeof window !== 'undefined') window.scrollTo({ top: 0, behavior: 'smooth' });
     } catch (err) {
       console.error('Catalog save failed:', err);
       setError(err.message || 'Could not save the catalog. Please try again.');
+    } finally {
       setSaving(false);
     }
   };
 
+  const url = savedId ? catalogUrl(savedId) : '';
+
+  const handleCopy = async () => {
+    try {
+      await navigator.clipboard.writeText(url);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2200);
+    } catch (_) {
+      window.prompt('Copy this catalog link:', url);
+    }
+  };
+
+  const handleShare = async () => {
+    if (typeof navigator !== 'undefined' && navigator.share) {
+      try {
+        await navigator.share({ title: 'Property Catalog', text: 'Here are some properties for you:', url });
+        return;
+      } catch (err) {
+        if (err?.name === 'AbortError') return; // user dismissed the sheet
+      }
+    }
+    handleCopy();
+  };
+
+  /* ── Step 2: send ──────────────────────────────────────────────────────── */
+  if (step === 'send') {
+    return (
+      <div style={{ maxWidth: 560, margin: '0 auto' }}>
+        <div style={{ textAlign: 'center', marginBottom: '1.75rem' }}>
+          <div style={{ width: 56, height: 56, borderRadius: '50%', background: '#dcfce7', color: '#166534', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 1rem' }}>
+            <Check size={28} />
+          </div>
+          <h2 className="section-title" style={{ fontSize: '1.5rem', marginBottom: '0.35rem' }}>Catalog ready</h2>
+          <p style={{ color: 'var(--text-muted)', margin: 0 }}>
+            {totalCount} {totalCount === 1 ? 'property' : 'properties'} — share this link with anyone.
+          </p>
+        </div>
+
+        <div style={{ background: 'white', border: '1px solid var(--border-color)', borderRadius: 'var(--radius-lg)', padding: '1.25rem', marginBottom: '1.25rem' }}>
+          <div style={{
+            display: 'flex', alignItems: 'center', gap: 8, background: '#f8fafc',
+            border: '1px solid var(--border-color)', borderRadius: 8, padding: '0.65rem 0.85rem',
+            marginBottom: '1rem', overflow: 'hidden',
+          }}>
+            <Link2 size={15} style={{ color: 'var(--text-muted)', flexShrink: 0 }} />
+            <span style={{ fontSize: '0.85rem', color: 'var(--text-main)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{url}</span>
+          </div>
+
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))', gap: '0.6rem' }}>
+            <button type="button" className="btn btn-primary" style={{ justifyContent: 'center', display: 'inline-flex', alignItems: 'center', gap: 7 }} onClick={handleShare}>
+              <Share2 size={16} /> Share
+            </button>
+            <a
+              className="btn"
+              href={`https://wa.me/?text=${encodeURIComponent('Here are some properties for you: ' + url)}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              style={{ justifyContent: 'center', display: 'inline-flex', alignItems: 'center', gap: 7, background: '#25d366', color: 'white', border: '1px solid #25d366' }}
+            >
+              <MessageCircle size={16} /> WhatsApp
+            </a>
+            <button type="button" className="btn btn-outline" style={{ justifyContent: 'center', background: 'white', display: 'inline-flex', alignItems: 'center', gap: 7 }} onClick={handleCopy}>
+              <Link2 size={16} /> {copied ? 'Copied!' : 'Copy link'}
+            </button>
+            <a className="btn btn-outline" href={url} target="_blank" rel="noopener noreferrer" style={{ justifyContent: 'center', background: 'white', display: 'inline-flex', alignItems: 'center', gap: 7 }}>
+              <FileText size={16} /> Open / PDF
+            </a>
+          </div>
+        </div>
+
+        <div style={{ display: 'flex', gap: '0.6rem', justifyContent: 'center', flexWrap: 'wrap' }}>
+          <button type="button" className="btn btn-outline" style={{ background: 'white', display: 'inline-flex', alignItems: 'center', gap: 6 }} onClick={() => setStep('select')}>
+            <ArrowLeft size={15} /> Edit properties
+          </button>
+          <button type="button" className="btn btn-outline" style={{ background: 'white' }} onClick={onCancel}>Done</button>
+        </div>
+      </div>
+    );
+  }
+
+  /* ── Step 1: select ────────────────────────────────────────────────────── */
   return (
     <div>
       <button className="btn btn-outline" style={{ display: 'inline-flex', alignItems: 'center', gap: 6, background: 'white', marginBottom: '1.25rem' }} onClick={onCancel}>
@@ -125,38 +221,17 @@ export default function CatalogBuilder({
       </button>
 
       <h2 className="section-title" style={{ fontSize: '1.6rem', marginBottom: '0.25rem' }}>
-        {editing ? 'Edit Catalog' : 'Make a Catalog'}
+        {editing ? 'Edit Catalog' : 'Select Properties'}
       </h2>
-      <p style={{ color: 'var(--text-muted)', marginBottom: '1.75rem' }}>
-        Pick properties from the platform, add your own, then share one link or PDF with your client.
+      <p style={{ color: 'var(--text-muted)', marginBottom: '1.5rem' }}>
+        Tap the properties you want to include, then press Next to get a shareable link.
       </p>
 
       {error && (
         <div style={{ background: '#fef2f2', border: '1px solid #fecaca', color: '#b91c1c', padding: '0.75rem 1rem', borderRadius: 8, marginBottom: '1.25rem', fontSize: '0.9rem' }}>{error}</div>
       )}
 
-      {/* ── Catalog details ───────────────────────────────────────────────── */}
-      <div className="listing-form" style={{ marginBottom: '1.75rem' }}>
-        <div className="form-grid">
-          <div className="form-group">
-            <label>Catalog Title <span style={{ color: 'var(--accent-red)' }}>*</span></label>
-            <input className="form-input" value={title} onChange={e => setTitle(e.target.value)} placeholder="e.g. Plots in Jaipur under ₹50L" />
-          </div>
-          <div className="form-group">
-            <label>Client Name</label>
-            <input className="form-input" value={clientName} onChange={e => setClientName(e.target.value)} placeholder="e.g. Mr. Sharma (optional)" />
-          </div>
-        </div>
-        <div className="form-group" style={{ marginTop: '1.25rem' }}>
-          <label>Message to Client</label>
-          <textarea className="form-input" rows={3} value={note} onChange={e => setNote(e.target.value)} placeholder="A short note that appears at the top of the catalog (optional)" />
-        </div>
-        <p style={{ fontSize: '0.8rem', color: 'var(--text-muted)', margin: '0.75rem 0 0' }}>
-          Anyone with the link can open this catalog, so please don't include confidential details.
-        </p>
-      </div>
-
-      {/* ── Pick from platform listings ───────────────────────────────────── */}
+      {/* ── Platform listings ─────────────────────────────────────────────── */}
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '1rem', flexWrap: 'wrap', marginBottom: '0.85rem' }}>
         <h3 style={{ fontSize: '1.15rem', margin: 0, color: 'var(--text-main)' }}>
           Properties on A1Plot <span style={{ color: 'var(--text-muted)', fontWeight: 500, fontSize: '0.95rem' }}>({selectedIds.size} selected)</span>
@@ -295,13 +370,13 @@ export default function CatalogBuilder({
         </div>
       )}
 
-      {/* ── Save ──────────────────────────────────────────────────────────── */}
+      {/* ── Next ──────────────────────────────────────────────────────────── */}
       <div style={{ position: 'sticky', bottom: 0, background: 'white', borderTop: '1px solid var(--border-color)', padding: '1rem 0', marginTop: '1.5rem', display: 'flex', gap: '0.75rem', alignItems: 'center', flexWrap: 'wrap' }}>
-        <button type="button" className="btn btn-primary" style={{ display: 'inline-flex', alignItems: 'center', gap: 7 }} onClick={handleSave} disabled={saving}>
-          <Save size={17} /> {saving ? 'Saving…' : editing ? 'Save Changes' : 'Create Catalog'}
+        <button type="button" className="btn btn-primary" style={{ display: 'inline-flex', alignItems: 'center', gap: 7 }} onClick={handleNext} disabled={saving || totalCount === 0}>
+          {saving ? 'Saving…' : 'Next'} <ArrowRight size={17} />
         </button>
         <span style={{ color: 'var(--text-muted)', fontSize: '0.9rem' }}>
-          {totalCount} propert{totalCount === 1 ? 'y' : 'ies'} in this catalog
+          {totalCount} selected
         </span>
       </div>
     </div>

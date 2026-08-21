@@ -11,8 +11,8 @@ export async function generateMetadata({ searchParams }) {
   const data = id ? await fetchCatalogWithItems(id) : null;
   if (!data) return { title: 'Property Catalog | A1Plot', robots: { index: false, follow: false } };
   const { catalog, items } = data;
-  const title = catalog.title || `Property Catalog${catalog.clientName ? ' for ' + catalog.clientName : ''}`;
-  const description = `${items.length} handpicked propert${items.length === 1 ? 'y' : 'ies'}${catalog.brokerName ? ' shared by ' + catalog.brokerName : ''} on A1Plot.`;
+  const title = catalog.brokerName ? `Properties shared by ${catalog.brokerName}` : 'Property Catalog';
+  const description = `${items.length} handpicked propert${items.length === 1 ? 'y' : 'ies'} on A1Plot.`;
   const image = items.find(i => i.image)?.image;
   return {
     title: `${title} | A1Plot`,
@@ -99,7 +99,11 @@ export default async function Page({ searchParams }) {
   }
 
   const { catalog, items } = data;
-  const title = catalog.title || 'Property Catalog';
+  // `catalog.title` is an internal label ("3 properties · 21 Aug") used to tell
+  // catalogs apart in the broker's own list — never shown to the client.
+  const title = catalog.brokerName
+    ? `Properties shared by ${catalog.brokerName}`
+    : 'Properties for you';
   const phoneHref = String(catalog.brokerPhone || '').replace(/[^\d+]/g, '');
   const waHref = phoneHref.replace(/^\+/, '');
 
@@ -112,8 +116,6 @@ export default async function Page({ searchParams }) {
         </div>
 
         <h1>{title}</h1>
-        {catalog.clientName && <p className="cat-client">Prepared for <strong>{catalog.clientName}</strong></p>}
-        {catalog.note && <p className="cat-note">{catalog.note}</p>}
 
         {(catalog.brokerName || catalog.brokerPhone) && (
           <section className="cat-broker">

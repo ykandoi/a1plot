@@ -65,19 +65,15 @@ export default function BrokerDashboard({
     if (typeof window !== 'undefined') window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
-  const handleSaveCatalog = async (data) => {
-    if (editingCatalog) {
-      await updateCatalog(editingCatalog.id, data);
-      showToast && showToast('Catalog updated.');
-    } else {
-      const id = await createCatalog(data);
-      // Put the link on the clipboard immediately — creating a catalog is
-      // almost always followed by sending it to someone.
-      try { await navigator.clipboard.writeText(CATALOG_URL(id)); } catch (_) {}
-      showToast && showToast('Catalog created — share link copied to your clipboard.');
+  // Returns the catalog id so the builder can show its share step. Deliberately
+  // does NOT leave the builder — step 2 (send) is where the broker finishes.
+  const handleSaveCatalog = async (data, existingId) => {
+    const id = existingId || editingCatalog?.id;
+    if (id) {
+      await updateCatalog(id, data);
+      return id;
     }
-    setEditingCatalog(null);
-    setMode('dashboard');
+    return await createCatalog(data);
   };
 
   const handleCopyLink = async (id) => {
@@ -364,14 +360,15 @@ export default function BrokerDashboard({
               return (
                 <div key={cat.id} style={{ background: 'white', border: '1px solid var(--border-color)', borderRadius: 'var(--radius-lg)', padding: '1.25rem', boxShadow: 'var(--shadow-sm)' }}>
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: '0.5rem', marginBottom: '0.4rem' }}>
-                    <h3 style={{ fontSize: '1.05rem', margin: 0, color: 'var(--text-main)' }}>{cat.title}</h3>
+                    {/* Catalogs have no user-given name, so the date is what
+                        tells one apart from another in this list. */}
+                    <h3 style={{ fontSize: '1.05rem', margin: 0, color: 'var(--text-main)' }}>
+                      Catalog · {new Date(Number(cat.createdAt) || Date.now()).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' })}
+                    </h3>
                     <span style={{ background: 'rgba(59,122,118,0.1)', color: 'var(--primary)', fontWeight: 700, fontSize: '0.72rem', padding: '0.2rem 0.55rem', borderRadius: 999, whiteSpace: 'nowrap' }}>
                       {count} {count === 1 ? 'property' : 'properties'}
                     </span>
                   </div>
-                  {cat.clientName && (
-                    <p style={{ color: 'var(--text-muted)', fontSize: '0.88rem', margin: '0 0 0.35rem' }}>For <strong>{cat.clientName}</strong></p>
-                  )}
                   <p style={{ display: 'flex', alignItems: 'center', gap: 4, color: 'var(--text-muted)', fontSize: '0.78rem', margin: '0 0 0.9rem' }}>
                     <Clock size={12} /> Updated {timeAgo(cat.updatedAt || cat.createdAt)}
                   </p>

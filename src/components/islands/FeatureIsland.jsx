@@ -2,10 +2,11 @@
 import React, { useState, useEffect } from 'react';
 import { CheckCircle2 } from 'lucide-react';
 import { auth } from '../../firebase';
-import { onAuthStateChanged } from 'firebase/auth';
+import { onAuthStateChanged, signInAnonymously } from 'firebase/auth';
 import { useBrokers } from '../../hooks/useBrokers';
 import { useRequirements } from '../../hooks/useRequirements';
 import { usePlots } from '../../hooks/usePlots';
+import { useCatalogs } from '../../hooks/useCatalogs';
 import BrokerRegister from '../BrokerRegister';
 import PostRequirement from '../PostRequirement';
 import BrokerDashboard from '../BrokerDashboard';
@@ -65,12 +66,37 @@ export default function FeatureIsland({ feature, initialPlots = [] }) {
 
   const showToast = (msg) => setToast(msg);
 
+  // Mirror of ClientApp's ensureAuth: registering as a broker needs no account,
+  // but firestore.rules still require a principal on create. Hands back an
+  // invisible anonymous session so the write succeeds with no sign-in screen.
+  const ensureAuth = async () => {
+    if (user) return user;
+    if (!auth || !auth.app) throw new Error('Authentication is unavailable. Please try again later.');
+    try {
+      const cred = await signInAnonymously(auth);
+      return cred.user;
+    } catch (err) {
+      console.error('Anonymous sign-in failed:', err);
+      throw new Error(
+        err?.code === 'auth/operation-not-allowed'
+          ? 'Guest registration is not enabled yet. Please log in to continue.'
+          : 'Could not start a guest session. Please check your connection and try again.'
+      );
+    }
+  };
+
   const { myBrokerProfile, myBrokerProfileLoading, saveBroker } = useBrokers(feature === 'broker-register' || feature === 'broker-dashboard' ? user?.uid : null);
   // Only subscribe to buyer requirements once the broker is APPROVED — a
   // pending/rejected broker would just get permission-denied from the rules.
   const reqMode = feature === 'broker-dashboard' && myBrokerProfile?.status === 'approved' ? 'broker' : 'none';
   const { requirements, loading: reqLoading, addRequirement } = useRequirements(reqMode, user?.uid);
-  const { plots } = usePlots(initialPlots, feature === 'search');
+  // The broker dashboard needs the full plot list too — "My Listings" and the
+  // catalog builder both read it. Without this it silently rendered an empty
+  // list ("No properties available on the platform yet").
+  const needsPlots = feature === 'search' || feature === 'broker-dashboard';
+  const { plots, loading: plotsLoading } = usePlots(initialPlots, needsPlots);
+  const { catalogs, loading: catalogsLoading, createCatalog, updateCatalog, deleteCatalog } =
+    useCatalogs(user?.uid, feature === 'broker-dashboard');
 
   // Combined "still figuring out who's asking" signal for BrokerDashboard —
   // either auth hasn't resolved yet, or (once we know there IS a user) their
@@ -81,9 +107,25 @@ export default function FeatureIsland({ feature, initialPlots = [] }) {
 
   return (
     <>
-      {feature === 'broker-register' && <BrokerRegister {...shared} myBrokerProfile={myBrokerProfile} saveBroker={saveBroker} />}
+      {feature === 'broker-register' && <BrokerRegister {...shared} myBrokerProfile={myBrokerProfile} saveBroker={saveBroker} ensureAuth={ensureAuth} />}
       {feature === 'post-requirement' && <PostRequirement {...shared} addRequirement={addRequirement} />}
-      {feature === 'broker-dashboard' && <BrokerDashboard {...shared} myBrokerProfile={myBrokerProfile} profileLoading={brokerProfileStillResolving} requirements={requirements} loading={reqLoading} />}
+      {feature === 'broker-dashboard' && (
+        <BrokerDashboard
+          {...shared}
+          myBrokerProfile={myBrokerProfile}
+          profileLoading={brokerProfileStillResolving}
+          requirements={requirements}
+          loading={reqLoading}
+          plots={plots}
+          plotsLoading={plotsLoading}
+          onViewPlot={openProperty}
+          catalogs={catalogs}
+          catalogsLoading={catalogsLoading}
+          createCatalog={createCatalog}
+          updateCatalog={updateCatalog}
+          deleteCatalog={deleteCatalog}
+        />
+      )}
       {feature === 'search' && <SearchResults plots={plots} navigate={navigate} user={user} showToast={showToast} onOpenProperty={openProperty} />}
 
       {toast && (
