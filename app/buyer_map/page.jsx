@@ -1,5 +1,5 @@
 import SiteChrome from '../../src/components/site/SiteChrome';
-import { jsonLdHtml } from '../../src/lib/jsonld';
+import { jsonLdHtml, priceOffer } from '../../src/lib/jsonld';
 import BuyerMapMount from '../../src/components/islands/BuyerMapMount';
 import { fetchPublicPlots } from '../../src/lib/fetchPlots';
 
@@ -25,7 +25,7 @@ export default async function Page() {
     numberOfItems: plots.length,
     itemListElement: plots.slice(0, 25).map((p, i) => ({
       '@type': 'ListItem', position: i + 1,
-      item: { '@type': 'RealEstateListing', name: p.title, url: `https://a1plot.com/property?id=${p.id}`, ...(p.price ? { offers: { '@type': 'Offer', price: String(p.price).replace(/[^\d]/g, '') || undefined, priceCurrency: 'INR' } } : {}) },
+      item: { '@type': 'RealEstateListing', name: p.title, url: `https://a1plot.com/property?id=${p.id}`, ...(priceOffer(p.price) ? { offers: priceOffer(p.price) } : {}) },
     })),
   };
 

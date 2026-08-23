@@ -67,7 +67,16 @@ export default function RootLayout({ children }) {
         <link rel="dns-prefetch" href="https://connect.facebook.net" />
         <link rel="dns-prefetch" href="https://www.googletagmanager.com" />
 
-        {/* Structured Data for AI & Search Engines */}
+        {/* Site-wide structured data: the organisation behind every page, plus
+            the WebSite entity that carries the sitelinks search box.
+
+            This deliberately does NOT describe listings. A hardcoded ItemList
+            of five properties used to live here, which meant every page on the
+            site — privacy policy included — claimed to list those exact plots,
+            at prices frozen at the time it was written. It also collided with
+            the real, Firestore-backed ItemList that app/page.jsx emits: same
+            @id, different contents, on the same page. Listing data belongs on
+            the routes that actually have listings, generated from live data. */}
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{
@@ -75,156 +84,28 @@ export default function RootLayout({ children }) {
               "@context": "https://schema.org",
               "@graph": [
                 {
-                  "@type": "WebSite",
-                  "@id": "https://a1plot.com/#website",
+                  "@type": "RealEstateAgent",
+                  "@id": "https://a1plot.com/#organization",
                   "name": "A1Plot",
                   "url": "https://a1plot.com/",
-                  "description": "A1Plot brings stock-market velocity, liquidity, and transparency to Indian real estate. Discover and invest in verified premium land parcels, commercial plots, and agricultural land in Rajasthan, Bangalore, and across India.",
-                  "keywords": "buy land, plots for sale, real estate investing, A1Plot, agricultural land India",
-                  "brand": {
-                    "@type": "Brand",
-                    "name": "A1Plot",
-                    "color": "#1e293b",
-                    "logo": "https://a1plot.com/assets/favicon_logo.png"
-                  }
+                  "email": "support@a1plot.com",
+                  "logo": { "@type": "ImageObject", "url": "https://a1plot.com/assets/logo.webp" },
+                  "image": "https://a1plot.com/assets/logo.webp",
+                  "description": "A1Plot is a direct digital marketplace for verified land, commercial plots and agricultural land across India, with transparent pricing and legally vetted title.",
+                  "areaServed": { "@type": "Country", "name": "India" },
+                  "knowsAbout": ["Land investment", "Agricultural land", "Commercial plots", "Residential plots", "RERA verification", "Title verification"]
                 },
                 {
-                  "@type": "ItemList",
-                  "@id": "https://a1plot.com/#property-listings",
-                  "name": "A1Plot Active Verified Properties",
-                  "numberOfItems": 5,
-                  "itemListElement": [
-                    {
-                      "@type": "ListItem",
-                      "position": 1,
-                      "item": {
-                        "@type": "RealEstateListing",
-                        "name": "SEZ Institutional Land",
-                        "description": "Premium institutional patta land parcel in SEZ zone. RERA verified and 50-point legal check completed.",
-                        "url": "https://a1plot.com/property?id=1",
-                        "offers": {
-                          "@type": "Offer",
-                          "price": "700000000",
-                          "priceCurrency": "INR",
-                          "availability": "https://schema.org/InStock"
-                        },
-                        "about": {
-                          "@type": "Landform",
-                          "name": "SEZ Institutional Land",
-                          "address": {
-                            "@type": "PostalAddress",
-                            "addressLocality": "SEZ",
-                            "addressRegion": "Rajasthan",
-                            "addressCountry": "IN"
-                          }
-                        }
-                      }
-                    },
-                    {
-                      "@type": "ListItem",
-                      "position": 2,
-                      "item": {
-                        "@type": "RealEstateListing",
-                        "name": "Palada Agriculture Land",
-                        "description": "Fertile agricultural land parcel in Palada. Ideal for long term holds and farming. Verified listing.",
-                        "url": "https://a1plot.com/property?id=2",
-                        "offers": {
-                          "@type": "Offer",
-                          "price": "72500000",
-                          "priceCurrency": "INR",
-                          "availability": "https://schema.org/InStock"
-                        },
-                        "about": {
-                          "@type": "Landform",
-                          "name": "Palada Agriculture Land",
-                          "address": {
-                            "@type": "PostalAddress",
-                            "addressLocality": "Palada",
-                            "addressRegion": "Rajasthan",
-                            "addressCountry": "IN"
-                          }
-                        }
-                      }
-                    },
-                    {
-                      "@type": "ListItem",
-                      "position": 3,
-                      "item": {
-                        "@type": "RealEstateListing",
-                        "name": "Todha Agriculture Land",
-                        "description": "Large agricultural land parcel in Todha. Complete title checks done. Direct booking.",
-                        "url": "https://a1plot.com/property?id=3",
-                        "offers": {
-                          "@type": "Offer",
-                          "price": "15000000",
-                          "priceCurrency": "INR",
-                          "availability": "https://schema.org/InStock"
-                        },
-                        "about": {
-                          "@type": "Landform",
-                          "name": "Todha Agriculture Land",
-                          "address": {
-                            "@type": "PostalAddress",
-                            "addressLocality": "Todha",
-                            "addressRegion": "Rajasthan",
-                            "addressCountry": "IN"
-                          }
-                        }
-                      }
-                    },
-                    {
-                      "@type": "ListItem",
-                      "position": 4,
-                      "item": {
-                        "@type": "RealEstateListing",
-                        "name": "Sikar Road Commercial Plot",
-                        "description": "High-value highway-facing commercial plot on Sikar Road. Complete RERA clearances.",
-                        "url": "https://a1plot.com/property?id=4",
-                        "offers": {
-                          "@type": "Offer",
-                          "price": "220000000",
-                          "priceCurrency": "INR",
-                          "availability": "https://schema.org/InStock"
-                        },
-                        "about": {
-                          "@type": "Landform",
-                          "name": "Sikar Road Commercial Plot",
-                          "address": {
-                            "@type": "PostalAddress",
-                            "addressLocality": "Sikar Road",
-                            "addressRegion": "Rajasthan",
-                            "addressCountry": "IN"
-                          }
-                        }
-                      }
-                    },
-                    {
-                      "@type": "ListItem",
-                      "position": 5,
-                      "item": {
-                        "@type": "RealEstateListing",
-                        "name": "Bikaner Agriculture Land",
-                        "description": "Massive 100 Bigha agricultural plot in Bikaner. Verified high-CAGR investment.",
-                        "url": "https://a1plot.com/property?id=5",
-                        "offers": {
-                          "@type": "Offer",
-                          "price": "200000000",
-                          "priceCurrency": "INR",
-                          "availability": "https://schema.org/InStock"
-                        },
-                        "about": {
-                          "@type": "Landform",
-                          "name": "Bikaner Agriculture Land",
-                          "address": {
-                            "@type": "PostalAddress",
-                            "addressLocality": "Bikaner",
-                            "addressRegion": "Rajasthan",
-                            "addressCountry": "IN"
-                          }
-                        }
-                      }
-                    }
-                  ]
+                  "@type": "WebSite",
+                  "@id": "https://a1plot.com/#website",
+                  "url": "https://a1plot.com/",
+                  "name": "A1Plot",
+                  "publisher": { "@id": "https://a1plot.com/#organization" },
+                  "potentialAction": {
+                    "@type": "SearchAction",
+                    "target": { "@type": "EntryPoint", "urlTemplate": "https://a1plot.com/search?q={search_term_string}" },
+                    "query-input": "required name=search_term_string"
+                  }
                 }
               ]
             })

@@ -1,5 +1,5 @@
 import SiteChrome from '../../src/components/site/SiteChrome';
-import { jsonLdHtml } from '../../src/lib/jsonld';
+import { jsonLdHtml, priceOffer, parseLotSize } from '../../src/lib/jsonld';
 import PropertyMount from '../../src/components/islands/PropertyMount';
 import PropertyResolverMount from '../../src/components/islands/PropertyResolverMount';
 import { fetchPlotById } from '../../src/lib/fetchPlots';
@@ -68,9 +68,13 @@ export default async function Page({ searchParams }) {
     description: plot.features || plot.title,
     url: `https://a1plot.com/property?id=${id}`,
     ...(images[0] ? { image: images } : {}),
-    ...(plot.price ? { offers: { '@type': 'Offer', price: String(plot.price).replace(/[^\d]/g, '') || undefined, priceCurrency: 'INR', availability: 'https://schema.org/InStock' } } : {}),
+    ...(priceOffer(plot.price) ? { offers: priceOffer(plot.price) } : {}),
     ...(plot.lat && plot.lng ? { geo: { '@type': 'GeoCoordinates', latitude: plot.lat, longitude: plot.lng } } : {}),
+    ...(parseLotSize(plot.size) ? { lotSize: parseLotSize(plot.size) } : {}),
     address: { '@type': 'PostalAddress', addressLocality: plot.city || plot.location || '', addressRegion: plot.state || 'Rajasthan', addressCountry: 'IN' },
+    // Ties every listing back to the single organisation node declared in
+    // app/layout.jsx, so Google reads them as one business's inventory.
+    provider: { '@id': 'https://a1plot.com/#organization' },
   };
 
   return (

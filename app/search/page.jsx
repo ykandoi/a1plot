@@ -1,5 +1,5 @@
 import SiteChrome from '../../src/components/site/SiteChrome';
-import { jsonLdHtml } from '../../src/lib/jsonld';
+import { jsonLdHtml, priceOffer } from '../../src/lib/jsonld';
 import { fetchPublicPlots } from '../../src/lib/fetchPlots';
 
 // Inline SVG (server-component safe — avoids pulling a client icon lib into RSC).
@@ -52,7 +52,7 @@ export default async function Page({ searchParams }) {
         '@type': 'RealEstateListing',
         name: p.title,
         url: `https://a1plot.com/property?id=${p.id}`,
-        ...(p.price ? { offers: { '@type': 'Offer', price: String(p.price).replace(/[^\d]/g, '') || undefined, priceCurrency: 'INR' } } : {}),
+        ...(priceOffer(p.price) ? { offers: priceOffer(p.price) } : {}),
       },
     })),
   };

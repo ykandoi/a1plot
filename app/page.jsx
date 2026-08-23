@@ -1,5 +1,5 @@
 import SiteChrome from '../src/components/site/SiteChrome';
-import { jsonLdHtml } from '../src/lib/jsonld';
+import { jsonLdHtml, priceOffer } from '../src/lib/jsonld';
 import ChartMount from '../src/components/islands/ChartMount';
 import { fetchPublicPlots } from '../src/lib/fetchPlots';
 
@@ -27,15 +27,19 @@ const I = {
 export default async function Page() {
   const plots = await fetchPublicPlots();
 
+  // Only the listings. The WebSite and organisation entities are emitted once,
+  // site-wide, from app/layout.jsx — declaring a second #website here gave two
+  // nodes the same @id on one page, which leaves Google picking between
+  // conflicting definitions of the same entity.
   const jsonLd = {
     '@context': 'https://schema.org',
     '@graph': [
-      { '@type': 'WebSite', '@id': 'https://a1plot.com/#website', name: 'A1Plot', url: 'https://a1plot.com/', description: 'A1Plot brings stock-market velocity, liquidity, and transparency to Indian real estate. Discover and invest in verified premium land parcels, commercial plots, and agricultural land.' },
       {
         '@type': 'ItemList', '@id': 'https://a1plot.com/#property-listings', name: 'A1Plot Active Verified Properties', numberOfItems: plots.length,
+        isPartOf: { '@id': 'https://a1plot.com/#website' },
         itemListElement: plots.slice(0, 25).map((p, i) => ({
           '@type': 'ListItem', position: i + 1,
-          item: { '@type': 'RealEstateListing', name: p.title, url: `https://a1plot.com/property?id=${p.id}`, ...(p.price ? { offers: { '@type': 'Offer', price: String(p.price).replace(/[^\d]/g, '') || undefined, priceCurrency: 'INR', availability: 'https://schema.org/InStock' } } : {}), address: { '@type': 'PostalAddress', addressLocality: p.city || p.location || '', addressRegion: p.state || 'Rajasthan', addressCountry: 'IN' } },
+          item: { '@type': 'RealEstateListing', name: p.title, url: `https://a1plot.com/property?id=${p.id}`, ...(priceOffer(p.price) ? { offers: priceOffer(p.price) } : {}), address: { '@type': 'PostalAddress', addressLocality: p.city || p.location || '', addressRegion: p.state || 'Rajasthan', addressCountry: 'IN' } },
         })),
       },
     ],
