@@ -1,4 +1,5 @@
 "use client";
+import { plotUrl } from '../../lib/slug';
 import React, { useState, useCallback } from 'react';
 import { GoogleMap, useJsApiLoader, MarkerF, InfoWindowF } from '@react-google-maps/api';
 
@@ -40,7 +41,7 @@ export default function BuyerMapIsland({ plots = [] }) {
             <div style={{ fontWeight: 700, marginBottom: 4 }}>{active.title}</div>
             <div style={{ fontSize: '0.85rem', color: '#10b981', fontWeight: 700 }}>{active.price}</div>
             <div style={{ fontSize: '0.8rem', color: '#64748b', margin: '2px 0 6px' }}>{active.location}</div>
-            <a href={`/property?id=${active.id}`} className="btn btn-primary" style={{ padding: '0.35rem 0.75rem', fontSize: '0.8rem' }}>Visit Property</a>
+            <a href={plotUrl(active)} className="btn btn-primary" style={{ padding: '0.35rem 0.75rem', fontSize: '0.8rem' }}>Visit Property</a>
           </div>
         </InfoWindowF>
       )}

@@ -262,7 +262,13 @@ button {
   border-top: 1px solid #e2e8f0;
   padding-top: 3rem;
 }
-.stat-item h4 {
+/* The big hero figures ("500+", "0%"). These were <h4>, which both skipped a
+   heading level and mislabelled a value as a section heading for screen
+   readers. They are spans now; .stat-item h4 is kept for any markup not yet
+   migrated. */
+.stat-item h4,
+.stat-value {
+  display: block;
   font-size: 2.25rem;
   font-weight: 800;
   line-height: 1.2;
@@ -649,7 +655,15 @@ footer {
   max-width: 300px;
   line-height: 1.6;
 }
+/* Footer column headings. They are <h2> rather than <h4>: the page runs
+   h1 -> h2 for content sections, so an h4 here skipped a level. The selector
+   covers both so the visual size is unchanged either way — it was never the
+   default h4 size, it was always set here. */
+.footer-links h2,
 .footer-links h4 {
+  /* Explicit size: the old <h4> rendered at the browser default 1em, and an
+     <h2> would otherwise jump to 2em. Pinned so the swap is invisible. */
+  font-size: 1rem;
   font-weight: 600;
   margin-bottom: 1.5rem;
 }

@@ -95,8 +95,12 @@ export default function PropertyIsland({ plot, slot }) {
 
 /**
  * PropertyResolver — used when /property is opened WITHOUT ?id= (e.g. an in-app
- * reload that stored the id in localStorage). It resolves the saved id to the
- * canonical /property?id=X URL, or sends the user home.
+ * reload that stored the id in localStorage), or sends the user home.
+ *
+ * Only a bare id is available here, never the plot document, so this cannot
+ * build the descriptive slug itself. Handing off to the legacy /property?id=
+ * route is deliberate: that route fetches the plot server-side and 308s to the
+ * canonical /property/<slug>-<id>, so the user still lands on one URL.
  */
 export function PropertyResolver() {
   useEffect(() => {

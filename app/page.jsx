@@ -1,5 +1,6 @@
 import SiteChrome from '../src/components/site/SiteChrome';
 import { jsonLdHtml, priceOffer } from '../src/lib/jsonld';
+import { plotUrl } from '../src/lib/slug';
 import ChartMount from '../src/components/islands/ChartMount';
 import { fetchPublicPlots } from '../src/lib/fetchPlots';
 
@@ -39,7 +40,7 @@ export default async function Page() {
         isPartOf: { '@id': 'https://a1plot.com/#website' },
         itemListElement: plots.slice(0, 25).map((p, i) => ({
           '@type': 'ListItem', position: i + 1,
-          item: { '@type': 'RealEstateListing', name: p.title, url: `https://a1plot.com/property?id=${p.id}`, ...(priceOffer(p.price) ? { offers: priceOffer(p.price) } : {}), address: { '@type': 'PostalAddress', addressLocality: p.city || p.location || '', addressRegion: p.state || 'Rajasthan', addressCountry: 'IN' } },
+          item: { '@type': 'RealEstateListing', name: p.title, url: `https://a1plot.com${plotUrl(p)}`, ...(priceOffer(p.price) ? { offers: priceOffer(p.price) } : {}), address: { '@type': 'PostalAddress', addressLocality: p.city || p.location || '', addressRegion: p.state || 'Rajasthan', addressCountry: 'IN' } },
         })),
       },
     ],
@@ -61,9 +62,9 @@ export default async function Page() {
               <a className="btn btn-secondary" href="/list_property">List Your Land</a>
             </div>
             <div className="hero-stats">
-              <div className="stat-item"><h4>500+</h4><p>Verified Plots</p></div>
-              <div className="stat-item"><h4>₹500Cr+</h4><p>Asset Value</p></div>
-              <div className="stat-item"><h4>0%</h4><p>Brokerage</p></div>
+              <div className="stat-item"><span className="stat-value">500+</span><p>Verified Plots</p></div>
+              <div className="stat-item"><span className="stat-value">₹500Cr+</span><p>Asset Value</p></div>
+              <div className="stat-item"><span className="stat-value">0%</span><p>Brokerage</p></div>
             </div>
           </div>
         </div>
@@ -118,7 +119,7 @@ export default async function Page() {
           </div>
           <div className="plots-grid">
             {plots.map((plot) => (
-              <a key={plot.id} href={`/property?id=${plot.id}`} className="plot-card" style={{ position: 'relative', color: 'inherit', textDecoration: 'none', display: 'block' }}>
+              <a key={plot.id} href={plotUrl(plot)} className="plot-card" style={{ position: 'relative', color: 'inherit', textDecoration: 'none', display: 'block' }}>
                 <div className="plot-image">
                   <div className="plot-badge">{plot.badge || 'Listed'}</div>
                   <span className="plot-favorite-btn" aria-hidden="true">{I.heart(16)}</span>

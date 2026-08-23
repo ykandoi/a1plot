@@ -16,7 +16,7 @@ places, all regenerated hourly from the same query:
 
 *   **`/llms.txt`** — every public listing with type, size, price, location and URL.
 *   **`/sitemap.xml`** — a URL per listing, plus the static routes.
-*   **Each `/property?id=<id>` page** — full detail, with schema.org
+*   **Each `/property/<slug>-<id>` page** — full detail, with schema.org
     `RealEstateListing` JSON-LD carrying price, geo coordinates, lot size and
     images.
 
@@ -86,7 +86,7 @@ Sellers navigate to `/list_property` to register a land parcel.
 ### Buying/Expressing Interest
 Buyers navigate to `/buyer_map` to search for plots.
 1.  **Filters**: Filter plots by State, Price range, or Tag (Agricultural/Commercial).
-2.  **Detail Inspection**: View the property page `/property?id=[ID]` to look at size, expected CAGR, satellite coordinates, and boundary shape.
+2.  **Detail Inspection**: View the property page `/property/<slug>-<id>` (the legacy `/property?id=[ID]` form still 308-redirects there) to look at size, expected CAGR, satellite coordinates, and boundary shape.
 3.  **Request Documents**: Click "Register Interest".
 4.  **Notification Pipeline**: The system records the user's interest in Firestore and triggers an HTTP POST request to the backend `/api/send-email` route. The handler emails the seller rep and the configured admin address (see `ADMIN_NOTIFY_EMAIL`) to coordinate document handovers.
 

@@ -1,4 +1,5 @@
 import { fetchPublicPlots } from '../../src/lib/fetchPlots';
+import { plotUrl } from '../../src/lib/slug';
 
 const BASE = 'https://a1plot.com';
 
@@ -25,7 +26,7 @@ function renderListing(p, i) {
     + line('Price', p.price)
     + line('Location', place)
     + line('Status', p.status)
-    + line('URL', `${BASE}/property?id=${p.id}`);
+    + line('URL', `${BASE}${plotUrl(p)}`);
 }
 
 export async function GET() {

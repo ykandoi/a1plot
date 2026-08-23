@@ -1,5 +1,6 @@
 import SiteChrome from '../../src/components/site/SiteChrome';
 import { jsonLdHtml, priceOffer } from '../../src/lib/jsonld';
+import { plotUrl } from '../../src/lib/slug';
 import BuyerMapMount from '../../src/components/islands/BuyerMapMount';
 import { fetchPublicPlots } from '../../src/lib/fetchPlots';
 
@@ -25,7 +26,7 @@ export default async function Page() {
     numberOfItems: plots.length,
     itemListElement: plots.slice(0, 25).map((p, i) => ({
       '@type': 'ListItem', position: i + 1,
-      item: { '@type': 'RealEstateListing', name: p.title, url: `https://a1plot.com/property?id=${p.id}`, ...(priceOffer(p.price) ? { offers: priceOffer(p.price) } : {}) },
+      item: { '@type': 'RealEstateListing', name: p.title, url: `https://a1plot.com${plotUrl(p)}`, ...(priceOffer(p.price) ? { offers: priceOffer(p.price) } : {}) },
     })),
   };
 
@@ -49,7 +50,7 @@ export default async function Page() {
             <div className="buyer-map-list">
               <div className="plots-grid" style={{ gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: '1.5rem' }}>
                 {plots.map(plot => (
-                  <a key={plot.id} href={`/property?id=${plot.id}`} className="plot-card" style={{ border: '1px solid var(--border-color)', position: 'relative', color: 'inherit', textDecoration: 'none', display: 'block' }}>
+                  <a key={plot.id} href={plotUrl(plot)} className="plot-card" style={{ border: '1px solid var(--border-color)', position: 'relative', color: 'inherit', textDecoration: 'none', display: 'block' }}>
                     <div className="plot-image" style={{ height: '160px' }}>
                       <div className="plot-badge">{plot.badge || 'Listed'}</div>
                       <img src={plot.image} alt={plot.title} loading="lazy" decoding="async" width="280" height="160" />

@@ -72,7 +72,7 @@ export default function SiteChrome({ active, searchDefault = '', hideFooter = fa
               </p>
             </div>
             <div className="footer-links">
-              <h4>Platform</h4>
+              <h2>Platform</h2>
               <ul>
                 <li><a href="/buyer_map">Browse Plots</a></li>
                 <li><a href="/search">Search Properties</a></li>
@@ -82,14 +82,14 @@ export default function SiteChrome({ active, searchDefault = '', hideFooter = fa
               </ul>
             </div>
             <div className="footer-links">
-              <h4>Company</h4>
+              <h2>Company</h2>
               <ul>
                 <li><a href="/about_us">About Us</a></li>
                 <li><a href="/contact">Contact</a></li>
               </ul>
             </div>
             <div className="footer-links">
-              <h4>Legal</h4>
+              <h2>Legal</h2>
               <ul>
                 <li><a href="/privacy_policy">Privacy Policy</a></li>
                 <li><a href="/terms_of_service">Terms of Service</a></li>

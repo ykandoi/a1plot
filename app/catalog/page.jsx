@@ -29,7 +29,7 @@ const money = (v) => (v == null || v === '' ? 'Price on request' : String(v));
 function PropertyCard({ item, index }) {
   const images = item.media && item.media.length > 0 ? item.media : (item.image ? [item.image] : []);
   const cover = images[0];
-  const detailUrl = item.source === 'platform' ? `https://a1plot.com/property?id=${item.id}` : null;
+  const detailUrl = item.source === 'platform' ? `https://a1plot.com${plotUrl(item)}` : null;
 
   return (
     <article className="cat-card">

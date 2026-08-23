@@ -1,5 +1,6 @@
 import SiteChrome from '../../src/components/site/SiteChrome';
 import { jsonLdHtml, priceOffer } from '../../src/lib/jsonld';
+import { plotUrl } from '../../src/lib/slug';
 import { fetchPublicPlots } from '../../src/lib/fetchPlots';
 
 // Inline SVG (server-component safe — avoids pulling a client icon lib into RSC).
@@ -51,7 +52,7 @@ export default async function Page({ searchParams }) {
       item: {
         '@type': 'RealEstateListing',
         name: p.title,
-        url: `https://a1plot.com/property?id=${p.id}`,
+        url: `https://a1plot.com${plotUrl(p)}`,
         ...(priceOffer(p.price) ? { offers: priceOffer(p.price) } : {}),
       },
     })),
@@ -87,7 +88,7 @@ export default async function Page({ searchParams }) {
           {results.length > 0 ? (
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: '1.5rem' }}>
               {results.map(plot => (
-                <a key={plot.id} href={`/property?id=${plot.id}`} style={{ background: 'white', border: '1px solid var(--border-color)', borderRadius: 'var(--radius-lg)', overflow: 'hidden', boxShadow: 'var(--shadow-lg)', display: 'block', color: 'inherit' }}>
+                <a key={plot.id} href={plotUrl(plot)} style={{ background: 'white', border: '1px solid var(--border-color)', borderRadius: 'var(--radius-lg)', overflow: 'hidden', boxShadow: 'var(--shadow-lg)', display: 'block', color: 'inherit' }}>
                   <img src={plot.image || (plot.media && plot.media[0]) || ''} alt={plot.title} loading="lazy" decoding="async" style={{ height: 170, width: '100%', objectFit: 'cover', background: '#eef2f1', display: 'block' }} />
                   <div style={{ padding: '1.1rem' }}>
                     {plot.badge && <span style={{ fontSize: '0.72rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '.04em', color: 'var(--primary)' }}>{plot.badge}</span>}

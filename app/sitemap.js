@@ -1,9 +1,10 @@
 import { fetchPublicPlots } from '../src/lib/fetchPlots';
+import { plotUrl, groupPlotsByPlace } from '../src/lib/slug';
 
 const BASE = 'https://a1plot.com';
 
 // Dynamic sitemap — regenerated hourly (ISR) so new verified listings and their
-// /property?id= pages are automatically discoverable by search engines and AI.
+// listing pages are automatically discoverable by search engines and AI.
 export const revalidate = 3600;
 
 export default async function sitemap() {
@@ -23,15 +24,26 @@ export default async function sitemap() {
   ].map(r => ({ ...r, lastModified: now }));
 
   let plotRoutes = [];
+  let placeRoutes = [];
   try {
     const plots = await fetchPublicPlots();
     plotRoutes = plots.map(p => ({
-      url: `${BASE}/property?id=${p.id}`,
+      url: `${BASE}${plotUrl(p)}`,
       lastModified: now,
       changeFrequency: 'weekly',
       priority: 0.8,
     }));
+    // One /land-for-sale/<city> page per place that actually has listings.
+    // Derived from the same data as the listings themselves, so a city page
+    // appears the moment its first plot is published and disappears with its
+    // last — no hand-maintained list to go stale.
+    placeRoutes = groupPlotsByPlace(plots).map(g => ({
+      url: `${BASE}/land-for-sale/${g.slug}`,
+      lastModified: now,
+      changeFrequency: 'weekly',
+      priority: 0.85,
+    }));
   } catch (_) {}
 
-  return [...staticRoutes, ...plotRoutes];
+  return [...staticRoutes, ...placeRoutes, ...plotRoutes];
 }
