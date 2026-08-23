@@ -9,9 +9,9 @@
  *
  * Bump CACHE_VERSION to force a clean cache on the next deploy.
  */
-const CACHE_VERSION = 'v1';
+const CACHE_VERSION = 'v2';
 const CACHE = `a1plot-${CACHE_VERSION}`;
-const PRECACHE = ['/', '/offline.html', '/manifest.json', '/assets/logo.png'];
+const PRECACHE = ['/', '/offline.html', '/manifest.json', '/assets/logo.webp'];
 
 self.addEventListener('install', (event) => {
   self.skipWaiting();

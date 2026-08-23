@@ -30,7 +30,7 @@ export default function SiteChrome({ active, searchDefault = '', hideFooter = fa
       <nav className="navbar sc-navbar">
         <div className="container sc-navbar-inner">
           <a href="/" className="navbar-brand sc-brand" aria-label="A1Plot home">
-            <img src="/assets/logo.png" alt="A1Plot Logo" className="logo-img" width="120" height="52" />
+            <img src="/assets/logo.webp" alt="A1Plot Logo" className="logo-img" width="120" height="52" />
           </a>
 
           {/* Central search — the primary action, like IndiaMART's header search */}
@@ -65,7 +65,7 @@ export default function SiteChrome({ active, searchDefault = '', hideFooter = fa
           <div className="footer-grid">
             <div>
               <div className="navbar-brand footer-brand">
-                <img src="/assets/logo.png" alt="A1Plot Logo" className="logo-img" />
+                <img src="/assets/logo.webp" alt="A1Plot Logo" className="logo-img" />
               </div>
               <p className="footer-desc">
                 Bringing stock-market velocity, liquidity, and transparency to Indian real estate investments.

@@ -15,7 +15,7 @@ const AppLoader = () => (
       <div className="logo-spinner-wrapper">
         <div className="spinner-ring"></div>
         <img
-          src="/assets/logo.png"
+          src="/assets/logo.webp"
           alt="A1Plot"
           className="spinner-logo"
           onError={(e) => { e.target.style.display = 'none'; }}

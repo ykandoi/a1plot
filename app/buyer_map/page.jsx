@@ -31,6 +31,12 @@ export default async function Page() {
 
   return (
     <SiteChrome active="/buyer_map">
+      {/* Preconnect lives here, not in the root layout: this is the one route that
+          actually loads the Maps JS API, so warming the handshake pays off. On
+          every other page Lighthouse flagged it as an unused preconnect. React
+          hoists these into <head>. */}
+      <link rel="preconnect" href="https://maps.googleapis.com" crossOrigin="" />
+      <link rel="preconnect" href="https://maps.gstatic.com" crossOrigin="" />
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: jsonLdHtml(jsonLd) }} />
       <section className="section bg-light" style={{ paddingTop: '2rem', paddingBottom: '0', minHeight: '100vh', display: 'flex', flexDirection: 'column' }}>
         <div style={{ width: '100%', padding: '0 2rem', maxWidth: '1800px', margin: '0 auto' }}>

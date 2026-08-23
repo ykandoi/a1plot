@@ -1,5 +1,17 @@
 import '../src/index.css';
 import Script from 'next/script';
+import { Inter } from 'next/font/google';
+
+// Self-hosted by next/font. index.css used to pull Inter via an @import, which
+// forced three serial round trips across two external origins (css ->
+// fonts.googleapis -> gstatic) in front of first paint, costing ~1.2s of LCP
+// render delay. Now the woff2 is same-origin, fetched over the connection that
+// is already open.
+//
+// display:'swap' plus next/font's metric-matched fallback is what actually
+// protects LCP here: the hero text paints on the first frame in the fallback
+// face and swaps in place, so first paint never waits on a font at all.
+const inter = Inter({ subsets: ['latin'], display: 'swap', variable: '--font-inter' });
 
 export const metadata = {
   title: 'A1Plot | Premium Land & Plot Investments in India',
@@ -35,7 +47,7 @@ export const metadata = {
 
 export default function RootLayout({ children }) {
   return (
-    <html lang="en" suppressHydrationWarning>
+    <html lang="en" className={inter.variable} suppressHydrationWarning>
       <head>
         {/* Link to AI Sitemap/Context */}
         <link rel="llms-txt" type="text/markdown" href="/llms.txt" />
@@ -47,11 +59,11 @@ export default function RootLayout({ children }) {
         <meta name="apple-mobile-web-app-capable" content="yes" />
         <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
 
-        {/* Warm up connections to third parties so they resolve faster */}
-        <link rel="preconnect" href="https://firestore.googleapis.com" crossOrigin="" />
-        <link rel="preconnect" href="https://firebasestorage.googleapis.com" crossOrigin="" />
-        <link rel="preconnect" href="https://maps.googleapis.com" crossOrigin="" />
-        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="" />
+        {/* Only origins this page actually requests. The firestore / firebasestorage /
+            maps preconnects that used to sit here were flagged unused by Lighthouse:
+            nothing on a server-rendered page touches them before hydration, so they
+            only cost handshakes. Maps is preconnected on /buyer_map instead, where it
+            IS used. fonts.gstatic is gone now that next/font self-hosts Inter. */}
         <link rel="dns-prefetch" href="https://connect.facebook.net" />
         <link rel="dns-prefetch" href="https://www.googletagmanager.com" />
 
@@ -233,8 +245,12 @@ export default function RootLayout({ children }) {
           `}
         </Script>
 
+        {/* Meta Pixel + GA4 run at lazyOnload rather than afterInteractive: together
+            they pull ~253KB (fbevents 105KB, gtag 148KB) that Lighthouse flagged as
+            largely unused at first paint. Both fbq() and gtag() queue calls made
+            before their script lands, so no pageview is lost — it just fires later. */}
         {/* Meta Pixel Code */}
-        <Script id="meta-pixel" strategy="afterInteractive">
+        <Script id="meta-pixel" strategy="lazyOnload">
           {`
             !function(f,b,e,v,n,t,s)
             {if(f.fbq)return;n=f.fbq=function(){n.callMethod?
@@ -262,9 +278,9 @@ export default function RootLayout({ children }) {
         {/* Google Analytics (GA4) — site-wide */}
         <Script
           src="https://www.googletagmanager.com/gtag/js?id=G-B7Y33BBVGX"
-          strategy="afterInteractive"
+          strategy="lazyOnload"
         />
-        <Script id="ga4-init" strategy="afterInteractive">
+        <Script id="ga4-init" strategy="lazyOnload">
           {`
             window.dataLayer = window.dataLayer || [];
             function gtag(){dataLayer.push(arguments);}

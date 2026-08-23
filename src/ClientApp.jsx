@@ -23,7 +23,7 @@ const SearchResults = dynamic(() => import('./components/SearchResults'), { ssr:
 import { GoogleMap, useJsApiLoader, MarkerF, InfoWindowF, Autocomplete, PolygonF } from '@react-google-maps/api';
 
 const LIBRARIES = ['places', 'geometry'];
-import { auth, googleProvider, storage } from './firebase';
+import { auth, googleProvider, storage, popupRedirectResolver } from './firebase';
 import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 import { signInWithPopup, signInWithEmailAndPassword, createUserWithEmailAndPassword, onAuthStateChanged, signOut, signInAnonymously } from 'firebase/auth';
 import { usePlots } from './hooks/usePlots';
@@ -675,7 +675,10 @@ export default function App({ hideChrome = false } = {}) {
     if (!auth || !auth.app) { setAuthError('Firebase not configured. Check .env file.'); return; }
     try {
       setAuthError('');
-      const result = await signInWithPopup(auth, googleProvider);
+      // The resolver is passed here rather than baked into initializeAuth (see
+      // src/firebase.js): that keeps its ~93KB firebaseapp.com iframe off every
+      // page load and pulls it in only when someone actually clicks sign in.
+      const result = await signInWithPopup(auth, googleProvider, popupRedirectResolver);
       if (result?.user) {
         const target = redirectTarget || (['login', 'home'].includes(view) ? 'home' : view);
         navigate(target);
@@ -3438,7 +3441,7 @@ export default function App({ hideChrome = false } = {}) {
       <div className="auth-container">
         {/* Left panel - branding */}
         <div className="auth-branding">
-          <img src="/assets/logo.png" alt="A1Plot" style={{height: '56px', width: 'auto', marginBottom: '2rem', alignSelf: 'flex-start', objectFit: 'contain'}} />
+          <img src="/assets/logo.webp" alt="A1Plot" style={{height: '56px', width: 'auto', marginBottom: '2rem', alignSelf: 'flex-start', objectFit: 'contain'}} />
           <h1 style={{fontSize: '2.5rem', fontWeight: 800, lineHeight: 1.1, marginBottom: '1.5rem'}}>Invest in Land.<br/><span style={{color: '#10b981'}}>Build Wealth.</span></h1>
           <p style={{color: '#94a3b8', fontSize: '1.1rem', lineHeight: 1.7, marginBottom: '2.5rem'}}>Join thousands of smart investors who trust A1Plot for verified, transparent land investments.</p>
           <div className="flex gap-8">
@@ -4859,7 +4862,7 @@ export default function App({ hideChrome = false } = {}) {
           boxShadow: 'var(--shadow-sm)'
         }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
-            <img src="/assets/logo.png" alt="A1Plot" style={{ height: '44px', width: 'auto', objectFit: 'contain' }} onError={e => { e.target.style.display = 'none'; }} />
+            <img src="/assets/logo.webp" alt="A1Plot" style={{ height: '44px', width: 'auto', objectFit: 'contain' }} onError={e => { e.target.style.display = 'none'; }} />
             <span style={{ fontSize: '1.6rem', fontWeight: 800, color: 'var(--primary)', letterSpacing: '-0.02em' }}>A1Plot</span>
             <span style={{
               backgroundColor: 'rgba(16, 185, 129, 0.1)',
@@ -4905,7 +4908,7 @@ export default function App({ hideChrome = false } = {}) {
         <div className="global-loader-card">
           <div className="logo-spinner-wrapper">
             <div className="spinner-ring"></div>
-            <img src="/assets/logo.png" alt="A1Plot" className="spinner-logo" onError={(e) => { e.target.style.display = 'none'; }} />
+            <img src="/assets/logo.webp" alt="A1Plot" className="spinner-logo" onError={(e) => { e.target.style.display = 'none'; }} />
           </div>
           <div className="loader-text">Securing Verified Land Plots...</div>
           <div className="loader-subtext">Connecting to registry & satellite imagery data</div>
@@ -4927,7 +4930,7 @@ export default function App({ hideChrome = false } = {}) {
       <nav className="navbar sc-navbar">
         <div className="container sc-navbar-inner">
           <a href="/" className="navbar-brand sc-brand" aria-label="A1Plot home">
-            <img src="/assets/logo.png" alt="A1Plot Logo" className="logo-img" width="120" height="52" />
+            <img src="/assets/logo.webp" alt="A1Plot Logo" className="logo-img" width="120" height="52" />
           </a>
 
           <form action="/search" method="get" className="sc-header-search" role="search">
@@ -5106,7 +5109,7 @@ export default function App({ hideChrome = false } = {}) {
             <div className="footer-grid">
               <div>
                 <div className="navbar-brand footer-brand">
-                  <img src="/assets/logo.png" alt="A1Plot Logo" className="logo-img" />
+                  <img src="/assets/logo.webp" alt="A1Plot Logo" className="logo-img" />
                 </div>
                 <p className="footer-desc">
                   Bringing stock-market velocity, liquidity, and transparency to Indian real estate investments.
