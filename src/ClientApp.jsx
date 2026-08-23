@@ -1,4 +1,5 @@
 "use client";
+import './clientApp.css';
 import React, { useState, useEffect, useCallback, useRef, useMemo } from 'react';
 import {
   TrendingUp, ShieldCheck, MapPin,
