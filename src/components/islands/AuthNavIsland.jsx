@@ -18,6 +18,26 @@ const SITE_LINKS = [
   { href: '/contact', label: 'Contact' },
 ];
 
+// A lightweight cached snapshot of the last-known signed-in user, so the
+// avatar can render the INSTANT this island mounts instead of waiting the
+// ~1-2s it takes Firebase's onAuthStateChanged to restore the session from
+// IndexedDB. This island is ssr:false (never server-rendered), so reading
+// localStorage synchronously here can't cause a hydration mismatch.
+const SNAP_KEY = 'a1plot_nav_user';
+function readSnapshot() {
+  if (typeof window === 'undefined') return null;
+  try {
+    const raw = localStorage.getItem(SNAP_KEY);
+    return raw ? JSON.parse(raw) : null;
+  } catch { return null; }
+}
+function writeSnapshot(u) {
+  try {
+    if (u) localStorage.setItem(SNAP_KEY, JSON.stringify({ photoURL: u.photoURL || '', displayName: u.displayName || '', email: u.email || '' }));
+    else localStorage.removeItem(SNAP_KEY);
+  } catch { /* ignore quota/private-mode */ }
+}
+
 /**
  * AuthNavIsland — the ONLY auth-aware piece of the server-rendered header.
  * SiteChrome itself has zero client JS, so without this the "Log In" button
@@ -31,8 +51,10 @@ const SITE_LINKS = [
  * the first place once a session is confirmed.
  */
 export default function AuthNavIsland() {
-  const [user, setUser] = useState(null);
-  const [ready, setReady] = useState(false);
+  // Seed from the cached snapshot so a returning signed-in user sees their
+  // avatar immediately, without waiting for Firebase to resolve.
+  const [user, setUser] = useState(readSnapshot);
+  const [ready, setReady] = useState(() => !!readSnapshot());
   const [open, setOpen] = useState(false);
   // Google's photoURL sometimes fails to load with a bare <img> (referrer
   // policy) — falls back to the placeholder icon instead of a broken image.
@@ -40,7 +62,11 @@ export default function AuthNavIsland() {
 
   useEffect(() => {
     if (auth && typeof auth.onAuthStateChanged === 'function') {
-      const unsub = onAuthStateChanged(auth, (u) => { setUser(u); setReady(true); });
+      const unsub = onAuthStateChanged(auth, (u) => {
+        setUser(u);
+        setReady(true);
+        writeSnapshot(u); // keep the cache fresh for the next load
+      });
       return () => unsub();
     }
     setReady(true);
