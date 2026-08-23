@@ -2,7 +2,7 @@
 import React, { useState, useEffect } from 'react';
 import { Heart } from 'lucide-react';
 import { GoogleMap, useJsApiLoader, MarkerF, PolygonF } from '@react-google-maps/api';
-import { auth } from '../../firebase';
+import { auth } from '../../firebaseAuth';
 import { onAuthStateChanged } from 'firebase/auth';
 import { useInterests } from '../../hooks/useInterests';
 

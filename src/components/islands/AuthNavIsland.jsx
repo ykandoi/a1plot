@@ -1,8 +1,8 @@
 "use client";
 import React, { useState, useEffect } from 'react';
 import { onAuthStateChanged, signOut } from 'firebase/auth';
-import { auth } from '../../firebase';
-import { User, ChevronDown, Building, MapPin, Shield, LogOut, Menu, X } from 'lucide-react';
+import { auth } from '../../firebaseAuth';
+import { User, ChevronDown, Building, MapPin, Shield, LogOut, Menu, X } from '../site/navIcons';
 
 // Kept in sync with the admin list in firestore.rules / ClientApp.jsx.
 const ADMIN_EMAILS = ['kdy20330@gmail.com', 'ykandoi20330@gmail.com'];

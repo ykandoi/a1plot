@@ -1802,21 +1802,21 @@ export default function App({ hideChrome = false } = {}) {
 
                   <div className="plot-metrics">
                     <div className="metric">
-                      <h5>Expected CAGR</h5>
+                      <span className="metric-label">Expected CAGR</span>
                       <p className="metric-up">
                         <TrendingUp size={16} /> {plot.cagr}
                       </p>
                     </div>
                     <div className="metric">
-                      <h5>Plot Size</h5>
+                      <span className="metric-label">Plot Size</span>
                       <p>{plot.size}</p>
                     </div>
                     <div className="metric">
-                      <h5>Seller</h5>
+                      <span className="metric-label">Seller</span>
                       <p>{plot.ownerUid === 'demo' ? plot.developer : 'A1Plot Verified Seller'}</p>
                     </div>
                     <div className="metric">
-                      <h5>Status</h5>
+                      <span className="metric-label">Status</span>
                       <p className="text-green font-semibold">{plot.status}</p>
                     </div>
                   </div>
@@ -2682,11 +2682,11 @@ export default function App({ hideChrome = false } = {}) {
                     <p className="text-muted mb-4" style={{display: 'flex', alignItems: 'center', gap: '0.35rem'}}><MapPin size={14} /> {plot.location}</p>
                     <div className="plot-metrics">
                       <div className="metric">
-                        <h5>Price</h5>
+                        <span className="metric-label">Price</span>
                         <p>{plot.price}</p>
                       </div>
                       <div className="metric">
-                        <h5>Size</h5>
+                        <span className="metric-label">Size</span>
                         <p>{plot.size}</p>
                       </div>
                     </div>
@@ -5109,7 +5109,7 @@ export default function App({ hideChrome = false } = {}) {
             <div className="footer-grid">
               <div>
                 <div className="navbar-brand footer-brand">
-                  <img src="/assets/logo.webp" alt="A1Plot Logo" className="logo-img" />
+                  <img src="/assets/logo.webp" alt="A1Plot Logo" className="logo-img" width="120" height="52" />
                 </div>
                 <p className="footer-desc">
                   Bringing stock-market velocity, liquidity, and transparency to Indian real estate investments.

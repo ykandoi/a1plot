@@ -65,7 +65,7 @@ export default function SiteChrome({ active, searchDefault = '', hideFooter = fa
           <div className="footer-grid">
             <div>
               <div className="navbar-brand footer-brand">
-                <img src="/assets/logo.webp" alt="A1Plot Logo" className="logo-img" />
+                <img src="/assets/logo.webp" alt="A1Plot Logo" className="logo-img" width="120" height="52" />
               </div>
               <p className="footer-desc">
                 Bringing stock-market velocity, liquidity, and transparency to Indian real estate investments.

@@ -6,6 +6,11 @@
   --text-main: #0f172a;
   --text-muted: #64748b;
   --accent-green: #10b981;
+  /* White text on --accent-green is only 2.48:1, below the WCAG AA 4.5:1
+     threshold, so buttons that put white on green use this darker variant
+     (4.86:1). The lighter value stays for borders, icons and accents, where
+     the contrast rule does not apply. */
+  --accent-green-strong: #047857;
   --accent-red: #ef4444;
   --surface: #ffffff;
   --border-color: #e2e8f0;
@@ -131,11 +136,11 @@ button {
 }
 
 .btn-accent {
-  background-color: var(--accent-green);
+  background-color: var(--accent-green-strong);
   color: white;
 }
 .btn-accent:hover {
-  background-color: #059669;
+  background-color: #065f46;
 }
 
 /* ================================================
@@ -450,10 +455,18 @@ button {
   padding-bottom: 1.5rem;
   border-bottom: 1px solid #e2e8f0;
 }
-.metric h5 {
+/* Field labels inside a .metric ("EXPECTED CAGR", "PLOT SIZE"). These used to
+   be <h5>, which put an h5 directly under an h4 with no h5-level section — a
+   skipped heading level for screen readers, and wrong semantically: they label
+   a value, they do not head a section. They are spans now; this keeps the
+   block layout the h5 had. The .metric h5 selector stays for any markup not
+   yet migrated. */
+.metric h5,
+.metric-label {
+  display: block;
   font-size: 0.75rem;
   text-transform: uppercase;
-  color: #94a3b8;
+  color: var(--text-muted);
   margin-bottom: 0.35rem;
   letter-spacing: 0.05em;
   font-weight: 600;
@@ -484,7 +497,7 @@ button {
 .price-label {
   display: block;
   font-size: 0.75rem;
-  color: #94a3b8;
+  color: var(--text-muted);
   font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 0.05em;

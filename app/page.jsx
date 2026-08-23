@@ -128,10 +128,10 @@ export default async function Page() {
                   <div className="plot-location">{I.pin(14)} {plot.location}</div>
                   <h3 className="plot-title">{plot.title}</h3>
                   <div className="plot-metrics">
-                    <div className="metric"><h5>Expected CAGR</h5><p className="metric-up">{I.trend(16)} {plot.cagr}</p></div>
-                    <div className="metric"><h5>Plot Size</h5><p>{plot.size}</p></div>
-                    <div className="metric"><h5>Seller</h5><p>A1Plot Verified Seller</p></div>
-                    <div className="metric"><h5>Status</h5><p className="text-green font-semibold">{plot.status}</p></div>
+                    <div className="metric"><span className="metric-label">Expected CAGR</span><p className="metric-up">{I.trend(16)} {plot.cagr}</p></div>
+                    <div className="metric"><span className="metric-label">Plot Size</span><p>{plot.size}</p></div>
+                    <div className="metric"><span className="metric-label">Seller</span><p>A1Plot Verified Seller</p></div>
+                    <div className="metric"><span className="metric-label">Status</span><p className="text-green font-semibold">{plot.status}</p></div>
                   </div>
                   <div className="plot-footer">
                     <div><span className="price-label">Total Price</span><div className="plot-price">{plot.price}</div></div>

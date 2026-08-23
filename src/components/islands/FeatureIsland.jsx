@@ -1,7 +1,7 @@
 "use client";
 import React, { useState, useEffect } from 'react';
 import { CheckCircle2 } from 'lucide-react';
-import { auth } from '../../firebase';
+import { auth } from '../../firebaseAuth';
 import { onAuthStateChanged, signInAnonymously } from 'firebase/auth';
 import { useBrokers } from '../../hooks/useBrokers';
 import { useRequirements } from '../../hooks/useRequirements';
