@@ -1709,7 +1709,7 @@ export default function App({ hideChrome = false } = {}) {
 
             <div className="dashboard-mockup">
               <div className="mockup-header">
-                <div className="font-semibold">My Portfolio</div>
+                <div className="font-semibold">My Portfolio <span className="mockup-sample-tag">Sample</span></div>
                 <div className="btn btn-secondary" style={{padding: '0.25rem 0.75rem', fontSize: '0.8rem'}}>Export</div>
               </div>
 
@@ -1726,6 +1726,7 @@ export default function App({ hideChrome = false } = {}) {
               <div style={{height: '200px'}}>
                 <MiniLineChart data={chartData} />
               </div>
+              <p className="mockup-disclaimer">Sample dashboard. Figures are illustrative only — not actual holdings, and not a projection or guarantee of returns.</p>
             </div>
           </div>
         </div>

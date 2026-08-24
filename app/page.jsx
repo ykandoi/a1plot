@@ -85,12 +85,13 @@ export default async function Page() {
               <a className="btn btn-accent" href="/interests">See My Interests {I.arrow(18)}</a>
             </div>
             <div className="dashboard-mockup">
-              <div className="mockup-header"><div className="font-semibold">My Portfolio</div><div className="btn btn-secondary" style={{ padding: '0.25rem 0.75rem', fontSize: '0.8rem' }}>Export</div></div>
+              <div className="mockup-header"><div className="font-semibold">My Portfolio <span className="mockup-sample-tag">Sample</span></div><div className="btn btn-secondary" style={{ padding: '0.25rem 0.75rem', fontSize: '0.8rem' }}>Export</div></div>
               <div className="mockup-portfolio">
                 <div className="text-muted mb-2">Total Current Value</div>
                 <div className="flex items-center gap-4"><div className="mockup-value">₹1,24,50,000</div><div className="mockup-gain">{I.trend(18)} +18.2%</div></div>
               </div>
               <div style={{ height: '200px' }}><ChartMount /></div>
+              <p className="mockup-disclaimer">Sample dashboard. Figures are illustrative only — not actual holdings, and not a projection or guarantee of returns.</p>
             </div>
           </div>
         </div>

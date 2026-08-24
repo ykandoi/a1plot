@@ -610,6 +610,33 @@ button {
 .mockup-portfolio {
   margin-bottom: 2rem;
 }
+/* The portfolio panel beside "Your Real Estate Portfolio, Digitized" is a
+   static illustration — the value and the percentage are hardcoded and
+   identical for every visitor, signed in or not. Unlabelled figures like those
+   read as a real balance and a real return on a page inviting people to
+   invest, so the panel carries an explicit sample tag and a disclaimer. Both
+   sit on the dark mockup background, hence the light colours. */
+.mockup-sample-tag {
+  display: inline-block;
+  margin-left: 0.5rem;
+  padding: 0.1rem 0.5rem;
+  border-radius: var(--radius-full);
+  background: rgba(226, 232, 240, 0.14);
+  border: 1px solid rgba(226, 232, 240, 0.28);
+  color: #e2e8f0;
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  vertical-align: middle;
+}
+.mockup-disclaimer {
+  margin-top: 0.75rem;
+  color: #cbd5e1;
+  font-size: 0.75rem;
+  line-height: 1.5;
+}
+
 .mockup-value {
   font-size: 2.25rem;
   font-weight: 800;
