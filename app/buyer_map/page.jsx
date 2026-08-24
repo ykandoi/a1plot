@@ -1,6 +1,7 @@
 import SiteChrome from '../../src/components/site/SiteChrome';
 import { jsonLdHtml, priceOffer } from '../../src/lib/jsonld';
 import { plotUrl } from '../../src/lib/slug';
+import { plotDisplayImage } from '../../src/lib/staticMap';
 import BuyerMapMount from '../../src/components/islands/BuyerMapMount';
 import { fetchPublicPlots } from '../../src/lib/fetchPlots';
 
@@ -53,7 +54,7 @@ export default async function Page() {
                   <a key={plot.id} href={plotUrl(plot)} className="plot-card" style={{ border: '1px solid var(--border-color)', position: 'relative', color: 'inherit', textDecoration: 'none', display: 'block' }}>
                     <div className="plot-image" style={{ height: '160px' }}>
                       <div className="plot-badge">{plot.badge || 'Listed'}</div>
-                      <img src={plot.image} alt={plot.title} loading="lazy" decoding="async" width="280" height="160" />
+                      <img src={plotDisplayImage(plot) || ''} alt={plot.title} loading="lazy" decoding="async" width="280" height="160" />
                     </div>
                     <div className="plot-content" style={{ padding: '1.25rem' }}>
                       <div className="plot-location" style={{ fontSize: '0.8rem', marginBottom: '0.35rem' }}><Pin /> {plot.location}</div>

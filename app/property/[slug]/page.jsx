@@ -1,6 +1,7 @@
 import SiteChrome from '../../../src/components/site/SiteChrome';
 import { jsonLdHtml, priceOffer, parseLotSize } from '../../../src/lib/jsonld';
 import { plotSlug, idFromSlug } from '../../../src/lib/slug';
+import { plotDisplayImage, isStockPhoto } from '../../../src/lib/staticMap';
 import { permanentRedirect } from 'next/navigation';
 import PropertyMount from '../../../src/components/islands/PropertyMount';
 import PropertyResolverMount from '../../../src/components/islands/PropertyResolverMount';
@@ -27,7 +28,7 @@ export async function generateMetadata({ params }) {
   if (!plot) return { title: 'Property | A1Plot', robots: { index: false } };
   const title = `${plot.title}${plot.location ? ' in ' + plot.location : ''} | A1Plot`;
   const description = `${plot.title} — ${plot.price || ''} · ${plot.size || ''} in ${plot.location || plot.city || 'India'}. ${plot.features || 'Verified land & property listing on A1Plot.'}`.slice(0, 300);
-  const image = plot.image || (plot.media && plot.media[0]);
+  const image = plotDisplayImage(plot);
   return {
     title, description,
     alternates: { canonical: `https://a1plot.com/property/${plotSlug(plot)}` },
@@ -66,7 +67,11 @@ export default async function Page({ params }) {
     );
   }
 
-  const images = plot.media && plot.media.length > 0 ? plot.media : (plot.image ? [plot.image] : []);
+  // Drop the stock photo that older listings had written into them, then
+  // fall back to a satellite view of the real coordinates. Showing a picture
+  // of unrelated farmland as a property photo is worse than showing none.
+  const realMedia = (plot.media || []).filter(m => m && !isStockPhoto(m));
+  const images = realMedia.length > 0 ? realMedia : (plotDisplayImage(plot) ? [plotDisplayImage(plot)] : []);
   const docs = (plot.documentsAvailable || []).filter(d => d && d.trim() !== '' && d.includes('.'));
   const status = plot.status || 'Verified';
   const isConstructed = plot.propertyType === 'constructed';

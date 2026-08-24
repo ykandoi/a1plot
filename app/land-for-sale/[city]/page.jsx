@@ -2,6 +2,7 @@ import { notFound } from 'next/navigation';
 import SiteChrome from '../../../src/components/site/SiteChrome';
 import { jsonLdHtml, priceOffer } from '../../../src/lib/jsonld';
 import { plotUrl, groupPlotsByPlace } from '../../../src/lib/slug';
+import { plotDisplayImage } from '../../../src/lib/staticMap';
 import { fetchPublicPlots } from '../../../src/lib/fetchPlots';
 
 const BASE = 'https://a1plot.com';
@@ -117,7 +118,7 @@ export default async function Page({ params }) {
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: '1.5rem', margin: '2rem 0' }}>
             {plots.map(plot => (
               <a key={plot.id} href={plotUrl(plot)} style={{ background: 'white', border: '1px solid var(--border-color)', borderRadius: 'var(--radius-lg)', overflow: 'hidden', boxShadow: 'var(--shadow-lg)', display: 'block', color: 'inherit' }}>
-                <img src={plot.image || (plot.media && plot.media[0]) || ''} alt={plot.title} loading="lazy" decoding="async" width="280" height="170" style={{ height: 170, width: '100%', objectFit: 'cover', background: '#eef2f1', display: 'block' }} />
+                <img src={plotDisplayImage(plot) || ''} alt={plot.title} loading="lazy" decoding="async" width="280" height="170" style={{ height: 170, width: '100%', objectFit: 'cover', background: '#eef2f1', display: 'block' }} />
                 <div style={{ padding: '1.1rem' }}>
                   {plot.badge && <span style={{ fontSize: '0.72rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '.04em', color: 'var(--primary)' }}>{plot.badge}</span>}
                   <h2 style={{ fontSize: '1.05rem', margin: '0.25rem 0 0.5rem', color: 'var(--text-main)' }}>{plot.title}</h2>

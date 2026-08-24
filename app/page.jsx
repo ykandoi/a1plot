@@ -3,6 +3,7 @@ import { jsonLdHtml, priceOffer } from '../src/lib/jsonld';
 import { plotUrl } from '../src/lib/slug';
 import { fetchPublicPlots } from '../src/lib/fetchPlots';
 import { inventoryStats } from '../src/lib/stats';
+import { plotDisplayImage } from '../src/lib/staticMap';
 
 export const revalidate = 3600;
 
@@ -155,7 +156,7 @@ export default async function Page() {
                 <div className="plot-image">
                   <div className="plot-badge">{plot.badge || 'Listed'}</div>
                   <span className="plot-favorite-btn" aria-hidden="true">{I.heart(16)}</span>
-                  <img src={plot.image} alt={plot.title} loading="lazy" decoding="async" width="340" height="220" />
+                  <img src={plotDisplayImage(plot) || ''} alt={plot.title} loading="lazy" decoding="async" width="340" height="220" />
                 </div>
                 <div className="plot-content">
                   <div className="plot-location">{I.pin(14)} {plot.location}</div>

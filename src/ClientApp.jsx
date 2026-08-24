@@ -25,6 +25,7 @@ import { GoogleMap, useJsApiLoader, MarkerF, InfoWindowF, Autocomplete, PolygonF
 
 const LIBRARIES = ['places', 'geometry'];
 import { auth, googleProvider, storage, popupRedirectResolver } from './firebase';
+import { plotStaticMapUrl } from './lib/staticMap';
 import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 import { signInWithPopup, signInWithEmailAndPassword, createUserWithEmailAndPassword, onAuthStateChanged, signOut, signInAnonymously } from 'firebase/auth';
 import { usePlots } from './hooks/usePlots';
@@ -1263,16 +1264,16 @@ export default function App({ hideChrome = false } = {}) {
       // Creates an invisible guest session when nobody is signed in, so the
       // Firestore write still satisfies `request.auth != null`.
       const authedUser = await ensureAuth();
-      let staticMapUrl = null;
-      if (sortedPolygonPath.length >= 3 && window.google?.maps?.geometry?.encoding) {
-        const latLngs = sortedPolygonPath.map(p => new window.google.maps.LatLng(p.lat, p.lng));
-        const encodedPath = window.google.maps.geometry.encoding.encodePath(latLngs);
-        const avgLat = sortedPolygonPath.reduce((sum, p) => sum + p.lat, 0) / sortedPolygonPath.length;
-        const avgLng = sortedPolygonPath.reduce((sum, p) => sum + p.lng, 0) / sortedPolygonPath.length;
-        const markersParam = encodeURIComponent(`color:red|${avgLat},${avgLng}`);
-        const pathParam = encodeURIComponent(`color:0x10b981AA|weight:3|fillcolor:0x10b98144|enc:${encodedPath}`);
-        staticMapUrl = `https://maps.googleapis.com/maps/api/staticmap?size=600x400&maptype=hybrid&zoom=19&markers=${markersParam}&path=${pathParam}&key=${GOOGLE_MAPS_API_KEY}`;
-      }
+      // A satellite view of the plot's own coordinates. This used to require a
+      // drawn boundary; without one the listing fell through to a stock photo
+      // of unrelated farmland (see below). plotStaticMapUrl outlines the parcel
+      // when a boundary exists and drops a marker when only a point does, so
+      // any listing with coordinates gets a picture of the actual land.
+      const staticMapUrl = plotStaticMapUrl({
+        lat: plotLocation.lat,
+        lng: plotLocation.lng,
+        polygonPath: sortedPolygonPath,
+      });
 
       if (editingPlot) {
         const updateData = { ...newPlot, lat: plotLocation.lat, lng: plotLocation.lng, polygonPath: sortedPolygonPath.length >= 3 ? sortedPolygonPath : null };
@@ -1286,8 +1287,6 @@ export default function App({ hideChrome = false } = {}) {
         await updatePlot(editingPlot.id, updateData);
         setEditingPlot(null);
       } else {
-        const fallbackImage = 'https://images.unsplash.com/photo-1500382017468-9049fed747ef?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80';
-
         // Upload photos/videos to Firebase Storage
         const uploadableMedia = mediaFiles.filter(f => !f.isStaticMap);
         const uploadedMediaUrls = await Promise.all(
@@ -1348,7 +1347,12 @@ export default function App({ hideChrome = false } = {}) {
           cagr: 'TBD',
           developer: myBrokerProfile ? (myBrokerProfile.agency || 'Broker Listed') : (isRealAccount ? 'Self Listed' : 'Guest Listed'),
           badge: 'New',
-          image: finalMedia[0] || fallbackImage,
+          // No stock photo. This was `finalMedia[0] || fallbackImage`, which
+          // pasted an Unsplash picture of someone else's field onto any
+          // listing without uploads — six of eight live listings were showing
+          // it. An empty string renders the "no photo" state instead, and the
+          // display layer substitutes a satellite view of the real location.
+          image: finalMedia[0] || '',
           media: finalMedia,
           documentsAvailable: await Promise.all(docFiles.map(f => uploadDocToStorage(f))),
           lat: plotLocation.lat,
