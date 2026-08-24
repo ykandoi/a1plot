@@ -630,6 +630,36 @@ button {
   text-transform: uppercase;
   vertical-align: middle;
 }
+/* Location breakdown inside the inventory panel, in place of the fabricated
+   trend chart. Sits on the dark panel, so light colours. */
+.mockup-breakdown {
+  margin-top: 1.25rem;
+  padding-top: 1rem;
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+  list-style: none;
+}
+.mockup-breakdown li {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.4rem 0;
+  font-size: 0.9rem;
+}
+.mockup-breakdown li + li {
+  border-top: 1px solid rgba(255, 255, 255, 0.05);
+}
+.mockup-breakdown a {
+  color: #e2e8f0;
+}
+.mockup-breakdown a:hover {
+  color: var(--accent-green);
+}
+.mockup-breakdown span {
+  color: #cbd5e1;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+
 .mockup-disclaimer {
   margin-top: 0.75rem;
   color: #cbd5e1;

@@ -1,8 +1,8 @@
 import SiteChrome from '../src/components/site/SiteChrome';
 import { jsonLdHtml, priceOffer } from '../src/lib/jsonld';
 import { plotUrl } from '../src/lib/slug';
-import ChartMount from '../src/components/islands/ChartMount';
 import { fetchPublicPlots } from '../src/lib/fetchPlots';
+import { inventoryStats } from '../src/lib/stats';
 
 export const revalidate = 3600;
 
@@ -27,6 +27,7 @@ const I = {
 
 export default async function Page() {
   const plots = await fetchPublicPlots();
+  const stats = inventoryStats(plots);
 
   // Only the listings. The WebSite and organisation entities are emitted once,
   // site-wide, from app/layout.jsx — declaring a second #website here gave two
@@ -61,9 +62,18 @@ export default async function Page() {
               <a className="btn btn-primary" href="/buyer_map">Explore Plots {I.arrow(18)}</a>
               <a className="btn btn-secondary" href="/list_property">List Your Land</a>
             </div>
+            {/* Live figures. These read "500+ Verified Plots" and "₹500Cr+ Asset
+                Value" while the site had six listings worth ₹51.75 Cr — stated
+                as fact in the hero, overstated roughly 80x and 10x. A stat is
+                only rendered when there is a real number behind it; 0%
+                brokerage stays because it is a pricing policy, not a metric. */}
             <div className="hero-stats">
-              <div className="stat-item"><span className="stat-value">500+</span><p>Verified Plots</p></div>
-              <div className="stat-item"><span className="stat-value">₹500Cr+</span><p>Asset Value</p></div>
+              {stats.count > 0 && (
+                <div className="stat-item"><span className="stat-value">{stats.count}</span><p>Verified {stats.count === 1 ? 'Plot' : 'Plots'}</p></div>
+              )}
+              {stats.totalValueLabel && (
+                <div className="stat-item"><span className="stat-value">{stats.totalValueLabel}</span><p>Listed Value</p></div>
+              )}
               <div className="stat-item"><span className="stat-value">0%</span><p>Brokerage</p></div>
             </div>
           </div>
@@ -84,14 +94,35 @@ export default async function Page() {
               </ul>
               <a className="btn btn-accent" href="/interests">See My Interests {I.arrow(18)}</a>
             </div>
+            {/* Real inventory, not a mockup. This panel used to show a hardcoded
+                ₹1,24,50,000 balance, a hardcoded +18.2% gain and a fixed
+                six-point rising chart, identical for every visitor. The value
+                and counts below come from the same live query that feeds the
+                listings; the trend line is gone because no historical series
+                exists to draw one from, and inventing one is what the +18.2%
+                was. */}
             <div className="dashboard-mockup">
-              <div className="mockup-header"><div className="font-semibold">My Portfolio <span className="mockup-sample-tag">Sample</span></div><div className="btn btn-secondary" style={{ padding: '0.25rem 0.75rem', fontSize: '0.8rem' }}>Export</div></div>
+              <div className="mockup-header"><div className="font-semibold">Verified Inventory</div><a className="btn btn-secondary" href="/buyer_map" style={{ padding: '0.25rem 0.75rem', fontSize: '0.8rem' }}>Browse</a></div>
               <div className="mockup-portfolio">
-                <div className="text-muted mb-2">Total Current Value</div>
-                <div className="flex items-center gap-4"><div className="mockup-value">₹1,24,50,000</div><div className="mockup-gain">{I.trend(18)} +18.2%</div></div>
+                <div className="text-muted mb-2">Total Listed Value</div>
+                <div className="flex items-center gap-4">
+                  <div className="mockup-value">{stats.totalValueLabel || '—'}</div>
+                  <div className="mockup-gain">{stats.count} {stats.count === 1 ? 'listing' : 'listings'}</div>
+                </div>
               </div>
-              <div style={{ height: '200px' }}><ChartMount /></div>
-              <p className="mockup-disclaimer">Sample dashboard. Figures are illustrative only — not actual holdings, and not a projection or guarantee of returns.</p>
+              {stats.places.length > 0 && (
+                <ul className="mockup-breakdown">
+                  {stats.places.slice(0, 5).map(pl => (
+                    <li key={pl.slug}>
+                      <a href={`/land-for-sale/${pl.slug}`}>{pl.name}</a>
+                      <span>{pl.plots.length}</span>
+                    </li>
+                  ))}
+                </ul>
+              )}
+              <p className="mockup-disclaimer">
+                Live figures from current verified listings{stats.pricedCount < stats.count ? `, covering the ${stats.pricedCount} of ${stats.count} with a listed price` : ''}. Past prices are not a guide to future returns.
+              </p>
             </div>
           </div>
         </div>
