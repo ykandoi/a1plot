@@ -1,6 +1,6 @@
 import SiteChrome from '../../src/components/site/SiteChrome';
 import { jsonLdHtml, priceOffer } from '../../src/lib/jsonld';
-import { plotUrl } from '../../src/lib/slug';
+import { plotUrl, groupPlotsByPlace, toSlug } from '../../src/lib/slug';
 import { fetchPublicPlots } from '../../src/lib/fetchPlots';
 
 // Inline SVG (server-component safe — avoids pulling a client icon lib into RSC).
@@ -40,6 +40,9 @@ export default async function Page({ searchParams }) {
   const q = (sp?.q || sp?.city || sp?.location || '').toString().trim();
   const allPlots = await fetchPublicPlots();
   const results = allPlots.filter(p => matches(p, q));
+  // Which cities actually have a /land-for-sale/<city> page (same derivation
+  // the route itself uses), so chips can link to a real page where one exists.
+  const placeSlugs = new Set(groupPlotsByPlace(allPlots).map(g => g.slug));
 
   const jsonLd = {
     '@context': 'https://schema.org',
@@ -71,12 +74,21 @@ export default async function Page({ searchParams }) {
             </p>
           </div>
 
-          {/* Popular city links — internal links help SEO discovery */}
+          {/* Popular city links. A city that HAS a landing page links to it
+              rather than to a search-results URL: /land-for-sale/jaipur is a
+              real indexable page with its own H1, copy and canonical, whereas
+              /search?q=Jaipur is a results view Google largely ignores. Cities
+              with no inventory yet keep the search link so the chip still
+              works. */}
           <div style={{ textAlign: 'center', marginBottom: '2rem' }}>
             <span style={{ color: 'var(--text-muted)', fontSize: '0.9rem', marginRight: 8 }}>Popular:</span>
-            {POPULAR.map(city => (
-              <a key={city} href={`/search?q=${encodeURIComponent(city)}`} style={{ display: 'inline-block', margin: '0 6px 8px 0', padding: '0.3rem 0.8rem', border: '1px solid var(--border-color)', borderRadius: 999, fontSize: '0.85rem', color: 'var(--primary)' }}>{city}</a>
-            ))}
+            {POPULAR.map(city => {
+              const slug = toSlug(city);
+              const hasPage = placeSlugs.has(slug);
+              return (
+                <a key={city} href={hasPage ? `/land-for-sale/${slug}` : `/search?q=${encodeURIComponent(city)}`} style={{ display: 'inline-block', margin: '0 6px 8px 0', padding: '0.3rem 0.8rem', border: '1px solid var(--border-color)', borderRadius: 999, fontSize: '0.85rem', color: 'var(--primary)' }}>{city}</a>
+              );
+            })}
           </div>
 
           {q && (

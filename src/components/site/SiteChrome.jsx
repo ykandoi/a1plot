@@ -10,6 +10,8 @@
 import React from 'react';
 import AuthNavMount from '../islands/AuthNavMount';
 import BrokerNavLinkMount from '../islands/BrokerNavLinkMount';
+import { fetchPublicPlots } from '../../lib/fetchPlots';
+import { groupPlotsByPlace } from '../../lib/slug';
 
 const SearchIcon = () => (
   <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="8" /><path d="m21 21-4.3-4.3" /></svg>
@@ -24,7 +26,26 @@ const BrokerIcon = () => (
   <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" /><circle cx="9" cy="7" r="4" /><polyline points="16 11 18 13 22 9" /></svg>
 );
 
-export default function SiteChrome({ active, searchDefault = '', hideFooter = false, children }) {
+// Location links for the footer, derived from live inventory so a city appears
+// the moment its first plot is published and vanishes with its last.
+//
+// These exist because a crawl of the site found every /land-for-sale/<city>
+// page ORPHANED: they were in the sitemap and cross-linked to each other, but
+// nothing on the site linked INTO that cluster, so they received no internal
+// link equity at all. Putting them in the footer gives every page a path in.
+//
+// Failure here must never break the shell — an empty list just omits the
+// column, which is also what happens before the first listing exists.
+async function footerPlaces() {
+  try {
+    return groupPlotsByPlace(await fetchPublicPlots()).slice(0, 6);
+  } catch (_) {
+    return [];
+  }
+}
+
+export default async function SiteChrome({ active, searchDefault = '', hideFooter = false, children }) {
+  const places = hideFooter ? [] : await footerPlaces();
   return (
     <>
       <nav className="navbar sc-navbar">
@@ -81,6 +102,16 @@ export default function SiteChrome({ active, searchDefault = '', hideFooter = fa
                 <li><a href="/broker-dashboard">Broker Dashboard</a></li>
               </ul>
             </div>
+            {places.length > 0 && (
+              <div className="footer-links">
+                <h2>Land for Sale</h2>
+                <ul>
+                  {places.map(p => (
+                    <li key={p.slug}><a href={`/land-for-sale/${p.slug}`}>Land in {p.name}</a></li>
+                  ))}
+                </ul>
+              </div>
+            )}
             <div className="footer-links">
               <h2>Company</h2>
               <ul>
