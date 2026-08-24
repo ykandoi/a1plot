@@ -53,6 +53,16 @@ export default function RootLayout({ children }) {
         <link rel="llms-txt" type="text/markdown" href="/llms.txt" />
 
         {/* PWA: installable + offline-capable */}
+        {/* The rupee sign is the ONLY character on this site that lives outside
+            Inter's `latin` subset — it sits in `latin-ext`, an 85KB download
+            fetched for that single glyph and nothing else. This claims U+20B9
+            for a system face instead, so latin-ext is never needed. If none of
+            these locals exist the @font-face is skipped entirely and the
+            browser falls through to the next family in the stack, which also
+            has the glyph. Declared here rather than in index.css because
+            next/font's @font-face rules are bundled after it, and for
+            overlapping unicode-ranges the last declaration wins. */}
+        <style dangerouslySetInnerHTML={{ __html: "@font-face{font-family:'Inter';src:local('Nirmala UI'),local('Segoe UI'),local('Noto Sans'),local('Arial Unicode MS'),local('DejaVu Sans');unicode-range:U+20B9;font-weight:100 900;font-style:normal;font-display:swap}" }} />
         <link rel="manifest" href="/manifest.json" />
         <meta name="theme-color" content="#10b981" />
         <meta name="mobile-web-app-capable" content="yes" />
