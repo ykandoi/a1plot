@@ -213,7 +213,112 @@
   border-radius: var(--radius-lg);
   border: 1px solid var(--border-color);
   box-shadow: var(--shadow-sm);
-  overflow-x: auto;
+  /* No overflow-x. The properties table had ten columns inside a horizontally
+     scrolling box, so reading a row meant dragging sideways. The table now
+     fits the screen: fixed layout, weighted column widths, and long values
+     wrap or ellipsize instead of widening the table. */
+}
+.admin-table-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 0.6rem 1rem;
+  border-bottom: 1px solid var(--border-color);
+  background: #f8fafc;
+  border-radius: var(--radius-lg) var(--radius-lg) 0 0;
+}
+.admin-table-clear {
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--primary);
+  background: none;
+  border: none;
+  cursor: pointer;
+}
+.admin-table-clear:hover { text-decoration: underline; }
+
+.admin-table--fit {
+  table-layout: fixed;
+  width: 100%;
+}
+.admin-table--fit th,
+.admin-table--fit td {
+  overflow-wrap: anywhere;
+  white-space: normal;
+}
+.admin-th-sort {
+  display: flex;
+  align-items: center;
+  gap: 0.3rem;
+  width: 100%;
+  padding: 0;
+  background: none;
+  border: none;
+  cursor: pointer;
+  font: inherit;
+  color: inherit;
+  text-transform: inherit;
+  letter-spacing: inherit;
+  text-align: left;
+}
+.admin-th-sort:hover { color: var(--text-main); }
+.admin-th-filter {
+  width: 100%;
+  margin-top: 0.35rem;
+  padding: 0.2rem 0.3rem;
+  font-size: 0.75rem;
+  font-weight: 500;
+  text-transform: none;
+  letter-spacing: 0;
+  color: var(--text-main);
+  background: white;
+  border: 1px solid var(--border-color);
+  border-radius: 4px;
+}
+.admin-table-row-clickable.is-selected > td {
+  background: #ecfdf5;
+  box-shadow: inset 3px 0 0 var(--accent-green-strong);
+}
+.admin-row-actions-row > td {
+  background: #ecfdf5;
+  padding-top: 0 !important;
+  border-bottom: 2px solid var(--accent-green-strong);
+}
+.admin-row-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  padding: 0 0 0.75rem 0.75rem;
+}
+
+/* Narrow screens: the table becomes stacked cards rather than scrolling. */
+@media (max-width: 860px) {
+  .admin-table--fit,
+  .admin-table--fit tbody,
+  .admin-table--fit tr,
+  .admin-table--fit td { display: block; width: 100%; }
+  .admin-table--fit thead { display: none; }
+  .admin-table--fit tr {
+    border-bottom: 1px solid var(--border-color);
+    padding: 0.5rem 0;
+  }
+  .admin-table--fit td {
+    display: flex;
+    justify-content: space-between;
+    gap: 1rem;
+    border: none;
+    padding: 0.35rem 1rem;
+  }
+  .admin-table--fit td::before {
+    content: attr(data-label);
+    font-size: 0.7rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    color: var(--text-muted);
+    flex-shrink: 0;
+  }
 }
 .admin-table {
   width: 100%;
@@ -982,4 +1087,19 @@
 .admin-actions {
   display: flex;
   gap: 0.5rem;
+}
+/* Document count badge, replacing the row of filename chips that made the
+   properties table too wide to fit. The full list is in the title attribute. */
+.admin-doc-count {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 1.7rem;
+  height: 1.7rem;
+  padding: 0 0.4rem;
+  border-radius: 999px;
+  background: #f1f5f9;
+  color: var(--text-muted);
+  font-size: 0.8rem;
+  font-weight: 700;
 }

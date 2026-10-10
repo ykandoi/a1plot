@@ -31,10 +31,11 @@ export default function Page() {
               </p>
             </div>
             <H>3. Listing Visibility &amp; Verification Checklist</H>
-            <P>Sellers listing properties can set visibility options to:</P>
+            <P>Whether a listing is shown publicly is determined solely by its verification status. Sellers do not set it, and it cannot be enabled before review:</P>
             <ul style={{ paddingLeft: '1.5rem', marginBottom: '1.5rem', listStyleType: 'disc' }}>
-              <li style={{ marginBottom: '0.5rem' }}><strong>Public:</strong> Properties are visible on the map and featured grids. Note: Properties must have their document verification approved by an A1Plot admin before they can be showcased publicly.</li>
-              <li style={{ marginBottom: '0.5rem' }}><strong>Private:</strong> Properties are restricted to the seller's personal portfolio dashboard and will not be displayed to the public or on the map.</li>
+              <li style={{ marginBottom: '0.5rem' }}><strong>Verification Pending:</strong> The listing has been submitted and is awaiting review by an A1Plot admin. It is visible only to the seller in their own dashboard, and does not appear on the map, in search, or in featured grids.</li>
+              <li style={{ marginBottom: '0.5rem' }}><strong>Verified:</strong> An A1Plot admin has reviewed the submitted documents and approved the listing. It is published and visible to buyers across the platform.</li>
+              <li style={{ marginBottom: '0.5rem' }}><strong>Rejected:</strong> The listing did not pass verification. It remains visible only to the seller and is never displayed publicly. A rejected listing can be re-reviewed if the seller corrects the issue.</li>
             </ul>
             <H>4. Accuracy of Information</H>
             <P>While A1Plot performs manual verification of upload files (such as EC and Title Deeds), we advise all users to execute their own independent land registry and local municipal checks. We explicitly leave direct government registration automated checks as an additional due-diligence step.</P>

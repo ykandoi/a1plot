@@ -26,6 +26,8 @@ import { GoogleMap, useJsApiLoader, MarkerF, InfoWindowF, Autocomplete, PolygonF
 const LIBRARIES = ['places', 'geometry'];
 import { auth, googleProvider, storage, popupRedirectResolver } from './firebase';
 import { plotStaticMapUrl } from './lib/staticMap';
+import AdminTable from './components/admin/AdminTable';
+import { plotDisplayImage } from './lib/staticMap';
 import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 import { signInWithPopup, signInWithEmailAndPassword, createUserWithEmailAndPassword, onAuthStateChanged, signOut, signInAnonymously } from 'firebase/auth';
 import { usePlots } from './hooks/usePlots';
@@ -1126,14 +1128,57 @@ export default function App({ hideChrome = false } = {}) {
     }
   };
 
-  // Admin actions
-  const handleVerifyPlot = async (plotId) => {
-    await updatePlot(plotId, { status: 'Verified', badge: 'Verified', visibility: 'public' });
+  // Admin actions.
+  //
+  // Status is the single control. Visibility is written alongside it rather
+  // than being a separate switch someone can set independently — the public
+  // site's Firestore query filters on `visibility`, so it still has to exist,
+  // but it is now always whatever the status implies. Previously a listing
+  // could be Rejected and still flagged public, or Verified and hidden.
+  const setPlotStatus = async (plotId, status) => {
+    await updatePlot(plotId, {
+      status,
+      badge: status === 'Verified' ? 'Verified' : status === 'Rejected' ? 'Rejected' : 'Pending',
+      visibility: visibilityForStatus(status),
+    });
   };
 
-  const handleRejectPlot = async (plotId) => {
-    await updatePlot(plotId, { status: 'Rejected', badge: 'Rejected' });
-  };
+  // One-time reconciliation of legacy records.
+  //
+  // Before status drove visibility, the two were set independently, so the
+  // database holds listings that are Rejected yet flagged public, or Verified
+  // yet private. New writes can no longer diverge, but existing documents
+  // still can, and the public site queries on `visibility`.
+  //
+  // This runs in the app rather than as an offline script because
+  // firestore.rules only permits an admin to update a listing, so it needs a
+  // signed-in admin session — which is exactly what viewing this panel is. It
+  // touches only documents that actually disagree, and runs at most once per
+  // session.
+  const visibilityBackfilled = useRef(false);
+  useEffect(() => {
+    if (!isAdmin || view !== 'admin' || plotsLoading) return;
+    if (visibilityBackfilled.current) return;
+    const wrong = plots.filter(p => p?.id && p.visibility !== visibilityForStatus(plotStatusOf(p)));
+    if (wrong.length === 0) { visibilityBackfilled.current = true; return; }
+    visibilityBackfilled.current = true;
+    (async () => {
+      let fixed = 0;
+      for (const p of wrong) {
+        try {
+          await updatePlot(p.id, { visibility: visibilityForStatus(plotStatusOf(p)) });
+          fixed++;
+        } catch (err) {
+          console.error('visibility backfill failed for', p.id, err);
+        }
+      }
+      if (fixed > 0) showToast(`Synced visibility on ${fixed} listing${fixed === 1 ? '' : 's'} to match their status.`);
+    })();
+  }, [isAdmin, view, plotsLoading, plots]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  const handleVerifyPlot = (plotId) => setPlotStatus(plotId, 'Verified');
+  const handleRejectPlot = (plotId) => setPlotStatus(plotId, 'Rejected');
+  const handlePendingPlot = (plotId) => setPlotStatus(plotId, 'Verification Pending');
 
   // Admin: approve / reject a broker application.
   const handleApproveBroker = async (broker) => {
@@ -1206,6 +1251,18 @@ export default function App({ hideChrome = false } = {}) {
     }
     return { name: 'Unknown', email: '', role: 'unknown' };
   };
+
+  // The three states a listing can be in. Visibility is no longer a separate
+  // switch an admin sets: a Verified listing is public, anything Pending or
+  // Rejected is not. The `visibility` field is still written, because the
+  // public site's Firestore query filters on it — it is just derived now
+  // rather than chosen, so the two can never contradict each other.
+  const PLOT_STATUSES = ['Verified', 'Verification Pending', 'Rejected'];
+  const plotStatusOf = (p) => (PLOT_STATUSES.includes(p?.status) ? p.status : 'Verified');
+  const visibilityForStatus = (status) => (status === 'Verified' ? 'public' : 'private');
+  const STATUS_RANK = { 'Verified': 0, 'Verification Pending': 1, 'Rejected': 2 };
+  // Listings submitted by users come before ones the admin added themselves.
+  const uploaderRank = (p) => (resolveUploader(p).role === 'admin' ? 1 : 0);
 
   const UPLOADER_ROLE_STYLES = {
     admin:   { bg: '#ede9fe', color: '#5b21b6' },
@@ -1568,7 +1625,8 @@ export default function App({ hideChrome = false } = {}) {
         price: adminNewPlot.price,
         size: adminNewPlot.size,
         features: adminNewPlot.features,
-        visibility: adminNewPlot.visibility,
+        // Derived, never chosen — see setPlotStatus.
+        visibility: visibilityForStatus(adminNewPlot.status),
         status: adminNewPlot.status,
         lat: plotLocation.lat,
         lng: plotLocation.lng,
@@ -2391,24 +2449,16 @@ export default function App({ hideChrome = false } = {}) {
             )}
           </div>
 
-          {/* Visibility Toggle */}
-          <div className="form-group" style={{background: '#f1f5f9', borderRadius: 'var(--radius-md)', padding: '1rem 1.25rem', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '1rem'}}>
-            <div>
-              <div style={{fontWeight: 600, fontSize: '0.9rem', marginBottom: '0.2rem'}}>Showcase to Public</div>
-              <div style={{fontSize: '0.8rem', color: 'var(--text-muted)'}}>
-                {newPlot.visibility === 'public'
-                  ? 'Listing will be visible to buyers only after admin verification.'
-                  : 'Listing is private — only visible to you in your dashboard.'}
-              </div>
+          {/* No visibility switch. It implied a choice the seller did not
+              actually have: a listing was only ever shown to buyers once an
+              admin verified it, whatever the toggle said. Verification alone
+              decides now, and this explains that. */}
+          <div className="form-group" style={{background: '#f1f5f9', borderRadius: 'var(--radius-md)', padding: '1rem 1.25rem'}}>
+            <div style={{fontWeight: 600, fontSize: '0.9rem', marginBottom: '0.2rem'}}>What happens next</div>
+            <div style={{fontSize: '0.8rem', color: 'var(--text-muted)'}}>
+              We review every listing before it goes live. Once verified it appears to buyers
+              across A1Plot. Until then it stays visible only to you in your dashboard.
             </div>
-            <label className="visibility-toggle">
-              <input
-                type="checkbox"
-                checked={newPlot.visibility === 'public'}
-                onChange={e => setNewPlot({ ...newPlot, visibility: e.target.checked ? 'public' : 'private' })}
-              />
-              <span className="visibility-toggle-slider" />
-            </label>
           </div>
 
           {submitError && (
@@ -3933,13 +3983,6 @@ export default function App({ hideChrome = false } = {}) {
               <option value="Rejected">Rejected</option>
             </select>
           </div>
-          <div className="form-group mb-8">
-            <label>Visibility</label>
-            <select className="form-input" value={adminNewPlot.visibility} onChange={(e) => setAdminNewPlot({...adminNewPlot, visibility: e.target.value})}>
-              <option value="public">Public</option>
-              <option value="private">Private</option>
-            </select>
-          </div>
 
           {submitError && (
             <div style={{background: '#fee2e2', border: '1px solid #fca5a5', borderRadius: '0.5rem', padding: '0.75rem 1rem', marginBottom: '1rem', color: '#b91c1c', fontSize: '0.9rem'}}>
@@ -4206,100 +4249,102 @@ export default function App({ hideChrome = false } = {}) {
               <p className="text-muted" style={{fontSize: '1.1rem'}}>No user-submitted listings yet.</p>
             </div>
           ) : (
-            <div className="admin-table-wrap">
-              <table className="admin-table">
-                <thead>
-                  <tr>
-                    <th>Property</th>
-                    <th>Uploaded By</th>
-                    <th>Location</th>
-                    <th>Price</th>
-                    <th>Size</th>
-                    <th>Documents</th>
-                    <th>Visibility</th>
-                    <th>Status</th>
-                    <th>Listed</th>
-                    <th>Actions</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {allListedPlots.map(plot => (
-                    <tr key={plot.id} onClick={() => handleAdminEditClick(plot)} style={{cursor: 'pointer'}} className="admin-table-row-clickable">
-                      <td>
-                        <div className="admin-plot-title">
-                          <img src={plot.image} alt="" className="admin-plot-thumb" />
-                          <span>{plot.title}</span>
-                        </div>
-                      </td>
-                      <td>{renderUploadedBy(plot)}</td>
-                      <td className="text-muted">{plot.location}</td>
-                      <td className="font-semibold">{plot.price}</td>
-                      <td>{plot.size}</td>
-                      <td>
-                        <div className="admin-docs">
-                          {(plot.documentsAvailable || []).map((d, i) => (
-                            <span key={i} className="admin-doc-chip">{d}</span>
-                          ))}
-                        </div>
-                      </td>
-                      <td>
-                        <span style={{
-                          padding: '0.2rem 0.5rem', 
-                          borderRadius: '4px', 
-                          fontSize: '0.75rem', 
-                          fontWeight: 600, 
-                          backgroundColor: plot.visibility === 'private' ? '#fee2e2' : '#dcfce7',
-                          color: plot.visibility === 'private' ? '#991b1b' : '#166534'
-                        }}>
-                          {plot.visibility === 'private' ? 'Private' : 'Public'}
-                        </span>
-                      </td>
-                      <td>
-                        {(() => {
-                          const displayStatus = ['Verification Pending', 'Rejected'].includes(plot.status) ? plot.status : 'Verified';
-                          return (
-                            <span className={`admin-status admin-status-${displayStatus.toLowerCase().replace(/\s+/g,'-')}`}>
-                              {displayStatus}
-                            </span>
-                          );
-                        })()}
-                      </td>
-                      <td className="text-muted" style={{whiteSpace: 'nowrap', fontSize: '0.8rem'}}>
-                        {formatListedTime(plot)}
-                      </td>
-                      <td onClick={(e) => e.stopPropagation()}>
-                        <div className="admin-actions">
-                          <button className="admin-btn" style={{backgroundColor: '#e2e8f0', color: '#1e293b', border: '1px solid #cbd5e1'}} onClick={(e) => { e.stopPropagation(); handleAdminEditClick(plot); }}>
-                            <Edit3 size={14} /> Edit
-                          </button>
-                          {plot.status === 'Verification Pending' ? (
-                            <>
-                              <button className="admin-btn admin-btn-verify" onClick={(e) => { e.stopPropagation(); handleVerifyPlot(plot.id); }}>
-                                <Check size={14} /> Verify
-                              </button>
-                              <button className="admin-btn admin-btn-reject" onClick={(e) => { e.stopPropagation(); handleRejectPlot(plot.id); }}>
-                                <X size={14} /> Reject
-                              </button>
-                            </>
-                          ) : plot.status === 'Rejected' ? (
-                            <button className="admin-btn admin-btn-verify" onClick={(e) => { e.stopPropagation(); handleVerifyPlot(plot.id); }}>
-                              <Check size={14} /> Verify
-                            </button>
-                          ) : (
-                            <button className="admin-btn admin-btn-reject" onClick={(e) => { e.stopPropagation(); handleRejectPlot(plot.id); }}>
-                              <X size={14} /> Reject
-                            </button>
-                          )}
-                          <button className="admin-btn" style={{backgroundColor: '#fee2e2', color: '#991b1b', border: '1px solid #fecaca'}} onClick={(e) => { e.stopPropagation(); handleDeletePlot(plot); }}>
-                            <Trash2 size={14} /> Delete
-                          </button>
-                        </div>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
+            <AdminTable
+              caption="properties"
+              rows={allListedPlots}
+              getRowKey={(p) => p.id}
+              onRowOpen={(p) => handleAdminEditClick(p)}
+              emptyMessage="No user-submitted listings yet."
+              // Verified first, then pending, then rejected; inside each group
+              // user submissions come before ones the admin listed themselves.
+              defaultSort={(a, b) =>
+                (STATUS_RANK[plotStatusOf(a)] - STATUS_RANK[plotStatusOf(b)])
+                || (uploaderRank(a) - uploaderRank(b))
+                || String(a.title || '').localeCompare(String(b.title || ''))
+              }
+              renderRowActions={(plot) => (
+                <>
+                  <button className="admin-btn" style={{ backgroundColor: '#e2e8f0', color: '#1e293b', border: '1px solid #cbd5e1' }} onClick={() => handleAdminEditClick(plot)}>
+                    <Edit3 size={14} /> Open &amp; Edit
+                  </button>
+                  {plotStatusOf(plot) !== 'Verified' && (
+                    <button className="admin-btn admin-btn-verify" onClick={() => handleVerifyPlot(plot.id)}>
+                      <Check size={14} /> Verify
+                    </button>
+                  )}
+                  {plotStatusOf(plot) !== 'Verification Pending' && (
+                    <button className="admin-btn" style={{ backgroundColor: '#fef3c7', color: '#92400e', border: '1px solid #fde68a' }} onClick={() => handlePendingPlot(plot.id)}>
+                      <Clock size={14} /> Mark Pending
+                    </button>
+                  )}
+                  {plotStatusOf(plot) !== 'Rejected' && (
+                    <button className="admin-btn admin-btn-reject" onClick={() => handleRejectPlot(plot.id)}>
+                      <X size={14} /> Reject
+                    </button>
+                  )}
+                  <button className="admin-btn" style={{ backgroundColor: '#fee2e2', color: '#991b1b', border: '1px solid #fecaca' }} onClick={() => handleDeletePlot(plot)}>
+                    <Trash2 size={14} /> Delete
+                  </button>
+                </>
+              )}
+              columns={[
+                {
+                  key: 'title', label: 'Property', filter: 'text', width: '22%',
+                  value: (p) => p.title || '',
+                  render: (p) => (
+                    <div className="admin-plot-title">
+                      <img src={plotDisplayImage(p) || ''} alt="" className="admin-plot-thumb" />
+                      <span>{p.title}</span>
+                    </div>
+                  ),
+                },
+                {
+                  key: 'uploader', label: 'Uploaded By', filter: 'select', width: '18%',
+                  value: (p) => resolveUploader(p).role,
+                  sortValue: (p) => uploaderRank(p),
+                  render: (p) => renderUploadedBy(p),
+                },
+                {
+                  key: 'location', label: 'Location', filter: 'text', width: '16%',
+                  value: (p) => p.location || p.city || '',
+                  render: (p) => <span className="text-muted">{p.location || p.city || '—'}</span>,
+                },
+                {
+                  key: 'price', label: 'Price / Size', filter: 'text', width: '13%',
+                  value: (p) => p.price || '',
+                  render: (p) => (
+                    <>
+                      <div className="font-semibold">{p.price || '—'}</div>
+                      <div className="text-muted" style={{ fontSize: '0.78rem' }}>{p.size || '—'}</div>
+                    </>
+                  ),
+                },
+                {
+                  key: 'docs', label: 'Docs', width: '7%', align: 'center',
+                  value: (p) => (p.documentsAvailable || []).length,
+                  render: (p) => {
+                    const n = (p.documentsAvailable || []).length;
+                    return <span className="admin-doc-count" title={(p.documentsAvailable || []).join(', ')}>{n}</span>;
+                  },
+                },
+                {
+                  key: 'status', label: 'Status', filter: 'select', width: '12%',
+                  value: (p) => plotStatusOf(p),
+                  sortValue: (p) => STATUS_RANK[plotStatusOf(p)],
+                  render: (p) => {
+                    const st = plotStatusOf(p);
+                    return (
+                      <span className={`admin-status admin-status-${st.toLowerCase().replace(/\s+/g, '-')}`}>{st}</span>
+                    );
+                  },
+                },
+                {
+                  key: 'listed', label: 'Listed', width: '12%',
+                  value: (p) => p.createdAt || p.listedAt || 0,
+                  render: (p) => <span className="text-muted" style={{ fontSize: '0.78rem' }}>{formatListedTime(p)}</span>,
+                },
+              ]}
+            />
           )}
 
           {/* ── Broker Applications ─────────────────────────────────────── */}
@@ -4312,47 +4357,77 @@ export default function App({ hideChrome = false } = {}) {
               Approve or reject brokers. Only <strong>approved</strong> brokers can see buyer requirements &amp; contact details.
             </p>
 
-            {(!allBrokers || allBrokers.length === 0) ? (
-              <div className="text-center" style={{ padding: '2.5rem 2rem', background: 'white', border: '1px solid var(--border-color)', borderRadius: 'var(--radius-lg)' }}>
-                <p className="text-muted">No broker applications yet.</p>
-              </div>
-            ) : (
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(320px, 1fr))', gap: '1.25rem' }}>
-                {allBrokers.map(b => {
-                  const status = b.status || 'pending';
-                  const statusColor = status === 'approved' ? '#166534' : status === 'rejected' ? '#991b1b' : '#92400e';
-                  const statusBg = status === 'approved' ? '#dcfce7' : status === 'rejected' ? '#fee2e2' : '#fef3c7';
-                  return (
-                    <div key={b.uid} style={{ background: 'white', border: '1px solid var(--border-color)', borderRadius: 'var(--radius-lg)', padding: '1.25rem', boxShadow: 'var(--shadow-sm)' }}>
-                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '0.75rem', gap: '0.5rem' }}>
-                        <div style={{ fontWeight: 700, fontSize: '1.05rem', color: 'var(--text-main)' }}>{b.name || 'Unnamed Broker'}</div>
-                        <span style={{ padding: '0.2rem 0.6rem', borderRadius: 999, fontSize: '0.72rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '.03em', background: statusBg, color: statusColor }}>{status}</span>
-                      </div>
-                      <div style={{ fontSize: '0.88rem', color: 'var(--text-muted)', lineHeight: 1.7 }}>
-                        {b.agency && <div>🏢 {b.agency}</div>}
-                        {b.phone && <div>📞 <a href={`tel:${b.phone}`} style={{ color: 'var(--primary)' }}>{b.phone}</a></div>}
-                        {b.email && <div>✉️ <a href={`mailto:${b.email}`} style={{ color: 'var(--primary)' }}>{b.email}</a></div>}
-                        <div>📍 {(b.citiesDisplay || b.cities || []).join(', ') || '—'}</div>
-                        {b.experience && <div>💼 {b.experience}</div>}
-                        <div>🆔 RERA: <strong>{b.reraId ? b.reraId : 'Not provided'}</strong></div>
-                      </div>
-                      <div style={{ display: 'flex', gap: '0.5rem', marginTop: '1rem', flexWrap: 'wrap' }}>
-                        {status !== 'approved' && (
-                          <button className="admin-btn admin-btn-verify" onClick={() => handleApproveBroker(b)}>
-                            <Check size={14} /> Approve
-                          </button>
-                        )}
-                        {status !== 'rejected' && (
-                          <button className="admin-btn admin-btn-reject" onClick={() => handleRejectBroker(b)}>
-                            <X size={14} /> Reject
-                          </button>
-                        )}
-                      </div>
-                    </div>
-                  );
-                })}
-              </div>
-            )}
+            <AdminTable
+              caption="brokers"
+              rows={allBrokers || []}
+              getRowKey={(b) => b.uid}
+              emptyMessage="No broker applications yet."
+              // Pending applications first — those are the ones needing action.
+              defaultSort={(a, b) => {
+                const rank = (x) => ({ pending: 0, approved: 1, rejected: 2 }[x.status || 'pending'] ?? 0);
+                return (rank(a) - rank(b)) || String(a.name || '').localeCompare(String(b.name || ''));
+              }}
+              renderRowActions={(b) => (
+                <>
+                  {(b.status || 'pending') !== 'approved' && (
+                    <button className="admin-btn admin-btn-verify" onClick={() => handleApproveBroker(b)}>
+                      <Check size={14} /> Approve
+                    </button>
+                  )}
+                  {(b.status || 'pending') !== 'rejected' && (
+                    <button className="admin-btn admin-btn-reject" onClick={() => handleRejectBroker(b)}>
+                      <X size={14} /> Reject
+                    </button>
+                  )}
+                </>
+              )}
+              columns={[
+                {
+                  key: 'name', label: 'Broker', filter: 'text', width: '20%',
+                  value: (b) => b.name || '',
+                  render: (b) => (
+                    <>
+                      <div style={{ fontWeight: 600 }}>{b.name || 'Unnamed Broker'}</div>
+                      {b.agency && <div className="text-muted" style={{ fontSize: '0.78rem' }}>{b.agency}</div>}
+                    </>
+                  ),
+                },
+                {
+                  key: 'email', label: 'Contact', filter: 'text', width: '22%',
+                  value: (b) => b.email || '',
+                  render: (b) => (
+                    <>
+                      {b.email && <div><a href={`mailto:${b.email}`} onClick={(e) => e.stopPropagation()} style={{ color: 'var(--primary)' }}>{b.email}</a></div>}
+                      {b.phone && <div className="text-muted" style={{ fontSize: '0.78rem' }}>{b.phone}</div>}
+                    </>
+                  ),
+                },
+                {
+                  key: 'cities', label: 'Cities Covered', filter: 'text', width: '22%',
+                  value: (b) => (b.citiesDisplay || b.cities || []).join(', '),
+                  render: (b) => <span className="text-muted">{(b.citiesDisplay || b.cities || []).join(', ') || '—'}</span>,
+                },
+                {
+                  key: 'rera', label: 'RERA ID', filter: 'text', width: '14%',
+                  value: (b) => b.reraId || '',
+                  render: (b) => b.reraId ? <span>{b.reraId}</span> : <span className="text-muted">Not provided</span>,
+                },
+                {
+                  key: 'experience', label: 'Experience', width: '10%',
+                  value: (b) => b.experience || '',
+                  render: (b) => <span className="text-muted">{b.experience || '—'}</span>,
+                },
+                {
+                  key: 'status', label: 'Status', filter: 'select', width: '12%',
+                  value: (b) => b.status || 'pending',
+                  render: (b) => {
+                    const st = b.status || 'pending';
+                    const c = st === 'approved' ? ['#dcfce7', '#166534'] : st === 'rejected' ? ['#fee2e2', '#991b1b'] : ['#fef3c7', '#92400e'];
+                    return <span style={{ padding: '0.2rem 0.6rem', borderRadius: 999, fontSize: '0.72rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '.03em', background: c[0], color: c[1] }}>{st}</span>;
+                  },
+                },
+              ]}
+            />
           </div>
 
           {/* ── Signed-In Users ──────────────────────────────────────────── */}
@@ -4371,68 +4446,74 @@ export default function App({ hideChrome = false } = {}) {
               <div className="text-center" style={{ padding: '2.5rem 2rem', background: 'white', border: '1px solid var(--border-color)', borderRadius: 'var(--radius-lg)' }}>
                 <p className="text-muted">Loading users…</p>
               </div>
-            ) : allUsers.length === 0 ? (
-              <div className="text-center" style={{ padding: '2.5rem 2rem', background: 'white', border: '1px solid var(--border-color)', borderRadius: 'var(--radius-lg)' }}>
-                <p className="text-muted">No users recorded yet. Users appear here the next time they sign in.</p>
-              </div>
             ) : (
-              <div className="admin-table-wrap">
-                <table className="admin-table">
-                  <thead>
-                    <tr>
-                      <th>User</th>
-                      <th>Email</th>
-                      <th>Sign-in Method</th>
-                      <th>Role</th>
-                      <th>Listings</th>
-                      <th>Sign-ins</th>
-                      <th>Last Seen</th>
-                      <th>Joined</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {allUsers.map(u => {
-                      const isUserAdmin = ADMIN_EMAILS.includes(u.email);
+              <AdminTable
+                caption="users"
+                rows={allUsers}
+                getRowKey={(u) => u.uid}
+                emptyMessage="No signed-in users yet."
+                defaultSort={(a, b) => (Number(b.lastSeenAt || 0) - Number(a.lastSeenAt || 0))}
+                columns={[
+                  {
+                    key: 'name', label: 'User', filter: 'text', width: '20%',
+                    value: (u) => u.displayName || u.email || '',
+                    render: (u) => (
+                      <div className="admin-plot-title">
+                        {u.photoURL
+                          ? <img src={u.photoURL} alt="" className="admin-plot-thumb" style={{ borderRadius: '50%' }} referrerPolicy="no-referrer" />
+                          : <span className="admin-plot-thumb" style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', borderRadius: '50%', background: '#e2e8f0' }}><User size={16} style={{ color: '#64748b' }} /></span>}
+                        <span>{u.displayName || u.email?.split('@')[0] || 'Unnamed'}</span>
+                      </div>
+                    ),
+                  },
+                  {
+                    key: 'email', label: 'Email', filter: 'text', width: '22%',
+                    value: (u) => u.email || '',
+                    render: (u) => u.email
+                      ? <a href={`mailto:${u.email}`} onClick={(e) => e.stopPropagation()} style={{ color: 'var(--primary)' }}>{u.email}</a>
+                      : <span className="text-muted">—</span>,
+                  },
+                  {
+                    key: 'provider', label: 'Sign-in', filter: 'select', width: '11%',
+                    value: (u) => (u.providers || []).map(x => (x === 'google.com' ? 'Google' : x === 'password' ? 'Email' : x)).join(', '),
+                    render: (u) => <span className="text-muted" style={{ fontSize: '0.82rem' }}>{(u.providers || []).map(x => (x === 'google.com' ? 'Google' : x === 'password' ? 'Email' : x)).join(', ') || '—'}</span>,
+                  },
+                  {
+                    key: 'role', label: 'Role', filter: 'select', width: '11%',
+                    value: (u) => ADMIN_EMAILS.includes(u.email) ? 'admin' : ((allBrokers || []).find(b => b.uid === u.uid) ? 'broker' : 'user'),
+                    render: (u) => {
                       const brokerProfile = (allBrokers || []).find(b => b.uid === u.uid);
-                      const role = isUserAdmin ? 'admin' : brokerProfile ? 'broker' : 'user';
-                      const roleStyle = UPLOADER_ROLE_STYLES[role];
-                      const listingCount = plots.filter(
-                        p => p.uploadedBy?.uid === u.uid || p.ownerUid === u.uid
-                      ).length;
-                      const providers = (u.providers || [])
-                        .map(p => (p === 'google.com' ? 'Google' : p === 'password' ? 'Email' : p))
-                        .join(', ');
+                      const role = ADMIN_EMAILS.includes(u.email) ? 'admin' : brokerProfile ? 'broker' : 'user';
+                      const st = UPLOADER_ROLE_STYLES[role];
                       return (
-                        <tr key={u.uid}>
-                          <td>
-                            <div className="admin-plot-title">
-                              {u.photoURL
-                                ? <img src={u.photoURL} alt="" className="admin-plot-thumb" style={{ borderRadius: '50%' }} referrerPolicy="no-referrer" />
-                                : <span className="admin-plot-thumb" style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', borderRadius: '50%', background: '#e2e8f0' }}><User size={16} style={{ color: '#64748b' }} /></span>}
-                              <span>{u.displayName || u.email?.split('@')[0] || 'Unnamed'}</span>
-                            </div>
-                          </td>
-                          <td>{u.email ? <a href={`mailto:${u.email}`} style={{ color: 'var(--primary)' }}>{u.email}</a> : <span className="text-muted">—</span>}</td>
-                          <td className="text-muted" style={{ fontSize: '0.85rem' }}>{providers || '—'}</td>
-                          <td>
-                            <span style={{
-                              padding: '0.15rem 0.5rem', borderRadius: 999, fontSize: '0.7rem',
-                              fontWeight: 700, textTransform: 'uppercase', letterSpacing: '.03em',
-                              background: roleStyle.bg, color: roleStyle.color,
-                            }}>
-                              {role}{brokerProfile && brokerProfile.status !== 'approved' ? ` · ${brokerProfile.status}` : ''}
-                            </span>
-                          </td>
-                          <td className="font-semibold">{listingCount}</td>
-                          <td className="text-muted">{u.signInCount || 1}</td>
-                          <td className="text-muted" style={{ whiteSpace: 'nowrap', fontSize: '0.8rem' }}>{formatTimestamp(u.lastSeenAt)}</td>
-                          <td className="text-muted" style={{ whiteSpace: 'nowrap', fontSize: '0.8rem' }}>{formatTimestamp(u.createdAt)}</td>
-                        </tr>
+                        <span style={{ padding: '0.15rem 0.5rem', borderRadius: 999, fontSize: '0.7rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '.03em', background: st.bg, color: st.color }}>
+                          {role}{brokerProfile && brokerProfile.status !== 'approved' ? ` · ${brokerProfile.status}` : ''}
+                        </span>
                       );
-                    })}
-                  </tbody>
-                </table>
-              </div>
+                    },
+                  },
+                  {
+                    key: 'listings', label: 'Listings', width: '8%', align: 'center',
+                    value: (u) => plots.filter(p => p.uploadedBy?.uid === u.uid || p.ownerUid === u.uid).length,
+                    render: (u) => <span className="font-semibold">{plots.filter(p => p.uploadedBy?.uid === u.uid || p.ownerUid === u.uid).length}</span>,
+                  },
+                  {
+                    key: 'signins', label: 'Sign-ins', width: '8%', align: 'center',
+                    value: (u) => Number(u.signInCount || 1),
+                    render: (u) => <span className="text-muted">{u.signInCount || 1}</span>,
+                  },
+                  {
+                    key: 'lastSeen', label: 'Last Seen', width: '10%',
+                    value: (u) => Number(u.lastSeenAt || 0),
+                    render: (u) => <span className="text-muted" style={{ fontSize: '0.78rem' }}>{formatTimestamp(u.lastSeenAt)}</span>,
+                  },
+                  {
+                    key: 'joined', label: 'Joined', width: '10%',
+                    value: (u) => Number(u.createdAt || 0),
+                    render: (u) => <span className="text-muted" style={{ fontSize: '0.78rem' }}>{formatTimestamp(u.createdAt)}</span>,
+                  },
+                ]}
+              />
             )}
           </div>
         </div>
