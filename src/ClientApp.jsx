@@ -415,6 +415,16 @@ export default function App({ hideChrome = false } = {}) {
   // Listing form file & location state
   const [mediaFiles, setMediaFiles] = useState([]);
   const [docFiles, setDocFiles] = useState([]);
+
+  // "AI Property Add" — describe the listing in plain language (optionally
+  // with photos already in mediaFiles) instead of filling the form field by
+  // field. Extraction only ever populates `newPlot` below; the seller still
+  // reviews and submits through the existing handleListProperty path.
+  const [listingMode, setListingMode] = useState('manual'); // 'manual' | 'ai'
+  const [aiPrompt, setAiPrompt] = useState('');
+  const [aiExtracting, setAiExtracting] = useState(false);
+  const [aiExtractError, setAiExtractError] = useState('');
+  const [aiExtracted, setAiExtracted] = useState(false);
   const [plotLocation, setPlotLocation] = useState({ lat: 20.5937, lng: 78.9629 }); // India center
   const [buyerMapCenter, setBuyerMapCenter] = useState(defaultCenter);
   const [userLocation, setUserLocation] = useState(null);
@@ -1298,6 +1308,63 @@ export default function App({ hideChrome = false } = {}) {
     );
   };
 
+  // Small client-side helper for the "AI Property Add" vision payload only —
+  // produces a throwaway, downscaled JPEG copy to keep the request small. It
+  // never touches the original File objects; those still go to Firebase
+  // Storage unchanged via handleListProperty below.
+  const compressImageForAI = (fileObj) => new Promise((resolve, reject) => {
+    const img = new Image();
+    img.onload = () => {
+      const scale = Math.min(1, 1024 / Math.max(img.width, img.height));
+      const canvas = document.createElement('canvas');
+      canvas.width = Math.round(img.width * scale);
+      canvas.height = Math.round(img.height * scale);
+      canvas.getContext('2d').drawImage(img, 0, 0, canvas.width, canvas.height);
+      const dataUrl = canvas.toDataURL('image/jpeg', 0.7);
+      resolve({ base64: dataUrl.split(',')[1], mediaType: 'image/jpeg' });
+    };
+    img.onerror = reject;
+    img.src = fileObj.preview || URL.createObjectURL(fileObj.file);
+  });
+
+  // "Extract with AI" — sends the free-text description (plus up to 2 of
+  // whatever photos are already in mediaFiles) to /api/ai-property-extract,
+  // then merges whatever fields come back into newPlot. Never writes to
+  // Firestore itself — the seller still reviews the now-prefilled form and
+  // submits through the unmodified handleListProperty/addPlot path below.
+  const handleAiExtract = async () => {
+    if (!aiPrompt.trim() || aiExtracting) return;
+    setAiExtracting(true);
+    setAiExtractError('');
+    try {
+      const imageFiles = mediaFiles.filter(f => f.file && f.file.type.startsWith('image/')).slice(0, 2);
+      const images = await Promise.all(imageFiles.map(compressImageForAI));
+      const res = await fetch('/api/ai-property-extract', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ description: aiPrompt.slice(0, 4000), images }),
+      });
+      const data = await res.json().catch(() => null);
+      if (!res.ok || !data?.success) {
+        throw new Error(data?.error || 'Could not extract details from that description. Please try rephrasing, or fill the form manually.');
+      }
+      setNewPlot(prev => {
+        const next = { ...prev };
+        for (const [key, value] of Object.entries(data.fields || {})) {
+          if (value === null || value === '') continue;
+          next[key] = value;
+        }
+        return next;
+      });
+      setAiExtracted(true);
+    } catch (err) {
+      console.error('AI extract error:', err);
+      setAiExtractError(err.message || 'Something went wrong. Please try again, or fill the form manually.');
+    } finally {
+      setAiExtracting(false);
+    }
+  };
+
   const handleListProperty = async (e) => {
     e.preventDefault();
     setSubmitError('');
@@ -1482,6 +1549,10 @@ export default function App({ hideChrome = false } = {}) {
       setNewPlot({ title: '', location: '', price: '', size: '', features: '', visibility: 'public', khasraNumber: '', state: '', district: '', tehsil: '', village: '', city: '', transactionType: 'sale', propertyType: 'land', landType: 'converted', landUse: 'residential', constructedType: 'flat', constructionStatus: 'constructed', budgetRange: '', facingDirection: 'East', cornerProperty: false, parkFacing: false, roadFacing: false });
       setLeadEmail('');
       setLeadPhone('');
+      setListingMode('manual');
+      setAiPrompt('');
+      setAiExtracted(false);
+      setAiExtractError('');
       setMediaFiles([]);
       setDocFiles([]);
       setPolygonPath([]);
@@ -1948,6 +2019,27 @@ export default function App({ hideChrome = false } = {}) {
             <p className="text-muted">{editingPlot ? 'Update your property details below.' : (view === 'direct-list' ? 'List your land directly on A1Plot and reach verified buyers across India — zero brokerage, a 50-point legal check, and your listing live within 24 hours. Just fill in the short form below to get started.' : 'Fill in the details below to start the verification process.')}</p>
           </div>
         )}
+        {/* AI Property Add: a toggle, not a separate page — keeps
+            handleListProperty/addPlot completely untouched below. Only makes
+            sense for a brand-new listing reached through the normal flow. */}
+        {!editingPlot && !hideChrome && (
+          <div style={{display: 'flex', gap: '0.5rem', marginBottom: '1.5rem'}}>
+            <button
+              type="button"
+              className={`btn ${listingMode === 'manual' ? 'btn-primary' : 'btn-outline'}`}
+              onClick={() => setListingMode('manual')}
+            >
+              Fill form manually
+            </button>
+            <button
+              type="button"
+              className={`btn ${listingMode === 'ai' ? 'btn-primary' : 'btn-outline'}`}
+              onClick={() => setListingMode('ai')}
+            >
+              ✨ Describe it, let AI fill it in
+            </button>
+          </div>
+        )}
         <form className="listing-form" onSubmit={handleListProperty}>
           {/* Contact details. Listing does NOT require an account, so we always
               collect a reachable email + phone — the only exception is editing,
@@ -1976,6 +2068,36 @@ export default function App({ hideChrome = false } = {}) {
               <p style={{fontSize: '0.82rem', color: 'var(--text-muted)', margin: '0.35rem 0 0'}}>
                 No account needed — we only use these to reach you about this listing.
               </p>
+            </div>
+          )}
+          {listingMode === 'ai' && !editingPlot && (
+            <div className="form-group mb-8" style={{background: '#f8fafc', border: '1px solid #e2e8f0', borderRadius: 'var(--radius-md)', padding: '1.25rem'}}>
+              <label>Describe the property</label>
+              <textarea
+                className="form-input"
+                rows={4}
+                maxLength={4000}
+                placeholder="e.g. 3BHK flat for sale in Sector 45 Gurgaon, 1450 sq ft, ready to move, asking 85 Lakh, east facing, corner plot, gated society..."
+                value={aiPrompt}
+                onChange={(e) => setAiPrompt(e.target.value)}
+              />
+              <p className="text-muted" style={{fontSize: '0.8rem', margin: '0.4rem 0'}}>
+                Tip: attach photos in the "Upload Images / Videos" section below first — the AI will look at those too.
+              </p>
+              <button
+                type="button"
+                className="btn btn-primary"
+                disabled={aiExtracting || !aiPrompt.trim()}
+                onClick={handleAiExtract}
+              >
+                {aiExtracting ? 'Extracting…' : 'Extract with AI'}
+              </button>
+              {aiExtractError && (
+                <p style={{color: 'var(--accent-red)', fontSize: '0.85rem', marginTop: '0.5rem'}}>{aiExtractError}</p>
+              )}
+              {aiExtracted && !aiExtractError && (
+                <p style={{color: '#10b981', fontSize: '0.85rem', marginTop: '0.5rem'}}>Fields below were filled in by AI — please review and correct anything before submitting.</p>
+              )}
             </div>
           )}
           <div className="form-group mb-8">
