@@ -61,14 +61,14 @@ const EXTRACT_TOOL = {
       tehsil: { type: ['string', 'null'] },
       village: { type: ['string', 'null'] },
       city: { type: ['string', 'null'] },
-      transactionType: { type: ['string', 'null'], enum: ['sale', 'lease', null] },
-      propertyType: { type: ['string', 'null'], enum: ['land', 'constructed', null] },
-      landType: { type: ['string', 'null'], enum: ['converted', 'agriculture', null] },
-      landUse: { type: ['string', 'null'], enum: ['residential', 'commercial', 'institutional', 'resort', 'industrial', null] },
-      constructedType: { type: ['string', 'null'], enum: ['flat', 'independent_house_villa', 'high_rise_apartment', 'g_plus_building', 'residential_plot', 'commercial_plot', null] },
-      constructionStatus: { type: ['string', 'null'], enum: ['constructed', 'under-construction', null] },
+      transactionType: { enum: ['sale', 'lease', null] },
+      propertyType: { enum: ['land', 'constructed', null] },
+      landType: { enum: ['converted', 'agriculture', null] },
+      landUse: { enum: ['residential', 'commercial', 'institutional', 'resort', 'industrial', null] },
+      constructedType: { enum: ['flat', 'independent_house_villa', 'high_rise_apartment', 'g_plus_building', 'residential_plot', 'commercial_plot', null] },
+      constructionStatus: { enum: ['constructed', 'under-construction', null] },
       budgetRange: { type: ['string', 'null'] },
-      facingDirection: { type: ['string', 'null'], enum: ['East', 'West', 'North', 'South', null] },
+      facingDirection: { enum: ['East', 'West', 'North', 'South', null] },
       cornerProperty: { type: 'boolean' },
       parkFacing: { type: 'boolean' },
       roadFacing: { type: 'boolean' },
@@ -137,7 +137,11 @@ export async function POST(request) {
     return jsonResponse({ success: false, error: 'AI extraction is not available right now. Please fill the form manually.' }, 500);
   }
 
-  const client = new Anthropic();
+  const client = new Anthropic(
+    process.env.ANTHROPIC_WORKSPACE_ID
+      ? { defaultHeaders: { 'anthropic-workspace-id': process.env.ANTHROPIC_WORKSPACE_ID } }
+      : undefined
+  );
 
   const content = [
     ...images.map((img) => ({
