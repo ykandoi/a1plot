@@ -425,6 +425,18 @@ export default function App({ hideChrome = false } = {}) {
   const [aiExtracting, setAiExtracting] = useState(false);
   const [aiExtractError, setAiExtractError] = useState('');
   const [aiExtracted, setAiExtracted] = useState(false);
+
+  // Admin-only "Bulk Import from Broker Message" — paste a raw blob
+  // containing several properties at once (mixed Hindi/English shorthand is
+  // common) and get one editable draft per property back. Submitting a
+  // draft calls addPlot directly, same pipeline/status as any other
+  // listing; nothing is saved until the admin reviews and hits Submit.
+  const [showBulkImport, setShowBulkImport] = useState(false);
+  const [bulkText, setBulkText] = useState('');
+  const [bulkExtracting, setBulkExtracting] = useState(false);
+  const [bulkError, setBulkError] = useState('');
+  const [bulkDrafts, setBulkDrafts] = useState([]); // [{ _id, included, ...fields, sourceText }]
+  const [bulkSubmitting, setBulkSubmitting] = useState(false);
   const [plotLocation, setPlotLocation] = useState({ lat: 20.5937, lng: 78.9629 }); // India center
   const [buyerMapCenter, setBuyerMapCenter] = useState(defaultCenter);
   const [userLocation, setUserLocation] = useState(null);
@@ -1308,6 +1320,32 @@ export default function App({ hideChrome = false } = {}) {
     );
   };
 
+  // plotStaticMapUrl() / the admin-edit equivalent return a LIVE
+  // maps.googleapis.com URL. Storing that URL directly as `image`/`media`
+  // meant every later view of the listing — every card grid, every detail
+  // page, every row in the admin table — re-fetched it from Google's Static
+  // Maps API, billing the key on every page load instead of once. This
+  // fetches that URL a single time at submit time and uploads the resulting
+  // image to Firebase Storage, so every later view loads the stored copy
+  // instead (and still works if the Maps API/billing ever breaks again).
+  // Returns null — same contract as plotStaticMapUrl itself — if there's no
+  // URL to capture or the fetch/upload fails, so callers fall back to their
+  // existing "no image" handling rather than storing a broken link.
+  const captureAndStoreMapImage = async (liveMapUrl) => {
+    if (!liveMapUrl || !storage) return null;
+    try {
+      const res = await fetch(liveMapUrl);
+      if (!res.ok) return null;
+      const blob = await res.blob();
+      const sRef = ref(storage, `media/${Date.now()}_boundary-snapshot.png`);
+      await uploadBytes(sRef, blob);
+      return await getDownloadURL(sRef);
+    } catch (err) {
+      console.warn('Static map snapshot capture failed:', err);
+      return null;
+    }
+  };
+
   // Small client-side helper for the "AI Property Add" vision payload only —
   // produces a throwaway, downscaled JPEG copy to keep the request small. It
   // never touches the original File objects; those still go to Firebase
@@ -1365,6 +1403,99 @@ export default function App({ hideChrome = false } = {}) {
     }
   };
 
+  // "Bulk Import from Broker Message" (admin only) — one AI call splits a
+  // pasted blob into N draft listings; nothing is saved until the admin
+  // reviews each draft and clicks Submit All.
+  const handleBulkExtract = async () => {
+    if (!bulkText.trim() || bulkExtracting) return;
+    setBulkExtracting(true);
+    setBulkError('');
+    try {
+      const res = await fetch('/api/ai-property-extract', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ mode: 'bulk', description: bulkText.slice(0, 8000) }),
+      });
+      const data = await res.json().catch(() => null);
+      if (!res.ok || !data?.success) {
+        throw new Error(data?.error || 'Could not read that text. Please check it and try again.');
+      }
+      setBulkDrafts((data.listings || []).map((fields, i) => ({
+        _id: `${Date.now()}_${i}`,
+        included: true,
+        ...fields,
+      })));
+    } catch (err) {
+      console.error('Bulk extract error:', err);
+      setBulkError(err.message || 'Something went wrong. Please try again.');
+    } finally {
+      setBulkExtracting(false);
+    }
+  };
+
+  const handleBulkDraftChange = (id, key, value) => {
+    setBulkDrafts(prev => prev.map(d => (d._id === id ? { ...d, [key]: value } : d)));
+  };
+
+  const handleBulkRemoveDraft = (id) => {
+    setBulkDrafts(prev => prev.filter(d => d._id !== id));
+  };
+
+  // Bypasses handleListProperty (that function assumes the public listing
+  // form's state — mediaFiles, a visited map pin, a lead phone/email — none
+  // of which exist for a pasted text blob) and calls addPlot directly, with
+  // the same required fields and 'Verification Pending' status any other
+  // listing gets.
+  const handleBulkSubmitAll = async () => {
+    const toSubmit = bulkDrafts.filter(d => d.included);
+    if (toSubmit.length === 0 || bulkSubmitting) return;
+    setBulkSubmitting(true);
+    try {
+      const authedUser = await ensureAuth();
+      const contactEmail = (isRealAccount ? user.email : '') || '';
+      await Promise.all(toSubmit.map(({ _id, included, sourceText, ...fields }) => addPlot({
+        ...fields,
+        id: `${Date.now()}_${_id}`,
+        createdAt: Date.now(),
+        visibility: 'public',
+        ownerUid: authedUser?.uid || 'admin-bulk-import',
+        ownerEmail: contactEmail,
+        ownerPhone: '',
+        uploadedBy: {
+          uid: authedUser?.uid || null,
+          name: user?.displayName || 'Admin',
+          email: contactEmail,
+          phone: '',
+          role: 'admin',
+          agency: '',
+          at: Date.now(),
+        },
+        status: 'Verification Pending',
+        cagr: 'TBD',
+        developer: 'Admin Listed',
+        badge: 'New',
+        image: '',
+        media: [],
+        documentsAvailable: [],
+        lat: null,
+        lng: null,
+        polygonPath: null,
+        priceHistory: [],
+        investedAmount: 0,
+        currentValue: 0,
+        purchaseDate: new Date().toISOString().split('T')[0],
+      })));
+      showToast(`Added ${toSubmit.length} listing${toSubmit.length === 1 ? '' : 's'} as Verification Pending.`);
+      setBulkDrafts([]);
+      setBulkText('');
+    } catch (err) {
+      console.error('Bulk submit error:', err);
+      setBulkError('Some listings failed to save. Please try again.');
+    } finally {
+      setBulkSubmitting(false);
+    }
+  };
+
   const handleListProperty = async (e) => {
     e.preventDefault();
     setSubmitError('');
@@ -1393,11 +1524,11 @@ export default function App({ hideChrome = false } = {}) {
       // of unrelated farmland (see below). plotStaticMapUrl outlines the parcel
       // when a boundary exists and drops a marker when only a point does, so
       // any listing with coordinates gets a picture of the actual land.
-      const staticMapUrl = plotStaticMapUrl({
+      const staticMapUrl = await captureAndStoreMapImage(plotStaticMapUrl({
         lat: plotLocation.lat,
         lng: plotLocation.lng,
         polygonPath: sortedPolygonPath,
-      });
+      }));
 
       if (editingPlot) {
         const updateData = { ...newPlot, lat: plotLocation.lat, lng: plotLocation.lng, polygonPath: sortedPolygonPath.length >= 3 ? sortedPolygonPath : null };
@@ -1672,7 +1803,8 @@ export default function App({ hideChrome = false } = {}) {
         const avgLng = sortedPolygonPath.reduce((sum, p) => sum + p.lng, 0) / sortedPolygonPath.length;
         const markersParam = encodeURIComponent(`color:red|${avgLat},${avgLng}`);
         const pathParam = encodeURIComponent(`color:0x10b981AA|weight:3|fillcolor:0x10b98144|enc:${encodedPath}`);
-        staticMapUrl = `https://maps.googleapis.com/maps/api/staticmap?size=600x400&maptype=hybrid&zoom=19&markers=${markersParam}&path=${pathParam}&key=${GOOGLE_MAPS_API_KEY}`;
+        const liveStaticMapUrl = `https://maps.googleapis.com/maps/api/staticmap?size=600x400&maptype=hybrid&zoom=19&markers=${markersParam}&path=${pathParam}&key=${GOOGLE_MAPS_API_KEY}`;
+        staticMapUrl = await captureAndStoreMapImage(liveStaticMapUrl);
       }
       
       let finalMedia = adminNewPlot.media || [];
@@ -4341,8 +4473,15 @@ export default function App({ hideChrome = false } = {}) {
               <p className="text-muted">Review and manage all user-submitted property listings.</p>
             </div>
             <div className="flex gap-4">
-              <button 
-                className="btn btn-primary" 
+              <button
+                className="btn btn-outline"
+                style={{display: 'flex', alignItems: 'center', gap: '0.5rem'}}
+                onClick={() => setShowBulkImport(v => !v)}
+              >
+                ✨ {showBulkImport ? 'Hide Bulk Import' : 'Bulk Import from Text'}
+              </button>
+              <button
+                className="btn btn-primary"
                 style={{display: 'flex', alignItems: 'center', gap: '0.5rem'}}
                 onClick={() => navigate('admin-map')}
               >
@@ -4365,6 +4504,78 @@ export default function App({ hideChrome = false } = {}) {
               </div>
             </div>
           </div>
+
+          {showBulkImport && (
+            <div style={{padding: '1.5rem', marginBottom: '2rem', background: '#fff', border: '1px solid #e2e8f0', borderRadius: 8}}>
+              <h3 style={{marginTop: 0}}>Bulk Import from Broker Message</h3>
+              <p className="text-muted" style={{fontSize: '0.9rem'}}>
+                Paste a raw broker message with one or more properties (Hindi/English, abbreviated units are fine).
+                AI splits it into drafts below — review, edit or remove any, then submit.
+              </p>
+              <textarea
+                className="form-input"
+                style={{minHeight: '160px', fontFamily: 'inherit', width: '100%'}}
+                placeholder="Paste the broker message here..."
+                value={bulkText}
+                onChange={(e) => setBulkText(e.target.value)}
+                maxLength={8000}
+              />
+              <div className="flex items-center gap-4" style={{marginTop: '0.75rem'}}>
+                <button
+                  type="button"
+                  className="btn btn-primary"
+                  disabled={bulkExtracting || !bulkText.trim()}
+                  onClick={handleBulkExtract}
+                >
+                  {bulkExtracting ? 'Extracting…' : 'Extract Listings'}
+                </button>
+                {bulkDrafts.length > 0 && (
+                  <span className="text-muted" style={{fontSize: '0.85rem'}}>{bulkDrafts.length} draft{bulkDrafts.length === 1 ? '' : 's'} found</span>
+                )}
+              </div>
+              {bulkError && <p style={{color: 'var(--accent-red)', fontSize: '0.85rem', marginTop: '0.5rem'}}>{bulkError}</p>}
+
+              {bulkDrafts.map((d) => (
+                <div key={d._id} style={{border: '1px solid #e2e8f0', borderRadius: 8, padding: '1rem', marginTop: '1rem', opacity: d.included ? 1 : 0.5}}>
+                  <div className="flex items-center justify-between" style={{marginBottom: '0.5rem'}}>
+                    <label className="flex items-center gap-2" style={{fontSize: '0.85rem'}}>
+                      <input type="checkbox" checked={d.included} onChange={(e) => handleBulkDraftChange(d._id, 'included', e.target.checked)} />
+                      Include this listing
+                    </label>
+                    <button type="button" className="admin-btn" style={{backgroundColor: '#fee2e2', color: '#991b1b', border: '1px solid #fecaca'}} onClick={() => handleBulkRemoveDraft(d._id)}>
+                      <Trash2 size={14} /> Remove
+                    </button>
+                  </div>
+                  <div style={{display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: '0.5rem'}}>
+                    <input className="form-input" placeholder="Title" value={d.title || ''} onChange={(e) => handleBulkDraftChange(d._id, 'title', e.target.value)} />
+                    <input className="form-input" placeholder="Location" value={d.location || ''} onChange={(e) => handleBulkDraftChange(d._id, 'location', e.target.value)} />
+                    <input className="form-input" placeholder="Price" value={d.price || ''} onChange={(e) => handleBulkDraftChange(d._id, 'price', e.target.value)} />
+                    <input className="form-input" placeholder="Size" value={d.size || ''} onChange={(e) => handleBulkDraftChange(d._id, 'size', e.target.value)} />
+                    <input className="form-input" placeholder="City" value={d.city || ''} onChange={(e) => handleBulkDraftChange(d._id, 'city', e.target.value)} />
+                    <input className="form-input" placeholder="Village" value={d.village || ''} onChange={(e) => handleBulkDraftChange(d._id, 'village', e.target.value)} />
+                    <input className="form-input" placeholder="Features" value={d.features || ''} onChange={(e) => handleBulkDraftChange(d._id, 'features', e.target.value)} />
+                  </div>
+                  {d.sourceText && (
+                    <p className="text-muted" style={{fontSize: '0.78rem', marginTop: '0.5rem', marginBottom: 0, whiteSpace: 'pre-wrap'}}>
+                      Source: {d.sourceText}
+                    </p>
+                  )}
+                </div>
+              ))}
+
+              {bulkDrafts.length > 0 && (
+                <button
+                  type="button"
+                  className="btn btn-primary"
+                  style={{marginTop: '1rem'}}
+                  disabled={bulkSubmitting || bulkDrafts.filter(d => d.included).length === 0}
+                  onClick={handleBulkSubmitAll}
+                >
+                  {bulkSubmitting ? 'Submitting…' : `Submit All (${bulkDrafts.filter(d => d.included).length})`}
+                </button>
+              )}
+            </div>
+          )}
 
           {allListedPlots.length === 0 ? (
             <div className="text-center" style={{padding: '4rem 2rem'}}>
