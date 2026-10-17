@@ -36,6 +36,7 @@ import { useBrokers } from './hooks/useBrokers';
 import { useRequirements } from './hooks/useRequirements';
 import { useUsers } from './hooks/useUsers';
 import { useCatalogs } from './hooks/useCatalogs';
+import { useInstallPrompt } from './hooks/useInstallPrompt';
 import PhoneField, { isValidPhone } from './components/PhoneField';
 
 const GOOGLE_MAPS_API_KEY = (typeof process !== 'undefined' && process.env && process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY) ? process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY : '';
@@ -458,6 +459,12 @@ export default function App({ hideChrome = false } = {}) {
   const NEEDS_PLOTS_VIEWS = ['home', 'buyer-map', 'seller-dashboard', 'seller-edit', 'admin', 'admin-edit', 'admin-map', 'property-detail', 'search', 'broker-dashboard'];
   const needsPlotsList = NEEDS_PLOTS_VIEWS.includes(view);
   const { plots, loading: plotsLoading, addPlot, updatePlot, deletePlot } = usePlots(INITIAL_PLOTS, needsPlotsList);
+  // "Install App" menu item — hidden entirely on desktop/laptop via the
+  // existing CSS on the two containers it's placed in (.sc-mobile-menu-wrapper
+  // and .profile-dropdown-mobile-links are both display:none above 860px), so
+  // no extra device check is needed here beyond what the hook itself covers
+  // (browser support, iOS vs Android, already-installed).
+  const { canInstall, showIOSInstructions, promptInstall } = useInstallPrompt();
 
   const [toastMessage, setToastMessage] = useState(null);
   
@@ -494,6 +501,14 @@ export default function App({ hideChrome = false } = {}) {
   }, [plots, selectedPropertyDetailId]);
 
   const showToast = (msg) => setToastMessage(msg);
+
+  const handleInstallAppClick = async () => {
+    const accepted = await promptInstall();
+    showToast(accepted ? 'A1Plot installed! Check your home screen.' : 'Install dismissed — you can try again anytime from this menu.');
+  };
+  const handleIOSInstallHintClick = () => {
+    showToast('Tap the Share icon in your browser, then "Add to Home Screen".');
+  };
 
   const [viewerOpen, setViewerOpen] = useState(false);
   const [viewerIndex, setViewerIndex] = useState(0);
@@ -5411,6 +5426,15 @@ export default function App({ hideChrome = false } = {}) {
                         <a className="profile-dropdown-item" href="/brokers/register">Register as a Broker</a>
                         <a className="profile-dropdown-item" href="/about_us">About Us</a>
                         <a className="profile-dropdown-item" href="/contact">Contact</a>
+                        {(canInstall || showIOSInstructions) && (
+                          <button
+                            type="button"
+                            className="profile-dropdown-item"
+                            onClick={() => { setProfileOpen(false); canInstall ? handleInstallAppClick() : handleIOSInstallHintClick(); }}
+                          >
+                            📲 {canInstall ? 'Install App' : 'Add to Home Screen'}
+                          </button>
+                        )}
                         <div className="profile-dropdown-divider" />
                       </div>
 
@@ -5461,6 +5485,16 @@ export default function App({ hideChrome = false } = {}) {
               <a className="mobile-menu-link" href="/about_us">About Us</a>
               <a className="mobile-menu-link" href="/contact">Contact</a>
               <a className="mobile-menu-link" href="/login">Log In</a>
+              {(canInstall || showIOSInstructions) && (
+                <button
+                  type="button"
+                  className="mobile-menu-link"
+                  style={{ background: 'none', border: 'none', width: '100%', textAlign: 'left', font: 'inherit' }}
+                  onClick={() => { setMobileMenuOpen(false); canInstall ? handleInstallAppClick() : handleIOSInstallHintClick(); }}
+                >
+                  📲 {canInstall ? 'Install App' : 'Add to Home Screen'}
+                </button>
+              )}
             </div>
           </div>
         )}
