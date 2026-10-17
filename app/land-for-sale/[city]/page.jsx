@@ -1,6 +1,6 @@
 import { notFound } from 'next/navigation';
 import SiteChrome from '../../../src/components/site/SiteChrome';
-import { jsonLdHtml, priceOffer } from '../../../src/lib/jsonld';
+import { jsonLdHtml, priceOffer, breadcrumbList } from '../../../src/lib/jsonld';
 import { plotUrl, groupPlotsByPlace } from '../../../src/lib/slug';
 import { plotDisplayImage } from '../../../src/lib/staticMap';
 import { fetchPublicPlots } from '../../../src/lib/fetchPlots';
@@ -73,6 +73,7 @@ export default async function Page({ params }) {
         isPartOf: { '@id': `${BASE}/#website` },
         about: { '@type': 'Place', name },
       },
+      breadcrumbList([{ name: 'Home', url: BASE }, { name: `Land for Sale in ${name}` }]),
       {
         '@type': 'ItemList',
         '@id': `${BASE}/land-for-sale/${group.slug}#listings`,

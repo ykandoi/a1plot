@@ -1,5 +1,5 @@
 import SiteChrome from '../../../src/components/site/SiteChrome';
-import { jsonLdHtml, priceOffer, parseLotSize } from '../../../src/lib/jsonld';
+import { jsonLdHtml, priceOffer, parseLotSize, breadcrumbList } from '../../../src/lib/jsonld';
 import { plotSlug, idFromSlug } from '../../../src/lib/slug';
 import { plotDisplayImage, isStockPhoto } from '../../../src/lib/staticMap';
 import { permanentRedirect } from 'next/navigation';
@@ -78,18 +78,23 @@ export default async function Page({ params }) {
 
   const jsonLd = {
     '@context': 'https://schema.org',
-    '@type': 'RealEstateListing',
-    name: plot.title,
-    description: plot.features || plot.title,
-    url: `https://a1plot.com/property/${plotSlug(plot)}`,
-    ...(images[0] ? { image: images } : {}),
-    ...(priceOffer(plot.price) ? { offers: priceOffer(plot.price) } : {}),
-    ...(plot.lat && plot.lng ? { geo: { '@type': 'GeoCoordinates', latitude: plot.lat, longitude: plot.lng } } : {}),
-    ...(parseLotSize(plot.size) ? { lotSize: parseLotSize(plot.size) } : {}),
-    address: { '@type': 'PostalAddress', addressLocality: plot.city || plot.location || '', addressRegion: plot.state || 'Rajasthan', addressCountry: 'IN' },
-    // Ties every listing back to the single organisation node declared in
-    // app/layout.jsx, so Google reads them as one business's inventory.
-    provider: { '@id': 'https://a1plot.com/#organization' },
+    '@graph': [
+      breadcrumbList([{ name: 'Home', url: 'https://a1plot.com/' }, { name: plot.title }]),
+      {
+        '@type': 'RealEstateListing',
+        name: plot.title,
+        description: plot.features || plot.title,
+        url: `https://a1plot.com/property/${plotSlug(plot)}`,
+        ...(images[0] ? { image: images } : {}),
+        ...(priceOffer(plot.price) ? { offers: priceOffer(plot.price) } : {}),
+        ...(plot.lat && plot.lng ? { geo: { '@type': 'GeoCoordinates', latitude: plot.lat, longitude: plot.lng } } : {}),
+        ...(parseLotSize(plot.size) ? { lotSize: parseLotSize(plot.size) } : {}),
+        address: { '@type': 'PostalAddress', addressLocality: plot.city || plot.location || '', addressRegion: plot.state || 'Rajasthan', addressCountry: 'IN' },
+        // Ties every listing back to the single organisation node declared in
+        // app/layout.jsx, so Google reads them as one business's inventory.
+        provider: { '@id': 'https://a1plot.com/#organization' },
+      },
+    ],
   };
 
   return (

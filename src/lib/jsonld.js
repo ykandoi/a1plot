@@ -78,3 +78,20 @@ export function priceOffer(raw) {
   if (!price) return null;
   return { '@type': 'Offer', price, priceCurrency: 'INR', availability: 'https://schema.org/InStock' };
 }
+
+/**
+ * BreadcrumbList node for `crumbs`, e.g. [{ name: 'Home', url: BASE }, { name: plot.title }].
+ * The last crumb (the current page) is conventionally left without a `url` —
+ * Google's own guidance treats that as the current page, not a dead link.
+ */
+export function breadcrumbList(crumbs) {
+  return {
+    '@type': 'BreadcrumbList',
+    itemListElement: crumbs.map((c, i) => ({
+      '@type': 'ListItem',
+      position: i + 1,
+      name: c.name,
+      ...(c.url ? { item: c.url } : {}),
+    })),
+  };
+}
