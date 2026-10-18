@@ -392,7 +392,7 @@ export default function App({ hideChrome = false } = {}) {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [newPlot, setNewPlot] = useState({ title: '', location: '', price: '', size: '', features: '', additionalInfo: '', visibility: 'public', khasraNumber: '', state: '', district: '', tehsil: '', village: '', city: '', transactionType: 'sale', propertyType: 'land', landType: 'converted', landUse: 'residential', constructedType: 'flat', constructionStatus: 'constructed', budgetRange: '', facingDirection: 'East', cornerProperty: false, parkFacing: false, roadFacing: false });
   const [editingPlot, setEditingPlot] = useState(null);
-  const [adminNewPlot, setAdminNewPlot] = useState({ title: '', location: '', price: '', size: '', features: '', additionalInfo: '', visibility: 'public', status: 'Verification Pending', media: [], documentsAvailable: [], khasraNumber: '', state: '', district: '', tehsil: '', village: '', city: '', transactionType: 'sale', propertyType: 'land', landType: 'converted', landUse: 'residential', constructedType: 'flat', constructionStatus: 'constructed', budgetRange: '', facingDirection: 'East', cornerProperty: false, parkFacing: false, roadFacing: false });
+  const [adminNewPlot, setAdminNewPlot] = useState({ ownerEmail: '', ownerPhone: '', title: '', location: '', price: '', size: '', features: '', additionalInfo: '', visibility: 'public', status: 'Verification Pending', media: [], documentsAvailable: [], khasraNumber: '', state: '', district: '', tehsil: '', village: '', city: '', transactionType: 'sale', propertyType: 'land', landType: 'converted', landUse: 'residential', constructedType: 'flat', constructionStatus: 'constructed', budgetRange: '', facingDirection: 'East', cornerProperty: false, parkFacing: false, roadFacing: false });
   const [adminEditingPlot, setAdminEditingPlot] = useState(null);
   const [adminTempPin, setAdminTempPin] = useState(null);
   // Store only the plot ID in localStorage to avoid stale cached data
@@ -1794,6 +1794,8 @@ export default function App({ hideChrome = false } = {}) {
     setAdminPreviewPlot(false);
     setAdminEditingPlot(plot);
     setAdminNewPlot({
+      ownerEmail: plot.ownerEmail || '',
+      ownerPhone: plot.ownerPhone || '',
       title: plot.title,
       location: plot.location,
       price: plot.price,
@@ -1865,6 +1867,8 @@ export default function App({ hideChrome = false } = {}) {
       }
 
       await updatePlot(adminEditingPlot.id, {
+        ownerEmail: adminNewPlot.ownerEmail || '',
+        ownerPhone: adminNewPlot.ownerPhone || '',
         title: adminNewPlot.title,
         location: adminNewPlot.location,
         price: adminNewPlot.price,
@@ -1901,6 +1905,8 @@ export default function App({ hideChrome = false } = {}) {
 
       setAdminEditingPlot(null);
       setAdminNewPlot({
+        ownerEmail: '',
+        ownerPhone: '',
         title: '',
         location: '',
         price: '',
@@ -3911,7 +3917,212 @@ export default function App({ hideChrome = false } = {}) {
           <h2 className="section-title">Admin Property Details & Edit</h2>
           <p className="text-muted">Review and update details for "{adminEditingPlot?.title}"</p>
         </div>
+        {/* Field order below mirrors the List Your Land form exactly (Contact
+            Email → Contact Phone → Title → Price → City → Transaction Type →
+            Budget Range → Property Type → classification → Facing →
+            Characteristics → Features → Additional Info → Map → Size →
+            District/Tehsil/Village → Khasra → Images → Documents), so
+            reviewing a listing here reads the same way it was entered.
+            Contact details are admin-only — never shown on the public
+            property page, same as the seller form never publishes them. */}
         <form className="listing-form" onSubmit={handleAdminUpdateProperty}>
+          <div className="form-group mb-8">
+            <label>Contact Email Address <span style={{color: 'var(--accent-red)'}}>*</span></label>
+            <input type="email" className="form-input" value={adminNewPlot.ownerEmail || ''} onChange={(e) => setAdminNewPlot({...adminNewPlot, ownerEmail: e.target.value})} />
+          </div>
+          <div className="form-group mb-8">
+            <label>Contact Phone Number <span style={{color: 'var(--accent-red)'}}>*</span></label>
+            <input type="tel" className="form-input" value={adminNewPlot.ownerPhone || ''} onChange={(e) => setAdminNewPlot({...adminNewPlot, ownerPhone: e.target.value})} />
+          </div>
+          <div className="form-group mb-8">
+            <label>Plot Title <span style={{color: 'var(--accent-red)'}}>*</span></label>
+            <input type="text" className="form-input" required value={adminNewPlot.title} onChange={(e) => setAdminNewPlot({...adminNewPlot, title: e.target.value})} />
+          </div>
+          <div className="form-group mb-8">
+            <label>Location (Text)</label>
+            <input type="text" className="form-input" required value={adminNewPlot.location} onChange={(e) => setAdminNewPlot({...adminNewPlot, location: e.target.value})} />
+          </div>
+
+          <div className="form-group mb-8">
+            <label>Expected Price</label>
+            <input type="text" className="form-input" required value={adminNewPlot.price} onChange={(e) => setAdminNewPlot({...adminNewPlot, price: e.target.value})} />
+          </div>
+
+          <div className="form-group mb-8">
+            <label>City Location <span style={{color: 'var(--accent-red)'}}>*</span></label>
+            <input
+              type="text"
+              placeholder="e.g. Bangalore, Jaipur, Indore"
+              className="form-input"
+              required
+              value={adminNewPlot.city || ''}
+              onChange={(e) => setAdminNewPlot({...adminNewPlot, city: e.target.value})}
+            />
+          </div>
+
+          <div style={{display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '1.5rem', marginBottom: '1.5rem'}}>
+            <div className="form-group mb-8">
+              <label>Lease or Outright Purchase <span style={{color: 'var(--accent-red)'}}>*</span></label>
+              <select
+                className="form-input"
+                required
+                value={adminNewPlot.transactionType}
+                onChange={(e) => setAdminNewPlot({...adminNewPlot, transactionType: e.target.value})}
+              >
+                <option value="sale">Outright Purchase</option>
+                <option value="lease">Lease</option>
+              </select>
+            </div>
+            <div className="form-group mb-8">
+              <label>Budget Range / Price range <span style={{color: 'var(--accent-red)'}}>*</span></label>
+              <input
+                type="text"
+                placeholder="e.g. ₹50 L - ₹70 L"
+                className="form-input"
+                required
+                value={adminNewPlot.budgetRange || ''}
+                onChange={(e) => setAdminNewPlot({...adminNewPlot, budgetRange: e.target.value})}
+              />
+            </div>
+          </div>
+
+          <div style={{display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '1.5rem', marginBottom: '1.5rem'}}>
+            <div className="form-group mb-8">
+              <label>Property Type <span style={{color: 'var(--accent-red)'}}>*</span></label>
+              <select
+                className="form-input"
+                required
+                value={adminNewPlot.propertyType}
+                onChange={(e) => setAdminNewPlot({...adminNewPlot, propertyType: e.target.value})}
+              >
+                <option value="land">Land</option>
+                <option value="constructed">Constructed Property</option>
+              </select>
+            </div>
+
+            {adminNewPlot.propertyType === 'land' ? (
+              <div className="form-group mb-8">
+                <label>Land Classification <span style={{color: 'var(--accent-red)'}}>*</span></label>
+                <select
+                  className="form-input"
+                  required
+                  value={adminNewPlot.landType}
+                  onChange={(e) => setAdminNewPlot({...adminNewPlot, landType: e.target.value})}
+                >
+                  <option value="converted">Land Converted</option>
+                  <option value="agriculture">Agriculture Land</option>
+                </select>
+              </div>
+            ) : (
+              <div className="form-group mb-8">
+                <label>Construction Status <span style={{color: 'var(--accent-red)'}}>*</span></label>
+                <select
+                  className="form-input"
+                  required
+                  value={adminNewPlot.constructionStatus}
+                  onChange={(e) => setAdminNewPlot({...adminNewPlot, constructionStatus: e.target.value})}
+                >
+                  <option value="constructed">Constructed</option>
+                  <option value="under-construction">Under construction</option>
+                </select>
+              </div>
+            )}
+          </div>
+
+          {adminNewPlot.propertyType === 'land' ? (
+            <div className="form-group mb-8">
+              <label>Land Use Zoning <span style={{color: 'var(--accent-red)'}}>*</span></label>
+              <select
+                className="form-input"
+                required
+                value={adminNewPlot.landUse}
+                onChange={(e) => setAdminNewPlot({...adminNewPlot, landUse: e.target.value})}
+              >
+                <option value="residential">Residential</option>
+                <option value="commercial">Commercial</option>
+                <option value="institutional">Institutional</option>
+                <option value="resort">Resort</option>
+                <option value="industrial">Industrial</option>
+              </select>
+            </div>
+          ) : (
+            <div className="form-group mb-8">
+              <label>Property Subtype <span style={{color: 'var(--accent-red)'}}>*</span></label>
+              <select
+                className="form-input"
+                required
+                value={adminNewPlot.constructedType}
+                onChange={(e) => setAdminNewPlot({...adminNewPlot, constructedType: e.target.value})}
+              >
+                <option value="flat">Flat / Apartment</option>
+                <option value="independent_house_villa">Independent House / Villa</option>
+                <option value="high_rise_apartment">High-rise Apartment</option>
+                <option value="g_plus_building">G+ Building</option>
+                <option value="residential_plot">Residential Plot</option>
+                <option value="commercial_plot">Commercial Plot</option>
+              </select>
+            </div>
+          )}
+
+          <div style={{display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '1.5rem', marginBottom: '1.5rem'}}>
+            <div className="form-group mb-8">
+              <label>Facing Direction <span style={{color: 'var(--accent-red)'}}>*</span></label>
+              <select
+                className="form-input"
+                required
+                value={adminNewPlot.facingDirection}
+                onChange={(e) => setAdminNewPlot({...adminNewPlot, facingDirection: e.target.value})}
+              >
+                <option value="East">East Facing</option>
+                <option value="West">West Facing</option>
+                <option value="North">North Facing</option>
+                <option value="South">South Facing</option>
+              </select>
+            </div>
+
+            <div className="form-group mb-8">
+              <label>Property Characteristics / Facing Tags</label>
+              <div style={{display: 'flex', gap: '1rem', marginTop: '0.75rem', flexWrap: 'wrap'}}>
+                <label style={{display: 'flex', alignItems: 'center', gap: '0.5rem', cursor: 'pointer', userSelect: 'none'}}>
+                  <input
+                    type="checkbox"
+                    checked={adminNewPlot.cornerProperty || false}
+                    onChange={(e) => setAdminNewPlot({...adminNewPlot, cornerProperty: e.target.checked})}
+                    style={{width: '18px', height: '18px', cursor: 'pointer'}}
+                  />
+                  <span>Corner Property</span>
+                </label>
+                <label style={{display: 'flex', alignItems: 'center', gap: '0.5rem', cursor: 'pointer', userSelect: 'none'}}>
+                  <input
+                    type="checkbox"
+                    checked={adminNewPlot.parkFacing || false}
+                    onChange={(e) => setAdminNewPlot({...adminNewPlot, parkFacing: e.target.checked})}
+                    style={{width: '18px', height: '18px', cursor: 'pointer'}}
+                  />
+                  <span>Park Facing</span>
+                </label>
+                <label style={{display: 'flex', alignItems: 'center', gap: '0.5rem', cursor: 'pointer', userSelect: 'none'}}>
+                  <input
+                    type="checkbox"
+                    checked={adminNewPlot.roadFacing || false}
+                    onChange={(e) => setAdminNewPlot({...adminNewPlot, roadFacing: e.target.checked})}
+                    style={{width: '18px', height: '18px', cursor: 'pointer'}}
+                  />
+                  <span>Road Facing</span>
+                </label>
+              </div>
+            </div>
+          </div>
+
+          <div className="form-group mb-8">
+            <label>Key Features</label>
+            <input type="text" className="form-input" value={adminNewPlot.features} onChange={(e) => setAdminNewPlot({...adminNewPlot, features: e.target.value})} />
+          </div>
+          <div className="form-group mb-8">
+            <label>Additional Information</label>
+            <textarea className="form-input" rows={3} value={adminNewPlot.additionalInfo} onChange={(e) => setAdminNewPlot({...adminNewPlot, additionalInfo: e.target.value})} />
+          </div>
+
           {/* ── Property Location on Map ── */}
           <div className="form-group mb-8">
             <label><MapPin size={16} style={{display: 'inline', verticalAlign: 'middle', marginRight: '0.35rem'}} />Property Location Map</label>
@@ -3937,7 +4148,7 @@ export default function App({ hideChrome = false } = {}) {
                   </div>
                   {/* Floating Map Controls Inside Map */}
                   <div className="map-drawing-controls" style={{ position: 'absolute', top: '10px', left: '10px', zIndex: 10, display: 'flex', gap: '0.5rem', background: 'rgba(255,255,255,0.95)', padding: '0.5rem', borderRadius: '0.5rem', boxShadow: '0 2px 8px rgba(0,0,0,0.15)', flexWrap: 'wrap', maxWidth: 'calc(100% - 20px)' }}>
-                    <button 
+                    <button
                       type="button"
                       className={`btn ${isDrawingMode ? 'btn-primary' : 'btn-outline'}`}
                       style={{ padding: '0.4rem 0.75rem', fontSize: '0.8rem', whiteSpace: 'nowrap' }}
@@ -4101,193 +4312,6 @@ export default function App({ hideChrome = false } = {}) {
             )}
           </div>
 
-          <div className="form-group mb-8">
-            <label>Plot Title <span style={{color: 'var(--accent-red)'}}>*</span></label>
-            <input type="text" className="form-input" required value={adminNewPlot.title} onChange={(e) => setAdminNewPlot({...adminNewPlot, title: e.target.value})} />
-          </div>
-          <div className="form-group mb-8">
-            <label>Location (Text)</label>
-            <input type="text" className="form-input" required value={adminNewPlot.location} onChange={(e) => setAdminNewPlot({...adminNewPlot, location: e.target.value})} />
-          </div>
-
-          <div className="form-group mb-8">
-            <label>Key Features</label>
-            <input type="text" className="form-input" value={adminNewPlot.features} onChange={(e) => setAdminNewPlot({...adminNewPlot, features: e.target.value})} />
-          </div>
-          <div className="form-group mb-8">
-            <label>Additional Information</label>
-            <textarea className="form-input" rows={3} value={adminNewPlot.additionalInfo} onChange={(e) => setAdminNewPlot({...adminNewPlot, additionalInfo: e.target.value})} />
-          </div>
-          <div className="form-group mb-8">
-            <label>Expected Price</label>
-            <input type="text" className="form-input" required value={adminNewPlot.price} onChange={(e) => setAdminNewPlot({...adminNewPlot, price: e.target.value})} />
-          </div>
-
-          <div className="form-group mb-8">
-            <label>City Location <span style={{color: 'var(--accent-red)'}}>*</span></label>
-            <input
-              type="text"
-              placeholder="e.g. Bangalore, Jaipur, Indore"
-              className="form-input"
-              required
-              value={adminNewPlot.city || ''}
-              onChange={(e) => setAdminNewPlot({...adminNewPlot, city: e.target.value})}
-            />
-          </div>
-
-          <div style={{display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '1.5rem', marginBottom: '1.5rem'}}>
-            <div className="form-group mb-8">
-              <label>Lease or Outright Purchase <span style={{color: 'var(--accent-red)'}}>*</span></label>
-              <select
-                className="form-input"
-                required
-                value={adminNewPlot.transactionType}
-                onChange={(e) => setAdminNewPlot({...adminNewPlot, transactionType: e.target.value})}
-              >
-                <option value="sale">Outright Purchase</option>
-                <option value="lease">Lease</option>
-              </select>
-            </div>
-            <div className="form-group mb-8">
-              <label>Budget Range / Price range <span style={{color: 'var(--accent-red)'}}>*</span></label>
-              <input
-                type="text"
-                placeholder="e.g. ₹50 L - ₹70 L"
-                className="form-input"
-                required
-                value={adminNewPlot.budgetRange || ''}
-                onChange={(e) => setAdminNewPlot({...adminNewPlot, budgetRange: e.target.value})}
-              />
-            </div>
-          </div>
-
-          <div style={{display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '1.5rem', marginBottom: '1.5rem'}}>
-            <div className="form-group mb-8">
-              <label>Property Type <span style={{color: 'var(--accent-red)'}}>*</span></label>
-              <select
-                className="form-input"
-                required
-                value={adminNewPlot.propertyType}
-                onChange={(e) => setAdminNewPlot({...adminNewPlot, propertyType: e.target.value})}
-              >
-                <option value="land">Land</option>
-                <option value="constructed">Constructed Property</option>
-              </select>
-            </div>
-
-            {adminNewPlot.propertyType === 'land' ? (
-              <div className="form-group mb-8">
-                <label>Land Classification <span style={{color: 'var(--accent-red)'}}>*</span></label>
-                <select
-                  className="form-input"
-                  required
-                  value={adminNewPlot.landType}
-                  onChange={(e) => setAdminNewPlot({...adminNewPlot, landType: e.target.value})}
-                >
-                  <option value="converted">Land Converted</option>
-                  <option value="agriculture">Agriculture Land</option>
-                </select>
-              </div>
-            ) : (
-              <div className="form-group mb-8">
-                <label>Construction Status <span style={{color: 'var(--accent-red)'}}>*</span></label>
-                <select
-                  className="form-input"
-                  required
-                  value={adminNewPlot.constructionStatus}
-                  onChange={(e) => setAdminNewPlot({...adminNewPlot, constructionStatus: e.target.value})}
-                >
-                  <option value="constructed">Constructed</option>
-                  <option value="under-construction">Under construction</option>
-                </select>
-              </div>
-            )}
-          </div>
-
-          {adminNewPlot.propertyType === 'land' ? (
-            <div className="form-group mb-8">
-              <label>Land Use Zoning <span style={{color: 'var(--accent-red)'}}>*</span></label>
-              <select
-                className="form-input"
-                required
-                value={adminNewPlot.landUse}
-                onChange={(e) => setAdminNewPlot({...adminNewPlot, landUse: e.target.value})}
-              >
-                <option value="residential">Residential</option>
-                <option value="commercial">Commercial</option>
-                <option value="institutional">Institutional</option>
-                <option value="resort">Resort</option>
-                <option value="industrial">Industrial</option>
-              </select>
-            </div>
-          ) : (
-            <div className="form-group mb-8">
-              <label>Property Subtype <span style={{color: 'var(--accent-red)'}}>*</span></label>
-              <select
-                className="form-input"
-                required
-                value={adminNewPlot.constructedType}
-                onChange={(e) => setAdminNewPlot({...adminNewPlot, constructedType: e.target.value})}
-              >
-                <option value="flat">Flat / Apartment</option>
-                <option value="independent_house_villa">Independent House / Villa</option>
-                <option value="high_rise_apartment">High-rise Apartment</option>
-                <option value="g_plus_building">G+ Building</option>
-                <option value="residential_plot">Residential Plot</option>
-                <option value="commercial_plot">Commercial Plot</option>
-              </select>
-            </div>
-          )}
-
-          <div style={{display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '1.5rem', marginBottom: '1.5rem'}}>
-            <div className="form-group mb-8">
-              <label>Facing Direction <span style={{color: 'var(--accent-red)'}}>*</span></label>
-              <select
-                className="form-input"
-                required
-                value={adminNewPlot.facingDirection}
-                onChange={(e) => setAdminNewPlot({...adminNewPlot, facingDirection: e.target.value})}
-              >
-                <option value="East">East Facing</option>
-                <option value="West">West Facing</option>
-                <option value="North">North Facing</option>
-                <option value="South">South Facing</option>
-              </select>
-            </div>
-            
-            <div className="form-group mb-8">
-              <label>Property Characteristics / Facing Tags</label>
-              <div style={{display: 'flex', gap: '1rem', marginTop: '0.75rem', flexWrap: 'wrap'}}>
-                <label style={{display: 'flex', alignItems: 'center', gap: '0.5rem', cursor: 'pointer', userSelect: 'none'}}>
-                  <input
-                    type="checkbox"
-                    checked={adminNewPlot.cornerProperty || false}
-                    onChange={(e) => setAdminNewPlot({...adminNewPlot, cornerProperty: e.target.checked})}
-                    style={{width: '18px', height: '18px', cursor: 'pointer'}}
-                  />
-                  <span>Corner Property</span>
-                </label>
-                <label style={{display: 'flex', alignItems: 'center', gap: '0.5rem', cursor: 'pointer', userSelect: 'none'}}>
-                  <input
-                    type="checkbox"
-                    checked={adminNewPlot.parkFacing || false}
-                    onChange={(e) => setAdminNewPlot({...adminNewPlot, parkFacing: e.target.checked})}
-                    style={{width: '18px', height: '18px', cursor: 'pointer'}}
-                  />
-                  <span>Park Facing</span>
-                </label>
-                <label style={{display: 'flex', alignItems: 'center', gap: '0.5rem', cursor: 'pointer', userSelect: 'none'}}>
-                  <input
-                    type="checkbox"
-                    checked={adminNewPlot.roadFacing || false}
-                    onChange={(e) => setAdminNewPlot({...adminNewPlot, roadFacing: e.target.checked})}
-                    style={{width: '18px', height: '18px', cursor: 'pointer'}}
-                  />
-                  <span>Road Facing</span>
-                </label>
-              </div>
-            </div>
-          </div>
           <div className="form-group mb-8">
             <label>Status</label>
             <select className="form-input" value={adminNewPlot.status} onChange={(e) => setAdminNewPlot({...adminNewPlot, status: e.target.value})}>
@@ -5102,6 +5126,27 @@ export default function App({ hideChrome = false } = {}) {
             </button>
           )}
 
+          {showAdminControls && (plot.ownerEmail || plot.ownerPhone) && (
+            <div className="mb-6" style={{
+              padding: '1.25rem 1.5rem',
+              background: '#f8fafc',
+              borderRadius: '0.75rem',
+              border: '1px solid #e2e8f0',
+              display: 'grid',
+              gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
+              gap: '1.5rem'
+            }}>
+              <div>
+                <span style={{fontSize: '0.8rem', textTransform: 'uppercase', color: '#64748b', display: 'block', fontWeight: 600, letterSpacing: '0.05em', marginBottom: '0.25rem'}}>Contact Email Address</span>
+                <span style={{fontSize: '1.05rem', fontWeight: 700, color: '#1e293b'}}>{plot.ownerEmail || 'Not provided'}</span>
+              </div>
+              <div>
+                <span style={{fontSize: '0.8rem', textTransform: 'uppercase', color: '#64748b', display: 'block', fontWeight: 600, letterSpacing: '0.05em', marginBottom: '0.25rem'}}>Contact Phone Number</span>
+                <span style={{fontSize: '1.05rem', fontWeight: 700, color: '#1e293b'}}>{plot.ownerPhone || 'Not provided'}</span>
+              </div>
+            </div>
+          )}
+
           <div style={{background: 'white', borderRadius: '1rem', overflow: 'hidden', boxShadow: 'var(--shadow-md)'}}>
             {/* Image Gallery Header */}
             {images.length > 0 && (
@@ -5144,7 +5189,6 @@ export default function App({ hideChrome = false } = {}) {
                       {interestedPlots.some(p => p.id === plot.id) ? 'Liked' : 'Like Property'}
                     </button>
                   </div>
-                  <p style={{fontSize: '1.1rem', color: 'var(--text-muted)'}}>{plot.features}</p>
                 </div>
                 <div style={{textAlign: 'right'}}>
                   <div style={{fontSize: '2.5rem', fontWeight: 800, color: 'var(--primary)', lineHeight: '1'}}>{plot.price}</div>
@@ -5152,7 +5196,11 @@ export default function App({ hideChrome = false } = {}) {
                 </div>
               </div>
 
-              {/* Property Specifications Grid */}
+              {/* Property Specifications Grid — field order mirrors the List
+                  Your Land form (City, Lease/Purchase, Budget Range, Property
+                  Type, Land/Construction classification, Land Use/Subtype,
+                  Facing Direction, then Characteristics tags), so a listing
+                  reads the same way here as it was entered. */}
               <div style={{
                 marginTop: '2rem',
                 padding: '1.5rem',
@@ -5176,6 +5224,10 @@ export default function App({ hideChrome = false } = {}) {
                   </span>
                 </div>
                 <div>
+                  <span style={{fontSize: '0.8rem', textTransform: 'uppercase', color: '#64748b', display: 'block', fontWeight: 600, letterSpacing: '0.05em', marginBottom: '0.25rem'}}>Budget / Asking Range</span>
+                  <span style={{fontSize: '1.05rem', fontWeight: 700, color: '#1e293b'}}>{plot.budgetRange || plot.price}</span>
+                </div>
+                <div>
                   <span style={{fontSize: '0.8rem', textTransform: 'uppercase', color: '#64748b', display: 'block', fontWeight: 600, letterSpacing: '0.05em', marginBottom: '0.25rem'}}>Property Classification</span>
                   <span style={{fontSize: '1.05rem', fontWeight: 700, color: '#1e293b'}}>
                     {plot.propertyType === 'constructed' ? 'Constructed Property' : 'Land Parcel'}
@@ -5183,6 +5235,12 @@ export default function App({ hideChrome = false } = {}) {
                 </div>
                 {plot.propertyType === 'constructed' ? (
                   <>
+                    <div>
+                      <span style={{fontSize: '0.8rem', textTransform: 'uppercase', color: '#64748b', display: 'block', fontWeight: 600, letterSpacing: '0.05em', marginBottom: '0.25rem'}}>Construction Status</span>
+                      <span style={{fontSize: '1.05rem', fontWeight: 700, color: '#1e293b'}}>
+                        {plot.constructionStatus === 'under-construction' ? 'Under Construction' : 'Constructed / Ready'}
+                      </span>
+                    </div>
                     <div>
                       <span style={{fontSize: '0.8rem', textTransform: 'uppercase', color: '#64748b', display: 'block', fontWeight: 600, letterSpacing: '0.05em', marginBottom: '0.25rem'}}>Property Subtype</span>
                       <span style={{fontSize: '1.05rem', fontWeight: 700, color: '#1e293b'}}>
@@ -5193,12 +5251,6 @@ export default function App({ hideChrome = false } = {}) {
                         {plot.constructedType === 'residential_plot' && 'Residential Plot'}
                         {plot.constructedType === 'commercial_plot' && 'Commercial Plot'}
                         {!['flat', 'independent_house_villa', 'high_rise_apartment', 'g_plus_building', 'residential_plot', 'commercial_plot'].includes(plot.constructedType) && (plot.constructedType || 'Constructed')}
-                      </span>
-                    </div>
-                    <div>
-                      <span style={{fontSize: '0.8rem', textTransform: 'uppercase', color: '#64748b', display: 'block', fontWeight: 600, letterSpacing: '0.05em', marginBottom: '0.25rem'}}>Construction Status</span>
-                      <span style={{fontSize: '1.05rem', fontWeight: 700, color: '#1e293b'}}>
-                        {plot.constructionStatus === 'under-construction' ? 'Under Construction' : 'Constructed / Ready'}
                       </span>
                     </div>
                   </>
@@ -5219,27 +5271,9 @@ export default function App({ hideChrome = false } = {}) {
                   </>
                 )}
                 <div>
-                  <span style={{fontSize: '0.8rem', textTransform: 'uppercase', color: '#64748b', display: 'block', fontWeight: 600, letterSpacing: '0.05em', marginBottom: '0.25rem'}}>Budget / Asking Range</span>
-                  <span style={{fontSize: '1.05rem', fontWeight: 700, color: '#1e293b'}}>{plot.budgetRange || plot.price}</span>
-                </div>
-                <div>
                   <span style={{fontSize: '0.8rem', textTransform: 'uppercase', color: '#64748b', display: 'block', fontWeight: 600, letterSpacing: '0.05em', marginBottom: '0.25rem'}}>Facing Direction</span>
                   <span style={{fontSize: '1.05rem', fontWeight: 700, color: '#1e293b'}}>{plot.facingDirection || 'East'} Facing</span>
                 </div>
-                {(plot.state || plot.district || plot.tehsil || plot.village) && (
-                  <div>
-                    <span style={{fontSize: '0.8rem', textTransform: 'uppercase', color: '#64748b', display: 'block', fontWeight: 600, letterSpacing: '0.05em', marginBottom: '0.25rem'}}>State / District / Tehsil / Village</span>
-                    <span style={{fontSize: '1.05rem', fontWeight: 700, color: '#1e293b'}}>
-                      {[plot.village, plot.tehsil, plot.district, plot.state].filter(Boolean).join(', ') || 'Not Specified'}
-                    </span>
-                  </div>
-                )}
-                {plot.khasraNumber && (
-                  <div>
-                    <span style={{fontSize: '0.8rem', textTransform: 'uppercase', color: '#64748b', display: 'block', fontWeight: 600, letterSpacing: '0.05em', marginBottom: '0.25rem'}}>Khasra / Khatauni Number</span>
-                    <span style={{fontSize: '1.05rem', fontWeight: 700, color: '#1e293b'}}>{plot.khasraNumber}</span>
-                  </div>
-                )}
                 {(plot.cornerProperty || plot.parkFacing || plot.roadFacing) && (
                   <div style={{gridColumn: '1 / -1'}}>
                     <span style={{fontSize: '0.8rem', textTransform: 'uppercase', color: '#64748b', display: 'block', fontWeight: 600, letterSpacing: '0.05em', marginBottom: '0.5rem'}}>Property Tags</span>
@@ -5264,10 +5298,46 @@ export default function App({ hideChrome = false } = {}) {
                 )}
               </div>
 
+              {plot.features && plot.features.trim() && (
+                <div style={{marginTop: '2rem'}}>
+                  <h3 style={{fontSize: '1.25rem', fontWeight: 700, marginBottom: '1rem'}}>Key Features</h3>
+                  <p style={{color: 'var(--text-muted)', lineHeight: 1.6}}>{plot.features}</p>
+                </div>
+              )}
+
               {plot.additionalInfo && plot.additionalInfo.trim() && (
                 <div style={{marginTop: '2rem'}}>
                   <h3 style={{fontSize: '1.25rem', fontWeight: 700, marginBottom: '1rem'}}>Additional Information</h3>
                   <p style={{whiteSpace: 'pre-wrap', color: 'var(--text-muted)', lineHeight: 1.6}}>{plot.additionalInfo}</p>
+                </div>
+              )}
+
+              {(plot.state || plot.district || plot.tehsil || plot.village || plot.khasraNumber) && (
+                <div style={{
+                  marginTop: '2rem',
+                  padding: '1.5rem',
+                  background: '#f8fafc',
+                  borderRadius: '0.75rem',
+                  border: '1px solid #e2e8f0',
+                  display: 'grid',
+                  gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
+                  gap: '1.5rem',
+                  textAlign: 'left'
+                }}>
+                  {(plot.state || plot.district || plot.tehsil || plot.village) && (
+                    <div>
+                      <span style={{fontSize: '0.8rem', textTransform: 'uppercase', color: '#64748b', display: 'block', fontWeight: 600, letterSpacing: '0.05em', marginBottom: '0.25rem'}}>State / District / Tehsil / Village</span>
+                      <span style={{fontSize: '1.05rem', fontWeight: 700, color: '#1e293b'}}>
+                        {[plot.village, plot.tehsil, plot.district, plot.state].filter(Boolean).join(', ') || 'Not Specified'}
+                      </span>
+                    </div>
+                  )}
+                  {plot.khasraNumber && (
+                    <div>
+                      <span style={{fontSize: '0.8rem', textTransform: 'uppercase', color: '#64748b', display: 'block', fontWeight: 600, letterSpacing: '0.05em', marginBottom: '0.25rem'}}>Khasra / Khatauni Number</span>
+                      <span style={{fontSize: '1.05rem', fontWeight: 700, color: '#1e293b'}}>{plot.khasraNumber}</span>
+                    </div>
+                  )}
                 </div>
               )}
 

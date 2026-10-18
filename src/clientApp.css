@@ -277,7 +277,12 @@
   border-radius: 4px;
 }
 .admin-table-row-clickable.is-selected > td {
+  /* Previously this box-shadow was applied to every <td>, which repeats the
+     accent stripe between each column instead of marking the row's left
+     edge once — a vertical "jail bars" look. Scoped to :first-child below. */
   background: #ecfdf5;
+}
+.admin-table-row-clickable.is-selected > td:first-child {
   box-shadow: inset 3px 0 0 var(--accent-green-strong);
 }
 .admin-row-actions-row > td {
