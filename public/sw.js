@@ -17,11 +17,12 @@
  *    these fixed-name files changes.
  *  - Cross-origin requests (Firebase, Google Maps, GA, Meta) are NOT touched.
  */
-const CACHE_VERSION = 'v3';
+const CACHE_VERSION = 'v4';
 const CACHE = `a1plot-${CACHE_VERSION}`;
 const PRECACHE = [
   '/', '/offline.html', '/manifest.json', '/assets/logo.webp',
   '/assets/pwa-icon-192.png', '/assets/pwa-icon-512.png', '/assets/pwa-icon-maskable-512.png',
+  '/assets/favicon_logo_Svg.svg',
 ];
 
 self.addEventListener('install', (event) => {

@@ -20,9 +20,11 @@ export const metadata = {
   authors: [{ name: 'A1Plot' }],
   icons: {
     icon: [
+      { url: '/assets/favicon_logo_Svg.svg', type: 'image/svg+xml' },
       { url: '/assets/favicon_logo.png', sizes: '32x32', type: 'image/png' },
       { url: '/assets/favicon_logo.png', sizes: '192x192', type: 'image/png' }
     ],
+    // Apple doesn't support SVG favicons — PNG stays here regardless.
     apple: '/assets/favicon_logo.png',
   },
   openGraph: {
