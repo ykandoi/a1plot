@@ -1472,7 +1472,11 @@ export default function App({ hideChrome = false } = {}) {
         ...fields,
         id: `${Date.now()}_${_id}`,
         createdAt: Date.now(),
-        visibility: 'public',
+        // Derived, never hardcoded — see visibilityForStatus. This used to be
+        // hardcoded 'public', which left a bulk-imported listing publicly
+        // visible to anyone with a direct /property/<slug> link while it was
+        // still Verification Pending.
+        visibility: visibilityForStatus('Verification Pending'),
         ownerUid: authedUser?.uid || 'admin-bulk-import',
         ownerEmail: contactEmail,
         ownerPhone: '',

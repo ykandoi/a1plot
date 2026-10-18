@@ -78,12 +78,22 @@ export async function fetchPublicPlots() {
   }
 }
 
+// Unlike fetchPublicPlots, this looks up a single plot by id — used by the
+// public property page and shared broker catalogs. It used to return any
+// plot regardless of status, so a direct link to a listing that was still
+// "Verification Pending" (e.g. one just created via the admin bulk-import
+// tool) rendered fully live before anyone had approved it. Applying the same
+// isPublic check every other listing surface already uses closes that gap:
+// a pending/rejected plot now looks exactly like a deleted one to callers.
 export async function fetchPlotById(id) {
   if (!id) return null;
   if (isDbReady()) {
     try {
       const snap = await getDoc(doc(db, 'plots', String(id)));
-      if (snap.exists()) return { ...snap.data(), id: snap.id };
+      if (snap.exists()) {
+        const plot = { ...snap.data(), id: snap.id };
+        return isPublic(plot) ? plot : null;
+      }
     } catch (e) {
       console.error('fetchPlotById (SDK) failed, trying REST:', e?.code || e?.message);
     }
@@ -94,7 +104,8 @@ export async function fetchPlotById(id) {
     const res = await fetch(url, { next: { revalidate: 3600 } });
     if (!res.ok) return null;
     const d = await res.json();
-    return d.name ? parseRestDoc(d) : null;
+    const plot = d.name ? parseRestDoc(d) : null;
+    return plot && isPublic(plot) ? plot : null;
   } catch (e) {
     console.error('fetchPlotById (REST) failed:', e);
     return null;
