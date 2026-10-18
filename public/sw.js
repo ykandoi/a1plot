@@ -5,13 +5,24 @@
  *    latest code; the cache is only a fallback when the network fails (offline).
  *  - Content-hashed assets (/_next/static, /assets): CACHE-FIRST, because their
  *    URLs change whenever the content changes, so a cached copy is never stale.
- *  - Cross-origin requests (Firebase, Google Maps, GA, Meta) are NOT touched.
  *
- * Bump CACHE_VERSION to force a clean cache on the next deploy.
+ *    CAVEAT: this assumes every /assets/ filename is content-hashed. It
+ *    isn't true for a handful of fixed-name files (logo.webp, the
+ *    pwa-icon-*.png icons) — editing one of THOSE in place while keeping the
+ *    same filename (e.g. regenerating a PWA icon) will NOT reach anyone with
+ *    an existing cache unless CACHE_VERSION is bumped. This happened once
+ *    already: the PWA icons were fixed to use the correct logo but
+ *    CACHE_VERSION wasn't bumped, so already-cached browsers kept serving
+ *    the old (wrong) icon indefinitely. Bump CACHE_VERSION any time one of
+ *    these fixed-name files changes.
+ *  - Cross-origin requests (Firebase, Google Maps, GA, Meta) are NOT touched.
  */
-const CACHE_VERSION = 'v2';
+const CACHE_VERSION = 'v3';
 const CACHE = `a1plot-${CACHE_VERSION}`;
-const PRECACHE = ['/', '/offline.html', '/manifest.json', '/assets/logo.webp'];
+const PRECACHE = [
+  '/', '/offline.html', '/manifest.json', '/assets/logo.webp',
+  '/assets/pwa-icon-192.png', '/assets/pwa-icon-512.png', '/assets/pwa-icon-maskable-512.png',
+];
 
 self.addEventListener('install', (event) => {
   self.skipWaiting();
