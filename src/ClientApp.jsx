@@ -404,6 +404,12 @@ export default function App({ hideChrome = false } = {}) {
     }
   });
   const [selectedPropertyDetail, setSelectedPropertyDetail] = useState(null);
+  // True when property-detail was opened from the admin panel's "Open" action
+  // rather than by a buyer browsing — swaps the "Back to Explore" button for
+  // admin review actions (Edit, Verify, Mark Pending, Reject, Delete) on the
+  // same formatted view buyers see, instead of dropping straight into the
+  // raw edit form.
+  const [adminPreviewPlot, setAdminPreviewPlot] = useState(false);
   const [requestingDocsFor, setRequestingDocsFor] = useState(null);
   const [legalAgreed, setLegalAgreed] = useState(false);
   const [selectedMarker, setSelectedMarker] = useState(null);
@@ -1239,12 +1245,14 @@ export default function App({ hideChrome = false } = {}) {
 
   const handleDeletePlot = async (plot) => {
     const ok = window.confirm(`Delete "${plot.title || 'this property'}" permanently? This removes it from the list and cannot be undone.`);
-    if (!ok) return;
+    if (!ok) return false;
     try {
       await deletePlot(plot.id);
       showToast('Property deleted.');
+      return true;
     } catch (e) {
       showToast('Failed to delete property. Please try again.');
+      return false;
     }
   };
 
@@ -1767,10 +1775,23 @@ export default function App({ hideChrome = false } = {}) {
   const handleViewProperty = (plot) => {
     setSelectedPropertyDetail(plot);
     setSelectedPropertyDetailId(String(plot.id));
+    setAdminPreviewPlot(false);
+    navigate('property-detail');
+  };
+
+  // "Open" from the admin panel — shows the exact same formatted view a
+  // buyer sees (so nothing looks different/broken from the raw Firestore
+  // record), with admin actions added on top. Editing is a deliberate next
+  // step from there (handleAdminEditClick), not the default landing spot.
+  const handleAdminViewClick = (plot) => {
+    setSelectedPropertyDetail(plot);
+    setSelectedPropertyDetailId(String(plot.id));
+    setAdminPreviewPlot(true);
     navigate('property-detail');
   };
 
   const handleAdminEditClick = (plot) => {
+    setAdminPreviewPlot(false);
     setAdminEditingPlot(plot);
     setAdminNewPlot({
       title: plot.title,
@@ -3970,9 +3991,10 @@ export default function App({ hideChrome = false } = {}) {
           </div>
 
           <div className="form-group mb-8">
-            <label>District ➔ Tehsil ➔ Village</label>
+            <label>State ➔ District ➔ Tehsil ➔ Village</label>
             <p className="text-muted" style={{fontSize: '0.85rem', marginBottom: '0.5rem'}}>Automatically fetched when you mark the plot on the map.</p>
             <div style={{ display: 'flex', gap: '0.5rem' }}>
+              <input type="text" placeholder="State" className="form-input" style={{flex: 1}} value={adminNewPlot.state || ''} onChange={e => setAdminNewPlot({...adminNewPlot, state: e.target.value})} />
               <input type="text" placeholder="District" className="form-input" style={{flex: 1}} value={adminNewPlot.district || ''} onChange={e => setAdminNewPlot({...adminNewPlot, district: e.target.value})} />
               <input type="text" placeholder="Tehsil" className="form-input" style={{flex: 1}} value={adminNewPlot.tehsil || ''} onChange={e => setAdminNewPlot({...adminNewPlot, tehsil: e.target.value})} />
               <input type="text" placeholder="Village" className="form-input" style={{flex: 1}} value={adminNewPlot.village || ''} onChange={e => setAdminNewPlot({...adminNewPlot, village: e.target.value})} />
@@ -4757,7 +4779,7 @@ export default function App({ hideChrome = false } = {}) {
               caption="properties"
               rows={allListedPlots}
               getRowKey={(p) => p.id}
-              onRowOpen={(p) => handleAdminEditClick(p)}
+              onRowOpen={(p) => handleAdminViewClick(p)}
               emptyMessage="No user-submitted listings yet."
               // Verified first, then pending, then rejected; inside each group
               // user submissions come before ones the admin listed themselves.
@@ -4768,8 +4790,8 @@ export default function App({ hideChrome = false } = {}) {
               }
               renderRowActions={(plot) => (
                 <>
-                  <button className="admin-btn" style={{ backgroundColor: '#e2e8f0', color: '#1e293b', border: '1px solid #cbd5e1' }} onClick={() => handleAdminEditClick(plot)}>
-                    <Edit3 size={14} /> Open &amp; Edit
+                  <button className="admin-btn" style={{ backgroundColor: '#e2e8f0', color: '#1e293b', border: '1px solid #cbd5e1' }} onClick={() => handleAdminViewClick(plot)}>
+                    <Eye size={14} /> Open
                   </button>
                   {plotStatusOf(plot) !== 'Verified' && (
                     <button className="admin-btn admin-btn-verify" onClick={() => handleVerifyPlot(plot.id)}>
@@ -5040,13 +5062,46 @@ export default function App({ hideChrome = false } = {}) {
     // Legacy placeholder strings like 'Title Deed', 'Patta' have no extension — skip them.
     const docs = (plot.documentsAvailable || []).filter(d => d && d.trim() !== '' && d.includes('.'));
 
+    const showAdminControls = isAdmin && adminPreviewPlot;
+
     return (
       <section className="section bg-light" style={{paddingTop: '6rem', minHeight: '100vh'}}>
         <div className="container" style={{maxWidth: '1000px'}}>
-          <button className="btn btn-outline mb-6" onClick={() => navigate('buyer-map')} style={{display: 'inline-flex', alignItems: 'center', gap: '0.5rem', padding: '0.5rem 1rem', background: 'white'}}>
-            <ArrowRight size={16} style={{transform: 'rotate(180deg)'}} /> Back to Explore
-          </button>
-          
+          {showAdminControls ? (
+            <div className="flex items-center justify-between mb-6" style={{flexWrap: 'wrap', gap: '0.75rem'}}>
+              <button className="btn btn-outline" onClick={() => { setAdminPreviewPlot(false); navigate('admin'); }} style={{display: 'inline-flex', alignItems: 'center', gap: '0.5rem', padding: '0.5rem 1rem', background: 'white'}}>
+                <ArrowRight size={16} style={{transform: 'rotate(180deg)'}} /> Back to Admin Panel
+              </button>
+              <div className="flex items-center gap-2" style={{flexWrap: 'wrap'}}>
+                <button className="admin-btn" style={{ backgroundColor: '#e2e8f0', color: '#1e293b', border: '1px solid #cbd5e1' }} onClick={() => handleAdminEditClick(plot)}>
+                  <Edit3 size={14} /> Edit
+                </button>
+                {plotStatusOf(plot) !== 'Verified' && (
+                  <button className="admin-btn admin-btn-verify" onClick={() => handleVerifyPlot(plot.id)}>
+                    <Check size={14} /> Verify
+                  </button>
+                )}
+                {plotStatusOf(plot) !== 'Verification Pending' && (
+                  <button className="admin-btn" style={{ backgroundColor: '#fef3c7', color: '#92400e', border: '1px solid #fde68a' }} onClick={() => handlePendingPlot(plot.id)}>
+                    <Clock size={14} /> Mark Pending
+                  </button>
+                )}
+                {plotStatusOf(plot) !== 'Rejected' && (
+                  <button className="admin-btn admin-btn-reject" onClick={() => handleRejectPlot(plot.id)}>
+                    <X size={14} /> Reject
+                  </button>
+                )}
+                <button className="admin-btn" style={{ backgroundColor: '#fee2e2', color: '#991b1b', border: '1px solid #fecaca' }} onClick={async () => { if (await handleDeletePlot(plot)) { setAdminPreviewPlot(false); navigate('admin'); } }}>
+                  <Trash2 size={14} /> Delete
+                </button>
+              </div>
+            </div>
+          ) : (
+            <button className="btn btn-outline mb-6" onClick={() => navigate('buyer-map')} style={{display: 'inline-flex', alignItems: 'center', gap: '0.5rem', padding: '0.5rem 1rem', background: 'white'}}>
+              <ArrowRight size={16} style={{transform: 'rotate(180deg)'}} /> Back to Explore
+            </button>
+          )}
+
           <div style={{background: 'white', borderRadius: '1rem', overflow: 'hidden', boxShadow: 'var(--shadow-md)'}}>
             {/* Image Gallery Header */}
             {images.length > 0 && (
@@ -5171,6 +5226,20 @@ export default function App({ hideChrome = false } = {}) {
                   <span style={{fontSize: '0.8rem', textTransform: 'uppercase', color: '#64748b', display: 'block', fontWeight: 600, letterSpacing: '0.05em', marginBottom: '0.25rem'}}>Facing Direction</span>
                   <span style={{fontSize: '1.05rem', fontWeight: 700, color: '#1e293b'}}>{plot.facingDirection || 'East'} Facing</span>
                 </div>
+                {(plot.state || plot.district || plot.tehsil || plot.village) && (
+                  <div>
+                    <span style={{fontSize: '0.8rem', textTransform: 'uppercase', color: '#64748b', display: 'block', fontWeight: 600, letterSpacing: '0.05em', marginBottom: '0.25rem'}}>State / District / Tehsil / Village</span>
+                    <span style={{fontSize: '1.05rem', fontWeight: 700, color: '#1e293b'}}>
+                      {[plot.village, plot.tehsil, plot.district, plot.state].filter(Boolean).join(', ') || 'Not Specified'}
+                    </span>
+                  </div>
+                )}
+                {plot.khasraNumber && (
+                  <div>
+                    <span style={{fontSize: '0.8rem', textTransform: 'uppercase', color: '#64748b', display: 'block', fontWeight: 600, letterSpacing: '0.05em', marginBottom: '0.25rem'}}>Khasra / Khatauni Number</span>
+                    <span style={{fontSize: '1.05rem', fontWeight: 700, color: '#1e293b'}}>{plot.khasraNumber}</span>
+                  </div>
+                )}
                 {(plot.cornerProperty || plot.parkFacing || plot.roadFacing) && (
                   <div style={{gridColumn: '1 / -1'}}>
                     <span style={{fontSize: '0.8rem', textTransform: 'uppercase', color: '#64748b', display: 'block', fontWeight: 600, letterSpacing: '0.05em', marginBottom: '0.5rem'}}>Property Tags</span>
@@ -5691,7 +5760,7 @@ export default function App({ hideChrome = false } = {}) {
             navigate={navigate}
             user={user}
             showToast={showToast}
-            onOpenProperty={(plot) => { setSelectedPropertyDetail(plot); navigate('property-detail'); }}
+            onOpenProperty={(plot) => { setSelectedPropertyDetail(plot); setAdminPreviewPlot(false); navigate('property-detail'); }}
           />
         )}
         {view === 'post-requirement' && (
