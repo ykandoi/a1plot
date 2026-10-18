@@ -390,9 +390,9 @@ export default function App({ hideChrome = false } = {}) {
   const [leadPhone, setLeadPhone] = useState('');
   const [directStep, setDirectStep] = useState('landing');
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-  const [newPlot, setNewPlot] = useState({ title: '', location: '', price: '', size: '', features: '', visibility: 'public', khasraNumber: '', state: '', district: '', tehsil: '', village: '', city: '', transactionType: 'sale', propertyType: 'land', landType: 'converted', landUse: 'residential', constructedType: 'flat', constructionStatus: 'constructed', budgetRange: '', facingDirection: 'East', cornerProperty: false, parkFacing: false, roadFacing: false });
+  const [newPlot, setNewPlot] = useState({ title: '', location: '', price: '', size: '', features: '', additionalInfo: '', visibility: 'public', khasraNumber: '', state: '', district: '', tehsil: '', village: '', city: '', transactionType: 'sale', propertyType: 'land', landType: 'converted', landUse: 'residential', constructedType: 'flat', constructionStatus: 'constructed', budgetRange: '', facingDirection: 'East', cornerProperty: false, parkFacing: false, roadFacing: false });
   const [editingPlot, setEditingPlot] = useState(null);
-  const [adminNewPlot, setAdminNewPlot] = useState({ title: '', location: '', price: '', size: '', features: '', visibility: 'public', status: 'Verification Pending', media: [], documentsAvailable: [], khasraNumber: '', state: '', district: '', tehsil: '', village: '', city: '', transactionType: 'sale', propertyType: 'land', landType: 'converted', landUse: 'residential', constructedType: 'flat', constructionStatus: 'constructed', budgetRange: '', facingDirection: 'East', cornerProperty: false, parkFacing: false, roadFacing: false });
+  const [adminNewPlot, setAdminNewPlot] = useState({ title: '', location: '', price: '', size: '', features: '', additionalInfo: '', visibility: 'public', status: 'Verification Pending', media: [], documentsAvailable: [], khasraNumber: '', state: '', district: '', tehsil: '', village: '', city: '', transactionType: 'sale', propertyType: 'land', landType: 'converted', landUse: 'residential', constructedType: 'flat', constructionStatus: 'constructed', budgetRange: '', facingDirection: 'East', cornerProperty: false, parkFacing: false, roadFacing: false });
   const [adminEditingPlot, setAdminEditingPlot] = useState(null);
   const [adminTempPin, setAdminTempPin] = useState(null);
   // Store only the plot ID in localStorage to avoid stale cached data
@@ -1731,6 +1731,7 @@ export default function App({ hideChrome = false } = {}) {
       price: plot.price,
       size: plot.size,
       features: plot.features || '',
+      additionalInfo: plot.additionalInfo || '',
       visibility: plot.visibility || 'public',
       khasraNumber: plot.khasraNumber || '',
       state: plot.state || '',
@@ -1773,6 +1774,7 @@ export default function App({ hideChrome = false } = {}) {
       price: plot.price,
       size: plot.size,
       features: plot.features || '',
+      additionalInfo: plot.additionalInfo || '',
       visibility: plot.visibility || 'public',
       status: plot.status || 'Verification Pending',
       media: plot.media || (plot.image ? [plot.image] : []),
@@ -1843,6 +1845,7 @@ export default function App({ hideChrome = false } = {}) {
         price: adminNewPlot.price,
         size: adminNewPlot.size,
         features: adminNewPlot.features,
+        additionalInfo: adminNewPlot.additionalInfo || '',
         // Derived, never chosen — see setPlotStatus.
         visibility: visibilityForStatus(adminNewPlot.status),
         status: adminNewPlot.status,
@@ -1878,6 +1881,7 @@ export default function App({ hideChrome = false } = {}) {
         price: '',
         size: '',
         features: '',
+        additionalInfo: '',
         visibility: 'public',
         status: 'Verification Pending',
         media: [],
@@ -2443,6 +2447,16 @@ export default function App({ hideChrome = false } = {}) {
               className="form-input"
               value={newPlot.features}
               onChange={(e) => setNewPlot({...newPlot, features: e.target.value})}
+            />
+          </div>
+          <div className="form-group mb-8">
+            <label>Additional Information</label>
+            <textarea
+              placeholder="Anything else buyers should know — contact/broker name, nearby landmarks, possession timeline, negotiability, loan/approval status, etc."
+              className="form-input"
+              rows={3}
+              value={newPlot.additionalInfo}
+              onChange={(e) => setNewPlot({...newPlot, additionalInfo: e.target.value})}
             />
           </div>
 
@@ -4075,6 +4089,10 @@ export default function App({ hideChrome = false } = {}) {
             <input type="text" className="form-input" value={adminNewPlot.features} onChange={(e) => setAdminNewPlot({...adminNewPlot, features: e.target.value})} />
           </div>
           <div className="form-group mb-8">
+            <label>Additional Information</label>
+            <textarea className="form-input" rows={3} value={adminNewPlot.additionalInfo} onChange={(e) => setAdminNewPlot({...adminNewPlot, additionalInfo: e.target.value})} />
+          </div>
+          <div className="form-group mb-8">
             <label>Expected Price</label>
             <input type="text" className="form-input" required value={adminNewPlot.price} onChange={(e) => setAdminNewPlot({...adminNewPlot, price: e.target.value})} />
           </div>
@@ -4561,14 +4579,148 @@ export default function App({ hideChrome = false } = {}) {
                       <Trash2 size={14} /> Remove
                     </button>
                   </div>
-                  <div style={{display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: '0.5rem'}}>
-                    <input className="form-input" placeholder="Title" value={d.title || ''} onChange={(e) => handleBulkDraftChange(d._id, 'title', e.target.value)} />
-                    <input className="form-input" placeholder="Location" value={d.location || ''} onChange={(e) => handleBulkDraftChange(d._id, 'location', e.target.value)} />
-                    <input className="form-input" placeholder="Price" value={d.price || ''} onChange={(e) => handleBulkDraftChange(d._id, 'price', e.target.value)} />
-                    <input className="form-input" placeholder="Size" value={d.size || ''} onChange={(e) => handleBulkDraftChange(d._id, 'size', e.target.value)} />
-                    <input className="form-input" placeholder="City" value={d.city || ''} onChange={(e) => handleBulkDraftChange(d._id, 'city', e.target.value)} />
-                    <input className="form-input" placeholder="Village" value={d.village || ''} onChange={(e) => handleBulkDraftChange(d._id, 'village', e.target.value)} />
-                    <input className="form-input" placeholder="Features" value={d.features || ''} onChange={(e) => handleBulkDraftChange(d._id, 'features', e.target.value)} />
+                  <div style={{display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: '0.75rem'}}>
+                    <div className="form-group mb-0">
+                      <label style={{fontSize: '0.78rem'}}>Title</label>
+                      <input className="form-input" value={d.title || ''} onChange={(e) => handleBulkDraftChange(d._id, 'title', e.target.value)} />
+                    </div>
+                    <div className="form-group mb-0">
+                      <label style={{fontSize: '0.78rem'}}>Location</label>
+                      <input className="form-input" value={d.location || ''} onChange={(e) => handleBulkDraftChange(d._id, 'location', e.target.value)} />
+                    </div>
+                    <div className="form-group mb-0">
+                      <label style={{fontSize: '0.78rem'}}>Price</label>
+                      <input className="form-input" value={d.price || ''} onChange={(e) => handleBulkDraftChange(d._id, 'price', e.target.value)} />
+                    </div>
+                    <div className="form-group mb-0">
+                      <label style={{fontSize: '0.78rem'}}>Budget Range</label>
+                      <input className="form-input" value={d.budgetRange || ''} onChange={(e) => handleBulkDraftChange(d._id, 'budgetRange', e.target.value)} />
+                    </div>
+                    <div className="form-group mb-0">
+                      <label style={{fontSize: '0.78rem'}}>Size</label>
+                      <input className="form-input" value={d.size || ''} onChange={(e) => handleBulkDraftChange(d._id, 'size', e.target.value)} />
+                    </div>
+                    <div className="form-group mb-0">
+                      <label style={{fontSize: '0.78rem'}}>City</label>
+                      <input className="form-input" value={d.city || ''} onChange={(e) => handleBulkDraftChange(d._id, 'city', e.target.value)} />
+                    </div>
+                    <div className="form-group mb-0">
+                      <label style={{fontSize: '0.78rem'}}>State</label>
+                      <input className="form-input" value={d.state || ''} onChange={(e) => handleBulkDraftChange(d._id, 'state', e.target.value)} />
+                    </div>
+                    <div className="form-group mb-0">
+                      <label style={{fontSize: '0.78rem'}}>District</label>
+                      <input className="form-input" value={d.district || ''} onChange={(e) => handleBulkDraftChange(d._id, 'district', e.target.value)} />
+                    </div>
+                    <div className="form-group mb-0">
+                      <label style={{fontSize: '0.78rem'}}>Tehsil</label>
+                      <input className="form-input" value={d.tehsil || ''} onChange={(e) => handleBulkDraftChange(d._id, 'tehsil', e.target.value)} />
+                    </div>
+                    <div className="form-group mb-0">
+                      <label style={{fontSize: '0.78rem'}}>Village</label>
+                      <input className="form-input" value={d.village || ''} onChange={(e) => handleBulkDraftChange(d._id, 'village', e.target.value)} />
+                    </div>
+                    <div className="form-group mb-0">
+                      <label style={{fontSize: '0.78rem'}}>Khasra Number</label>
+                      <input className="form-input" value={d.khasraNumber || ''} onChange={(e) => handleBulkDraftChange(d._id, 'khasraNumber', e.target.value)} />
+                    </div>
+                    <div className="form-group mb-0">
+                      <label style={{fontSize: '0.78rem'}}>Lease or Outright Purchase</label>
+                      <select className="form-input" value={d.transactionType || ''} onChange={(e) => handleBulkDraftChange(d._id, 'transactionType', e.target.value)}>
+                        <option value="">—</option>
+                        <option value="sale">Outright Purchase</option>
+                        <option value="lease">Lease</option>
+                      </select>
+                    </div>
+                    <div className="form-group mb-0">
+                      <label style={{fontSize: '0.78rem'}}>Property Type</label>
+                      <select className="form-input" value={d.propertyType || ''} onChange={(e) => handleBulkDraftChange(d._id, 'propertyType', e.target.value)}>
+                        <option value="">—</option>
+                        <option value="land">Land</option>
+                        <option value="constructed">Constructed Property</option>
+                      </select>
+                    </div>
+                    {d.propertyType === 'constructed' ? (
+                      <>
+                        <div className="form-group mb-0">
+                          <label style={{fontSize: '0.78rem'}}>Construction Status</label>
+                          <select className="form-input" value={d.constructionStatus || ''} onChange={(e) => handleBulkDraftChange(d._id, 'constructionStatus', e.target.value)}>
+                            <option value="">—</option>
+                            <option value="constructed">Constructed</option>
+                            <option value="under-construction">Under construction</option>
+                          </select>
+                        </div>
+                        <div className="form-group mb-0">
+                          <label style={{fontSize: '0.78rem'}}>Property Subtype</label>
+                          <select className="form-input" value={d.constructedType || ''} onChange={(e) => handleBulkDraftChange(d._id, 'constructedType', e.target.value)}>
+                            <option value="">—</option>
+                            <option value="flat">Flat / Apartment</option>
+                            <option value="independent_house_villa">Independent House / Villa</option>
+                            <option value="high_rise_apartment">High-rise Apartment</option>
+                            <option value="g_plus_building">G+ Building</option>
+                            <option value="residential_plot">Residential Plot</option>
+                            <option value="commercial_plot">Commercial Plot</option>
+                          </select>
+                        </div>
+                      </>
+                    ) : (
+                      <>
+                        <div className="form-group mb-0">
+                          <label style={{fontSize: '0.78rem'}}>Land Classification</label>
+                          <select className="form-input" value={d.landType || ''} onChange={(e) => handleBulkDraftChange(d._id, 'landType', e.target.value)}>
+                            <option value="">—</option>
+                            <option value="converted">Land Converted</option>
+                            <option value="agriculture">Agriculture Land</option>
+                          </select>
+                        </div>
+                        <div className="form-group mb-0">
+                          <label style={{fontSize: '0.78rem'}}>Land Use Zoning</label>
+                          <select className="form-input" value={d.landUse || ''} onChange={(e) => handleBulkDraftChange(d._id, 'landUse', e.target.value)}>
+                            <option value="">—</option>
+                            <option value="residential">Residential</option>
+                            <option value="commercial">Commercial</option>
+                            <option value="institutional">Institutional</option>
+                            <option value="resort">Resort</option>
+                            <option value="industrial">Industrial</option>
+                          </select>
+                        </div>
+                      </>
+                    )}
+                    <div className="form-group mb-0">
+                      <label style={{fontSize: '0.78rem'}}>Facing Direction</label>
+                      <select className="form-input" value={d.facingDirection || ''} onChange={(e) => handleBulkDraftChange(d._id, 'facingDirection', e.target.value)}>
+                        <option value="">—</option>
+                        <option value="East">East Facing</option>
+                        <option value="West">West Facing</option>
+                        <option value="North">North Facing</option>
+                        <option value="South">South Facing</option>
+                      </select>
+                    </div>
+                    <div className="form-group mb-0">
+                      <label style={{fontSize: '0.78rem'}}>Property Tags</label>
+                      <div style={{display: 'flex', gap: '0.75rem', flexWrap: 'wrap', paddingTop: '0.5rem'}}>
+                        <label style={{display: 'flex', alignItems: 'center', gap: '0.35rem', fontSize: '0.85rem', cursor: 'pointer'}}>
+                          <input type="checkbox" checked={d.cornerProperty || false} onChange={(e) => handleBulkDraftChange(d._id, 'cornerProperty', e.target.checked)} />
+                          Corner
+                        </label>
+                        <label style={{display: 'flex', alignItems: 'center', gap: '0.35rem', fontSize: '0.85rem', cursor: 'pointer'}}>
+                          <input type="checkbox" checked={d.parkFacing || false} onChange={(e) => handleBulkDraftChange(d._id, 'parkFacing', e.target.checked)} />
+                          Park Facing
+                        </label>
+                        <label style={{display: 'flex', alignItems: 'center', gap: '0.35rem', fontSize: '0.85rem', cursor: 'pointer'}}>
+                          <input type="checkbox" checked={d.roadFacing || false} onChange={(e) => handleBulkDraftChange(d._id, 'roadFacing', e.target.checked)} />
+                          Road Facing
+                        </label>
+                      </div>
+                    </div>
+                    <div className="form-group mb-0" style={{gridColumn: '1 / -1'}}>
+                      <label style={{fontSize: '0.78rem'}}>Key Features</label>
+                      <input className="form-input" value={d.features || ''} onChange={(e) => handleBulkDraftChange(d._id, 'features', e.target.value)} />
+                    </div>
+                    <div className="form-group mb-0" style={{gridColumn: '1 / -1'}}>
+                      <label style={{fontSize: '0.78rem'}}>Additional Information</label>
+                      <textarea className="form-input" rows={2} value={d.additionalInfo || ''} onChange={(e) => handleBulkDraftChange(d._id, 'additionalInfo', e.target.value)} />
+                    </div>
                   </div>
                   {d.sourceText && (
                     <p className="text-muted" style={{fontSize: '0.78rem', marginTop: '0.5rem', marginBottom: 0, whiteSpace: 'pre-wrap'}}>
@@ -5038,6 +5190,13 @@ export default function App({ hideChrome = false } = {}) {
                   </div>
                 )}
               </div>
+
+              {plot.additionalInfo && plot.additionalInfo.trim() && (
+                <div style={{marginTop: '2rem'}}>
+                  <h3 style={{fontSize: '1.25rem', fontWeight: 700, marginBottom: '1rem'}}>Additional Information</h3>
+                  <p style={{whiteSpace: 'pre-wrap', color: 'var(--text-muted)', lineHeight: 1.6}}>{plot.additionalInfo}</p>
+                </div>
+              )}
 
               <div style={{display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '2rem', marginTop: '3rem'}}>
                 <div>

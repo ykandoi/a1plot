@@ -54,13 +54,23 @@ const LISTING_FIELD_PROPERTIES = {
   cornerProperty: { type: 'boolean' },
   parkFacing: { type: 'boolean' },
   roadFacing: { type: 'boolean' },
+  additionalInfo: {
+    type: ['string', 'null'],
+    description:
+      'Catch-all for anything relevant in the source text that does not fit ' +
+      'one of the other fields — e.g. contact/broker names, nearby landmarks, ' +
+      'possession timeline, negotiability, loan/approval status, amenities not ' +
+      'covered by features. Never discard information just because it has no ' +
+      'dedicated field; put it here instead. Null only if there is truly ' +
+      'nothing left over.',
+  },
 };
 const LISTING_FIELD_REQUIRED = [
   'title', 'location', 'price', 'size', 'features', 'khasraNumber',
   'state', 'district', 'tehsil', 'village', 'city', 'transactionType',
   'propertyType', 'landType', 'landUse', 'constructedType',
   'constructionStatus', 'budgetRange', 'facingDirection',
-  'cornerProperty', 'parkFacing', 'roadFacing',
+  'cornerProperty', 'parkFacing', 'roadFacing', 'additionalInfo',
 ];
 
 const EXTRACT_TOOL = {
