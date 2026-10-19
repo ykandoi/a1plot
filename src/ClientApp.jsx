@@ -2263,12 +2263,63 @@ export default function App({ hideChrome = false } = {}) {
                 value={aiPrompt}
                 onChange={(e) => setAiPrompt(e.target.value)}
               />
-              <p className="text-muted" style={{fontSize: '0.8rem', margin: '0.4rem 0'}}>
-                Tip: attach photos in the "Upload Images / Videos" section below first — the AI will look at those too.
+
+              {/* These attach to the SAME mediaFiles/docFiles state as the
+                  "Upload Images/Videos" and "Upload Documents" sections
+                  further down — nothing uploaded here is extra or separate,
+                  it's exactly what gets attached to the listing on submit.
+                  Clicking just opens those same hidden file inputs via ref,
+                  so there's no second upload pipeline to keep in sync. */}
+              <div style={{display: 'flex', gap: '0.75rem', flexWrap: 'wrap', marginTop: '0.85rem'}}>
+                <button type="button" className="btn btn-outline" style={{padding: '0.45rem 0.9rem', fontSize: '0.85rem'}} onClick={() => mediaInputRef.current?.click()}>
+                  <Upload size={14} style={{display: 'inline', marginRight: '0.35rem'}} />
+                  {mediaFiles.length > 0 ? `Photos (${mediaFiles.length})` : 'Add Photos'}
+                </button>
+                <button type="button" className="btn btn-outline" style={{padding: '0.45rem 0.9rem', fontSize: '0.85rem'}} onClick={() => docInputRef.current?.click()}>
+                  <Upload size={14} style={{display: 'inline', marginRight: '0.35rem'}} />
+                  {docFiles.length > 0 ? `Documents (${docFiles.length})` : 'Add Documents'}
+                </button>
+              </div>
+              <p className="text-muted" style={{fontSize: '0.78rem', margin: '0.4rem 0 0'}}>
+                Up to 2 photos are shown to the AI to help fill in details; all photos and documents you attach here are saved with the listing.
               </p>
+
+              {mediaFiles.length > 0 && (
+                <div className="media-preview-grid" style={{marginTop: '0.6rem'}}>
+                  {mediaFiles.map(f => (
+                    <div key={f.id} className="media-preview-item">
+                      {f.preview ? (
+                        <img src={f.preview} alt={f.name} />
+                      ) : f.isVideo ? (
+                        <div className="media-preview-video">
+                          <span>🎬</span>
+                          <span style={{fontSize: '0.7rem', wordBreak: 'break-all'}}>{f.name}</span>
+                        </div>
+                      ) : null}
+                      <button type="button" className="media-preview-remove" onClick={() => removeMediaFile(f.id)}>✕</button>
+                    </div>
+                  ))}
+                </div>
+              )}
+              {docFiles.length > 0 && (
+                <div className="doc-file-list" style={{marginTop: '0.6rem'}}>
+                  {docFiles.map(f => (
+                    <div key={f.id} className="doc-file-item">
+                      <div className="doc-file-icon">📄</div>
+                      <div className="doc-file-info">
+                        <div className="doc-file-name">{f.name}</div>
+                        <div className="doc-file-size">{f.size}</div>
+                      </div>
+                      <button type="button" className="doc-file-remove" onClick={() => removeDocFile(f.id)}>✕</button>
+                    </div>
+                  ))}
+                </div>
+              )}
+
               <button
                 type="button"
                 className="btn btn-primary"
+                style={{marginTop: '1rem'}}
                 disabled={aiExtracting || !aiPrompt.trim()}
                 onClick={handleAiExtract}
               >
@@ -2690,18 +2741,35 @@ export default function App({ hideChrome = false } = {}) {
             )}
           </div>
 
+          {/* Hidden file inputs always rendered — the AI panel's "Add
+              Photos"/"Add Documents" buttons above open these same elements
+              via ref, so there's one upload pipeline whichever button opens
+              the picker. Their visible upload-area + previews below are
+              hidden in AI mode since the AI panel already shows them, to
+              avoid showing the same thumbnails twice on one page. */}
+          <input
+            ref={mediaInputRef}
+            type="file"
+            multiple
+            accept="image/*,video/*"
+            onChange={handleMediaSelect}
+            style={{display: 'none'}}
+            id="media-upload"
+          />
+          <input
+            ref={docInputRef}
+            type="file"
+            multiple
+            accept=".pdf,.doc,.docx,.jpg,.jpeg,.png"
+            onChange={handleDocSelect}
+            style={{display: 'none'}}
+            id="doc-upload"
+          />
+
           {/* ── Upload Images / Videos ── */}
+          {listingMode !== 'ai' && (
           <div className="form-group mb-8">
             <label>Upload Images / Videos</label>
-            <input
-              ref={mediaInputRef}
-              type="file"
-              multiple
-              accept="image/*,video/*"
-              onChange={handleMediaSelect}
-              style={{display: 'none'}}
-              id="media-upload"
-            />
             <div className="upload-area" onClick={() => mediaInputRef.current?.click()}>
               <Upload size={28} className="text-muted" />
               <p className="text-muted">Click to upload photos & videos (multiple allowed)</p>
@@ -2729,19 +2797,12 @@ export default function App({ hideChrome = false } = {}) {
               </div>
             )}
           </div>
+          )}
 
           {/* ── Upload Documents ── */}
+          {listingMode !== 'ai' && (
           <div className="form-group mb-12">
             <label>Upload Documents (Title Deed, EC, Legal docs)</label>
-            <input
-              ref={docInputRef}
-              type="file"
-              multiple
-              accept=".pdf,.doc,.docx,.jpg,.jpeg,.png"
-              onChange={handleDocSelect}
-              style={{display: 'none'}}
-              id="doc-upload"
-            />
             <div className="upload-area" onClick={() => docInputRef.current?.click()}>
               <Upload size={28} className="text-muted" />
               <p className="text-muted">Click to upload property papers (multiple allowed)</p>
@@ -2762,6 +2823,7 @@ export default function App({ hideChrome = false } = {}) {
               </div>
             )}
           </div>
+          )}
 
           {/* No visibility switch. It implied a choice the seller did not
               actually have: a listing was only ever shown to buyers once an
