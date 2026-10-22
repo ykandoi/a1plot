@@ -135,5 +135,16 @@ service cloud.firestore {
       allow update, delete: if isAdmin()
         || (request.auth != null && resource.data.buyerUid == request.auth.uid);
     }
+
+    // Government-published property valuation rates (DLC rate / circle rate /
+    // ready reckoner rate, depending on state) shown on the Price Trends map.
+    // World-readable like plots — this is public reference data, not PII.
+    // Only an admin can write, since every entry must be a real, sourced
+    // government figure, not something a regular user should be able to
+    // inject or alter.
+    match /valuationRates/{rateId} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
   }
 }

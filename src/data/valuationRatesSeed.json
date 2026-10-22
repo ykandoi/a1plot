@@ -1,0 +1,1611 @@
+[
+  {
+    "state": "Delhi",
+    "city": "New Delhi",
+    "area": "Vasant Vihar",
+    "category": "A",
+    "unit": "per_sq_m",
+    "history": [
+      {
+        "year": 2011,
+        "rate": 86000,
+        "source": "https://revenue.delhi.gov.in/sites/default/files/revenue/nf/agvd/circle_rate_notification_4_2_11.pdf"
+      },
+      {
+        "year": 2014,
+        "rate": 774000,
+        "source": "https://revenue.delhi.gov.in/sites/default/files/revenue/revised_circle-rate-english0001.pdf"
+      }
+    ],
+    "notes": "Category A base land rate; colony assignment secondary-sourced (cross-verified against two independent portals matching the official category rate).",
+    "lat": 28.5602839,
+    "lng": 77.1617881,
+    "geocodedAddress": "Vasant Vihar, New Delhi, Delhi, India",
+    "ward": "VASANT VIHAR"
+  },
+  {
+    "state": "Delhi",
+    "city": "New Delhi",
+    "area": "Golf Links",
+    "category": "A",
+    "unit": "per_sq_m",
+    "history": [
+      {
+        "year": 2011,
+        "rate": 86000,
+        "source": "https://revenue.delhi.gov.in/sites/default/files/revenue/nf/agvd/circle_rate_notification_4_2_11.pdf"
+      },
+      {
+        "year": 2014,
+        "rate": 774000,
+        "source": "https://revenue.delhi.gov.in/sites/default/files/revenue/revised_circle-rate-english0001.pdf"
+      }
+    ],
+    "notes": "Category A.",
+    "lat": 28.5973381,
+    "lng": 77.2322727,
+    "geocodedAddress": "Golf Links, New Delhi, Delhi, India",
+    "ward": null
+  },
+  {
+    "state": "Delhi",
+    "city": "New Delhi",
+    "area": "Nehru Place",
+    "category": "A",
+    "unit": "per_sq_m",
+    "history": [
+      {
+        "year": 2011,
+        "rate": 86000,
+        "source": "https://revenue.delhi.gov.in/sites/default/files/revenue/nf/agvd/circle_rate_notification_4_2_11.pdf"
+      },
+      {
+        "year": 2014,
+        "rate": 774000,
+        "source": "https://revenue.delhi.gov.in/sites/default/files/revenue/revised_circle-rate-english0001.pdf"
+      }
+    ],
+    "notes": "Category A.",
+    "lat": 28.5503314,
+    "lng": 77.2501893,
+    "geocodedAddress": "Nehru Place, New Delhi, Delhi, India",
+    "ward": null
+  },
+  {
+    "state": "Delhi",
+    "city": "New Delhi",
+    "area": "New Friends Colony",
+    "category": "A",
+    "unit": "per_sq_m",
+    "history": [
+      {
+        "year": 2011,
+        "rate": 86000,
+        "source": "https://revenue.delhi.gov.in/sites/default/files/revenue/nf/agvd/circle_rate_notification_4_2_11.pdf"
+      },
+      {
+        "year": 2014,
+        "rate": 774000,
+        "source": "https://revenue.delhi.gov.in/sites/default/files/revenue/revised_circle-rate-english0001.pdf"
+      }
+    ],
+    "notes": "Category A.",
+    "lat": 28.5674621,
+    "lng": 77.26913259999999,
+    "geocodedAddress": "New Friends Colony, New Delhi, Delhi, India",
+    "ward": "SARITA VIHAR"
+  },
+  {
+    "state": "Delhi",
+    "city": "New Delhi",
+    "area": "Friends Colony East",
+    "category": "A",
+    "unit": "per_sq_m",
+    "history": [
+      {
+        "year": 2011,
+        "rate": 86000,
+        "source": "https://revenue.delhi.gov.in/sites/default/files/revenue/nf/agvd/circle_rate_notification_4_2_11.pdf"
+      },
+      {
+        "year": 2014,
+        "rate": 774000,
+        "source": "https://revenue.delhi.gov.in/sites/default/files/revenue/revised_circle-rate-english0001.pdf"
+      }
+    ],
+    "notes": "Category A.",
+    "lat": 28.5668488,
+    "lng": 77.26638799999999,
+    "geocodedAddress": "Friends Colony East, New Friends Colony, New Delhi, Delhi, India",
+    "ward": null
+  },
+  {
+    "state": "Delhi",
+    "city": "New Delhi",
+    "area": "Friends Colony West",
+    "category": "A",
+    "unit": "per_sq_m",
+    "history": [
+      {
+        "year": 2011,
+        "rate": 86000,
+        "source": "https://revenue.delhi.gov.in/sites/default/files/revenue/nf/agvd/circle_rate_notification_4_2_11.pdf"
+      },
+      {
+        "year": 2014,
+        "rate": 774000,
+        "source": "https://revenue.delhi.gov.in/sites/default/files/revenue/revised_circle-rate-english0001.pdf"
+      }
+    ],
+    "notes": "Category A.",
+    "lat": 28.5638946,
+    "lng": 77.26305719999999,
+    "geocodedAddress": "Friends Colony West, New Delhi, Delhi, India",
+    "ward": null
+  },
+  {
+    "state": "Delhi",
+    "city": "New Delhi",
+    "area": "Maharani Bagh",
+    "category": "A",
+    "unit": "per_sq_m",
+    "history": [
+      {
+        "year": 2011,
+        "rate": 86000,
+        "source": "https://revenue.delhi.gov.in/sites/default/files/revenue/nf/agvd/circle_rate_notification_4_2_11.pdf"
+      },
+      {
+        "year": 2014,
+        "rate": 774000,
+        "source": "https://revenue.delhi.gov.in/sites/default/files/revenue/revised_circle-rate-english0001.pdf"
+      }
+    ],
+    "notes": "Category A.",
+    "lat": 28.5714978,
+    "lng": 77.2640259,
+    "geocodedAddress": "Maharani Bagh, New Friends Colony, New Delhi, Delhi, India",
+    "ward": null
+  },
+  {
+    "state": "Delhi",
+    "city": "New Delhi",
+    "area": "Panchshila Park",
+    "category": "A",
+    "unit": "per_sq_m",
+    "history": [
+      {
+        "year": 2011,
+        "rate": 86000,
+        "source": "https://revenue.delhi.gov.in/sites/default/files/revenue/nf/agvd/circle_rate_notification_4_2_11.pdf"
+      },
+      {
+        "year": 2014,
+        "rate": 774000,
+        "source": "https://revenue.delhi.gov.in/sites/default/files/revenue/revised_circle-rate-english0001.pdf"
+      }
+    ],
+    "notes": "Category A.",
+    "lat": 28.539375,
+    "lng": 77.21347999999999,
+    "geocodedAddress": "Panchshila Park, New Delhi, Delhi 110017, India",
+    "ward": null
+  },
+  {
+    "state": "Delhi",
+    "city": "New Delhi",
+    "area": "Rajendra Place",
+    "category": "A",
+    "unit": "per_sq_m",
+    "history": [
+      {
+        "year": 2011,
+        "rate": 86000,
+        "source": "https://revenue.delhi.gov.in/sites/default/files/revenue/nf/agvd/circle_rate_notification_4_2_11.pdf"
+      },
+      {
+        "year": 2014,
+        "rate": 774000,
+        "source": "https://revenue.delhi.gov.in/sites/default/files/revenue/revised_circle-rate-english0001.pdf"
+      }
+    ],
+    "notes": "Category A.",
+    "lat": 28.6432533,
+    "lng": 77.17799250000002,
+    "geocodedAddress": "Rajendra Place, New Delhi, Delhi, India",
+    "ward": "EAST PATEL NAGAR"
+  },
+  {
+    "state": "Delhi",
+    "city": "New Delhi",
+    "area": "Shanti Niketan",
+    "category": "A",
+    "unit": "per_sq_m",
+    "history": [
+      {
+        "year": 2011,
+        "rate": 86000,
+        "source": "https://revenue.delhi.gov.in/sites/default/files/revenue/nf/agvd/circle_rate_notification_4_2_11.pdf"
+      },
+      {
+        "year": 2014,
+        "rate": 774000,
+        "source": "https://revenue.delhi.gov.in/sites/default/files/revenue/revised_circle-rate-english0001.pdf"
+      }
+    ],
+    "notes": "Category A.",
+    "lat": 28.5779173,
+    "lng": 77.16936609999999,
+    "geocodedAddress": "Shanti Niketan, New Delhi, Delhi 110021, India",
+    "ward": "VASANT VIHAR"
+  },
+  {
+    "state": "Delhi",
+    "city": "New Delhi",
+    "area": "Sunder Nagar",
+    "category": "A",
+    "unit": "per_sq_m",
+    "history": [
+      {
+        "year": 2011,
+        "rate": 86000,
+        "source": "https://revenue.delhi.gov.in/sites/default/files/revenue/nf/agvd/circle_rate_notification_4_2_11.pdf"
+      },
+      {
+        "year": 2014,
+        "rate": 774000,
+        "source": "https://revenue.delhi.gov.in/sites/default/files/revenue/revised_circle-rate-english0001.pdf"
+      }
+    ],
+    "notes": "Category A.",
+    "lat": 28.6016775,
+    "lng": 77.2433795,
+    "geocodedAddress": "Sundar Nagar, New Delhi, Delhi, India",
+    "ward": "DARYAGANJ"
+  },
+  {
+    "state": "Delhi",
+    "city": "New Delhi",
+    "area": "Anand Niketan",
+    "category": "A",
+    "unit": "per_sq_m",
+    "history": [
+      {
+        "year": 2011,
+        "rate": 86000,
+        "source": "https://revenue.delhi.gov.in/sites/default/files/revenue/nf/agvd/circle_rate_notification_4_2_11.pdf"
+      },
+      {
+        "year": 2014,
+        "rate": 774000,
+        "source": "https://revenue.delhi.gov.in/sites/default/files/revenue/revised_circle-rate-english0001.pdf"
+      }
+    ],
+    "notes": "Category A.",
+    "lat": 28.5789383,
+    "lng": 77.16505269999999,
+    "geocodedAddress": "Anand Niketan, New Delhi, Delhi 110021, India",
+    "ward": "VASANT VIHAR"
+  },
+  {
+    "state": "Delhi",
+    "city": "New Delhi",
+    "area": "Bhikaji Cama Place",
+    "category": "A",
+    "unit": "per_sq_m",
+    "history": [
+      {
+        "year": 2011,
+        "rate": 86000,
+        "source": "https://revenue.delhi.gov.in/sites/default/files/revenue/nf/agvd/circle_rate_notification_4_2_11.pdf"
+      },
+      {
+        "year": 2014,
+        "rate": 774000,
+        "source": "https://revenue.delhi.gov.in/sites/default/files/revenue/revised_circle-rate-english0001.pdf"
+      }
+    ],
+    "notes": "Category A.",
+    "lat": 28.567924,
+    "lng": 77.1880786,
+    "geocodedAddress": "Bhikaji Cama Place, Rama Krishna Puram, New Delhi, Delhi 110066, India",
+    "ward": "MUNIRKA"
+  },
+  {
+    "state": "Delhi",
+    "city": "New Delhi",
+    "area": "Kalindi Colony",
+    "category": "A",
+    "unit": "per_sq_m",
+    "history": [
+      {
+        "year": 2011,
+        "rate": 86000,
+        "source": "https://revenue.delhi.gov.in/sites/default/files/revenue/nf/agvd/circle_rate_notification_4_2_11.pdf"
+      },
+      {
+        "year": 2014,
+        "rate": 774000,
+        "source": "https://revenue.delhi.gov.in/sites/default/files/revenue/revised_circle-rate-english0001.pdf"
+      }
+    ],
+    "notes": "Category A.",
+    "lat": 28.5757582,
+    "lng": 77.2670954,
+    "geocodedAddress": "Kalindi Colony, New Friends Colony, New Delhi, Delhi 110065, India",
+    "ward": "SARITA VIHAR"
+  },
+  {
+    "state": "Delhi",
+    "city": "New Delhi",
+    "area": "Defence Colony",
+    "category": "B",
+    "unit": "per_sq_m",
+    "history": [
+      {
+        "year": 2011,
+        "rate": 68200,
+        "source": "https://revenue.delhi.gov.in/sites/default/files/revenue/nf/agvd/circle_rate_notification_4_2_11.pdf"
+      },
+      {
+        "year": 2014,
+        "rate": 245520,
+        "source": "https://revenue.delhi.gov.in/sites/default/files/revenue/revised_circle-rate-english0001.pdf"
+      }
+    ],
+    "notes": "Category B.",
+    "lat": 28.5740467,
+    "lng": 77.2308826,
+    "geocodedAddress": "Defence Colony, New Delhi, Delhi, India",
+    "ward": null
+  },
+  {
+    "state": "Delhi",
+    "city": "New Delhi",
+    "area": "Greater Kailash I",
+    "category": "B",
+    "unit": "per_sq_m",
+    "history": [
+      {
+        "year": 2011,
+        "rate": 68200,
+        "source": "https://revenue.delhi.gov.in/sites/default/files/revenue/nf/agvd/circle_rate_notification_4_2_11.pdf"
+      },
+      {
+        "year": 2014,
+        "rate": 245520,
+        "source": "https://revenue.delhi.gov.in/sites/default/files/revenue/revised_circle-rate-english0001.pdf"
+      }
+    ],
+    "notes": "Category B.",
+    "lat": 28.5555328,
+    "lng": 77.233732,
+    "geocodedAddress": "Greater Kailash I, New Delhi, Delhi, India",
+    "ward": null
+  },
+  {
+    "state": "Delhi",
+    "city": "New Delhi",
+    "area": "Greater Kailash II",
+    "category": "B",
+    "unit": "per_sq_m",
+    "history": [
+      {
+        "year": 2011,
+        "rate": 68200,
+        "source": "https://revenue.delhi.gov.in/sites/default/files/revenue/nf/agvd/circle_rate_notification_4_2_11.pdf"
+      },
+      {
+        "year": 2014,
+        "rate": 245520,
+        "source": "https://revenue.delhi.gov.in/sites/default/files/revenue/revised_circle-rate-english0001.pdf"
+      }
+    ],
+    "notes": "Category B.",
+    "lat": 28.53536,
+    "lng": 77.2419522,
+    "geocodedAddress": "Greater Kailash II, Greater Kailash, New Delhi, Delhi, India",
+    "ward": null
+  },
+  {
+    "state": "Delhi",
+    "city": "New Delhi",
+    "area": "Green Park",
+    "category": "B",
+    "unit": "per_sq_m",
+    "history": [
+      {
+        "year": 2011,
+        "rate": 68200,
+        "source": "https://revenue.delhi.gov.in/sites/default/files/revenue/nf/agvd/circle_rate_notification_4_2_11.pdf"
+      },
+      {
+        "year": 2014,
+        "rate": 245520,
+        "source": "https://revenue.delhi.gov.in/sites/default/files/revenue/revised_circle-rate-english0001.pdf"
+      }
+    ],
+    "notes": "Category B.",
+    "lat": 28.5584489,
+    "lng": 77.2029376,
+    "geocodedAddress": "Green Park, New Delhi, Delhi 110016, India",
+    "ward": "GREEN PARK"
+  },
+  {
+    "state": "Delhi",
+    "city": "New Delhi",
+    "area": "Hauz Khas",
+    "category": "B",
+    "unit": "per_sq_m",
+    "history": [
+      {
+        "year": 2011,
+        "rate": 68200,
+        "source": "https://revenue.delhi.gov.in/sites/default/files/revenue/nf/agvd/circle_rate_notification_4_2_11.pdf"
+      },
+      {
+        "year": 2014,
+        "rate": 245520,
+        "source": "https://revenue.delhi.gov.in/sites/default/files/revenue/revised_circle-rate-english0001.pdf"
+      }
+    ],
+    "notes": "Category B.",
+    "lat": 28.5478897,
+    "lng": 77.2031247,
+    "geocodedAddress": "Hauz Khas, New Delhi, Delhi 110016, India",
+    "ward": null
+  },
+  {
+    "state": "Delhi",
+    "city": "New Delhi",
+    "area": "Gulmohar Park",
+    "category": "B",
+    "unit": "per_sq_m",
+    "history": [
+      {
+        "year": 2011,
+        "rate": 68200,
+        "source": "https://revenue.delhi.gov.in/sites/default/files/revenue/nf/agvd/circle_rate_notification_4_2_11.pdf"
+      },
+      {
+        "year": 2014,
+        "rate": 245520,
+        "source": "https://revenue.delhi.gov.in/sites/default/files/revenue/revised_circle-rate-english0001.pdf"
+      }
+    ],
+    "notes": "Category B.",
+    "lat": 28.5572098,
+    "lng": 77.2127891,
+    "geocodedAddress": "Gulmohar Park, New Delhi, Delhi 110049, India",
+    "ward": null
+  },
+  {
+    "state": "Delhi",
+    "city": "New Delhi",
+    "area": "Anand Lok",
+    "category": "B",
+    "unit": "per_sq_m",
+    "history": [
+      {
+        "year": 2011,
+        "rate": 68200,
+        "source": "https://revenue.delhi.gov.in/sites/default/files/revenue/nf/agvd/circle_rate_notification_4_2_11.pdf"
+      },
+      {
+        "year": 2014,
+        "rate": 245520,
+        "source": "https://revenue.delhi.gov.in/sites/default/files/revenue/revised_circle-rate-english0001.pdf"
+      }
+    ],
+    "notes": "Category B.",
+    "lat": 28.557232,
+    "lng": 77.2193187,
+    "geocodedAddress": "Anand Lok, Sadiq Nagar, New Delhi, Delhi 110049, India",
+    "ward": null
+  },
+  {
+    "state": "Delhi",
+    "city": "New Delhi",
+    "area": "Sarvapriya Vihar",
+    "category": "B",
+    "unit": "per_sq_m",
+    "history": [
+      {
+        "year": 2011,
+        "rate": 68200,
+        "source": "https://revenue.delhi.gov.in/sites/default/files/revenue/nf/agvd/circle_rate_notification_4_2_11.pdf"
+      },
+      {
+        "year": 2014,
+        "rate": 245520,
+        "source": "https://revenue.delhi.gov.in/sites/default/files/revenue/revised_circle-rate-english0001.pdf"
+      }
+    ],
+    "notes": "Category B.",
+    "lat": 28.542767,
+    "lng": 77.20674269999999,
+    "geocodedAddress": "Sarvapriya Vihar, New Delhi, Delhi, India",
+    "ward": null
+  },
+  {
+    "state": "Delhi",
+    "city": "New Delhi",
+    "area": "Neeti Bagh",
+    "category": "B",
+    "unit": "per_sq_m",
+    "history": [
+      {
+        "year": 2011,
+        "rate": 68200,
+        "source": "https://revenue.delhi.gov.in/sites/default/files/revenue/nf/agvd/circle_rate_notification_4_2_11.pdf"
+      },
+      {
+        "year": 2014,
+        "rate": 245520,
+        "source": "https://revenue.delhi.gov.in/sites/default/files/revenue/revised_circle-rate-english0001.pdf"
+      }
+    ],
+    "notes": "Category B.",
+    "lat": 28.5595022,
+    "lng": 77.21680359999999,
+    "geocodedAddress": "Neeti Bagh, New Delhi, Delhi 110049, India",
+    "ward": null
+  },
+  {
+    "state": "Delhi",
+    "city": "New Delhi",
+    "area": "Panchsheel Park",
+    "category": "B",
+    "unit": "per_sq_m",
+    "history": [
+      {
+        "year": 2011,
+        "rate": 68200,
+        "source": "https://revenue.delhi.gov.in/sites/default/files/revenue/nf/agvd/circle_rate_notification_4_2_11.pdf"
+      },
+      {
+        "year": 2014,
+        "rate": 245520,
+        "source": "https://revenue.delhi.gov.in/sites/default/files/revenue/revised_circle-rate-english0001.pdf"
+      }
+    ],
+    "notes": "Category B.",
+    "lat": 28.5415056,
+    "lng": 77.21608499999999,
+    "geocodedAddress": "Panchsheel Park, New Delhi, Delhi 110017, India",
+    "ward": null
+  },
+  {
+    "state": "Delhi",
+    "city": "New Delhi",
+    "area": "Safdarjung Enclave",
+    "category": "B",
+    "unit": "per_sq_m",
+    "history": [
+      {
+        "year": 2011,
+        "rate": 68200,
+        "source": "https://revenue.delhi.gov.in/sites/default/files/revenue/nf/agvd/circle_rate_notification_4_2_11.pdf"
+      },
+      {
+        "year": 2014,
+        "rate": 245520,
+        "source": "https://revenue.delhi.gov.in/sites/default/files/revenue/revised_circle-rate-english0001.pdf"
+      }
+    ],
+    "notes": "Category B.",
+    "lat": 28.564726,
+    "lng": 77.1949164,
+    "geocodedAddress": "Safdarjung Enclave, New Delhi, Delhi 110029, India",
+    "ward": "GREEN PARK"
+  },
+  {
+    "state": "Delhi",
+    "city": "New Delhi",
+    "area": "Nizamuddin East",
+    "category": "B",
+    "unit": "per_sq_m",
+    "history": [
+      {
+        "year": 2011,
+        "rate": 68200,
+        "source": "https://revenue.delhi.gov.in/sites/default/files/revenue/nf/agvd/circle_rate_notification_4_2_11.pdf"
+      },
+      {
+        "year": 2014,
+        "rate": 245520,
+        "source": "https://revenue.delhi.gov.in/sites/default/files/revenue/revised_circle-rate-english0001.pdf"
+      }
+    ],
+    "notes": "Category B.",
+    "lat": 28.5902107,
+    "lng": 77.24993669999999,
+    "geocodedAddress": "Nizamuddin East, New Delhi, Delhi 110013, India",
+    "ward": "DARYAGANJ"
+  },
+  {
+    "state": "Delhi",
+    "city": "New Delhi",
+    "area": "Civil Lines",
+    "category": "C",
+    "unit": "per_sq_m",
+    "history": [
+      {
+        "year": 2011,
+        "rate": 54600,
+        "source": "https://revenue.delhi.gov.in/sites/default/files/revenue/nf/agvd/circle_rate_notification_4_2_11.pdf"
+      },
+      {
+        "year": 2014,
+        "rate": 159840,
+        "source": "https://revenue.delhi.gov.in/sites/default/files/revenue/revised_circle-rate-english0001.pdf"
+      }
+    ],
+    "notes": "Category C.",
+    "lat": 28.6764269,
+    "lng": 77.2025851,
+    "geocodedAddress": "Civil Lines, Delhi, India",
+    "ward": "KAMLA NAGAR"
+  },
+  {
+    "state": "Delhi",
+    "city": "New Delhi",
+    "area": "Alaknanda",
+    "category": "C",
+    "unit": "per_sq_m",
+    "history": [
+      {
+        "year": 2011,
+        "rate": 54600,
+        "source": "https://revenue.delhi.gov.in/sites/default/files/revenue/nf/agvd/circle_rate_notification_4_2_11.pdf"
+      },
+      {
+        "year": 2014,
+        "rate": 159840,
+        "source": "https://revenue.delhi.gov.in/sites/default/files/revenue/revised_circle-rate-english0001.pdf"
+      }
+    ],
+    "notes": "Category C.",
+    "lat": 28.5304408,
+    "lng": 77.2505733,
+    "geocodedAddress": "Alaknanda, New Delhi, Delhi, India",
+    "ward": null
+  },
+  {
+    "state": "Delhi",
+    "city": "New Delhi",
+    "area": "Chittaranjan Park",
+    "category": "C",
+    "unit": "per_sq_m",
+    "history": [
+      {
+        "year": 2011,
+        "rate": 54600,
+        "source": "https://revenue.delhi.gov.in/sites/default/files/revenue/nf/agvd/circle_rate_notification_4_2_11.pdf"
+      },
+      {
+        "year": 2014,
+        "rate": 159840,
+        "source": "https://revenue.delhi.gov.in/sites/default/files/revenue/revised_circle-rate-english0001.pdf"
+      }
+    ],
+    "notes": "Category C.",
+    "lat": 28.5397842,
+    "lng": 77.2489726,
+    "geocodedAddress": "Chittaranjan Park, New Delhi, Delhi, India",
+    "ward": null
+  },
+  {
+    "state": "Delhi",
+    "city": "New Delhi",
+    "area": "East of Kailash",
+    "category": "C",
+    "unit": "per_sq_m",
+    "history": [
+      {
+        "year": 2011,
+        "rate": 54600,
+        "source": "https://revenue.delhi.gov.in/sites/default/files/revenue/nf/agvd/circle_rate_notification_4_2_11.pdf"
+      },
+      {
+        "year": 2014,
+        "rate": 159840,
+        "source": "https://revenue.delhi.gov.in/sites/default/files/revenue/revised_circle-rate-english0001.pdf"
+      }
+    ],
+    "notes": "Category C.",
+    "lat": 28.5605666,
+    "lng": 77.2505932,
+    "geocodedAddress": "East of Kailash, New Delhi, Delhi, India",
+    "ward": null
+  },
+  {
+    "state": "Delhi",
+    "city": "New Delhi",
+    "area": "Lajpat Nagar I",
+    "category": "C",
+    "unit": "per_sq_m",
+    "history": [
+      {
+        "year": 2011,
+        "rate": 54600,
+        "source": "https://revenue.delhi.gov.in/sites/default/files/revenue/nf/agvd/circle_rate_notification_4_2_11.pdf"
+      },
+      {
+        "year": 2014,
+        "rate": 159840,
+        "source": "https://revenue.delhi.gov.in/sites/default/files/revenue/revised_circle-rate-english0001.pdf"
+      }
+    ],
+    "notes": "Category C.",
+    "lat": 28.5649034,
+    "lng": 77.2403317,
+    "geocodedAddress": "Lajpat Nagar, New Delhi, Delhi, India",
+    "ward": null
+  },
+  {
+    "state": "Delhi",
+    "city": "New Delhi",
+    "area": "Lajpat Nagar II",
+    "category": "C",
+    "unit": "per_sq_m",
+    "history": [
+      {
+        "year": 2011,
+        "rate": 54600,
+        "source": "https://revenue.delhi.gov.in/sites/default/files/revenue/nf/agvd/circle_rate_notification_4_2_11.pdf"
+      },
+      {
+        "year": 2014,
+        "rate": 159840,
+        "source": "https://revenue.delhi.gov.in/sites/default/files/revenue/revised_circle-rate-english0001.pdf"
+      }
+    ],
+    "notes": "Category C.",
+    "lat": 28.5697967,
+    "lng": 77.2420937,
+    "geocodedAddress": "Lajpat Nagar II, Lajpat Nagar, New Delhi, Delhi 110024, India",
+    "ward": "LAJPAT NAGAR"
+  },
+  {
+    "state": "Delhi",
+    "city": "New Delhi",
+    "area": "Malviya Nagar",
+    "category": "C",
+    "unit": "per_sq_m",
+    "history": [
+      {
+        "year": 2011,
+        "rate": 54600,
+        "source": "https://revenue.delhi.gov.in/sites/default/files/revenue/nf/agvd/circle_rate_notification_4_2_11.pdf"
+      },
+      {
+        "year": 2014,
+        "rate": 159840,
+        "source": "https://revenue.delhi.gov.in/sites/default/files/revenue/revised_circle-rate-english0001.pdf"
+      }
+    ],
+    "notes": "Category C.",
+    "lat": 28.5342332,
+    "lng": 77.2094473,
+    "geocodedAddress": "Malviya Nagar, New Delhi, Delhi 110017, India",
+    "ward": null
+  },
+  {
+    "state": "Delhi",
+    "city": "New Delhi",
+    "area": "Kalkaji",
+    "category": "C",
+    "unit": "per_sq_m",
+    "history": [
+      {
+        "year": 2011,
+        "rate": 54600,
+        "source": "https://revenue.delhi.gov.in/sites/default/files/revenue/nf/agvd/circle_rate_notification_4_2_11.pdf"
+      },
+      {
+        "year": 2014,
+        "rate": 159840,
+        "source": "https://revenue.delhi.gov.in/sites/default/files/revenue/revised_circle-rate-english0001.pdf"
+      }
+    ],
+    "notes": "Category C.",
+    "lat": 28.5399515,
+    "lng": 77.25915789999999,
+    "geocodedAddress": "Kalkaji, New Delhi, Delhi, India",
+    "ward": null
+  },
+  {
+    "state": "Delhi",
+    "city": "New Delhi",
+    "area": "Punjabi Bagh",
+    "category": "C",
+    "unit": "per_sq_m",
+    "history": [
+      {
+        "year": 2011,
+        "rate": 54600,
+        "source": "https://revenue.delhi.gov.in/sites/default/files/revenue/nf/agvd/circle_rate_notification_4_2_11.pdf"
+      },
+      {
+        "year": 2014,
+        "rate": 159840,
+        "source": "https://revenue.delhi.gov.in/sites/default/files/revenue/revised_circle-rate-english0001.pdf"
+      }
+    ],
+    "notes": "Category C.",
+    "lat": 28.6706933,
+    "lng": 77.12847649999999,
+    "geocodedAddress": "Punjabi Bagh, Delhi, India",
+    "ward": "MADIPUR"
+  },
+  {
+    "state": "Delhi",
+    "city": "New Delhi",
+    "area": "Vasant Kunj",
+    "category": "C",
+    "unit": "per_sq_m",
+    "history": [
+      {
+        "year": 2011,
+        "rate": 54600,
+        "source": "https://revenue.delhi.gov.in/sites/default/files/revenue/nf/agvd/circle_rate_notification_4_2_11.pdf"
+      },
+      {
+        "year": 2014,
+        "rate": 159840,
+        "source": "https://revenue.delhi.gov.in/sites/default/files/revenue/revised_circle-rate-english0001.pdf"
+      }
+    ],
+    "notes": "Category C.",
+    "lat": 28.5247418,
+    "lng": 77.1554539,
+    "geocodedAddress": "Vasant Kunj, New Delhi, Delhi, India",
+    "ward": "VASANT KUNJ"
+  },
+  {
+    "state": "Delhi",
+    "city": "New Delhi",
+    "area": "Munirka",
+    "category": "C",
+    "unit": "per_sq_m",
+    "history": [
+      {
+        "year": 2011,
+        "rate": 54600,
+        "source": "https://revenue.delhi.gov.in/sites/default/files/revenue/nf/agvd/circle_rate_notification_4_2_11.pdf"
+      },
+      {
+        "year": 2014,
+        "rate": 159840,
+        "source": "https://revenue.delhi.gov.in/sites/default/files/revenue/revised_circle-rate-english0001.pdf"
+      }
+    ],
+    "notes": "Category C.",
+    "lat": 28.5532203,
+    "lng": 77.1745067,
+    "geocodedAddress": "Munirka, New Delhi, Delhi 110067, India",
+    "ward": "MUNIRKA"
+  },
+  {
+    "state": "Delhi",
+    "city": "New Delhi",
+    "area": "Nizamuddin West",
+    "category": "C",
+    "unit": "per_sq_m",
+    "history": [
+      {
+        "year": 2011,
+        "rate": 54600,
+        "source": "https://revenue.delhi.gov.in/sites/default/files/revenue/nf/agvd/circle_rate_notification_4_2_11.pdf"
+      },
+      {
+        "year": 2014,
+        "rate": 159840,
+        "source": "https://revenue.delhi.gov.in/sites/default/files/revenue/revised_circle-rate-english0001.pdf"
+      }
+    ],
+    "notes": "Category C.",
+    "lat": 28.5892126,
+    "lng": 77.24267069999999,
+    "geocodedAddress": "Nizamuddin West, New Delhi, Delhi, India",
+    "ward": "DARYAGANJ"
+  },
+  {
+    "state": "Delhi",
+    "city": "New Delhi",
+    "area": "Karol Bagh",
+    "category": "D",
+    "unit": "per_sq_m",
+    "history": [
+      {
+        "year": 2011,
+        "rate": 43600,
+        "source": "https://revenue.delhi.gov.in/sites/default/files/revenue/nf/agvd/circle_rate_notification_4_2_11.pdf"
+      },
+      {
+        "year": 2014,
+        "rate": 127680,
+        "source": "https://revenue.delhi.gov.in/sites/default/files/revenue/revised_circle-rate-english0001.pdf"
+      }
+    ],
+    "notes": "Category D.",
+    "lat": 28.6550458,
+    "lng": 77.1888201,
+    "geocodedAddress": "Karol Bagh, New Delhi, Delhi, India",
+    "ward": "KAROL BAGH"
+  },
+  {
+    "state": "Delhi",
+    "city": "New Delhi",
+    "area": "Rajouri Garden",
+    "category": "D",
+    "unit": "per_sq_m",
+    "history": [
+      {
+        "year": 2011,
+        "rate": 43600,
+        "source": "https://revenue.delhi.gov.in/sites/default/files/revenue/nf/agvd/circle_rate_notification_4_2_11.pdf"
+      },
+      {
+        "year": 2014,
+        "rate": 127680,
+        "source": "https://revenue.delhi.gov.in/sites/default/files/revenue/revised_circle-rate-english0001.pdf"
+      }
+    ],
+    "notes": "Category D.",
+    "lat": 28.649019,
+    "lng": 77.122705,
+    "geocodedAddress": "Rajouri Garden, Najafgarh Rd, Shivaji Place, Vishal Enclave, Tagore Garden Extension, New Delhi, Delhi, 110027, India",
+    "ward": null
+  },
+  {
+    "state": "Delhi",
+    "city": "New Delhi",
+    "area": "Dwarka",
+    "category": "D",
+    "unit": "per_sq_m",
+    "history": [
+      {
+        "year": 2011,
+        "rate": 43600,
+        "source": "https://revenue.delhi.gov.in/sites/default/files/revenue/nf/agvd/circle_rate_notification_4_2_11.pdf"
+      },
+      {
+        "year": 2014,
+        "rate": 127680,
+        "source": "https://revenue.delhi.gov.in/sites/default/files/revenue/revised_circle-rate-english0001.pdf"
+      }
+    ],
+    "notes": "Category D.",
+    "lat": 28.5822999,
+    "lng": 77.0499762,
+    "geocodedAddress": "Dwarka, Delhi, India",
+    "ward": "DWARKA-B"
+  },
+  {
+    "state": "Delhi",
+    "city": "New Delhi",
+    "area": "Daryaganj",
+    "category": "D",
+    "unit": "per_sq_m",
+    "history": [
+      {
+        "year": 2011,
+        "rate": 43600,
+        "source": "https://revenue.delhi.gov.in/sites/default/files/revenue/nf/agvd/circle_rate_notification_4_2_11.pdf"
+      },
+      {
+        "year": 2014,
+        "rate": 127680,
+        "source": "https://revenue.delhi.gov.in/sites/default/files/revenue/revised_circle-rate-english0001.pdf"
+      }
+    ],
+    "notes": "Category D.",
+    "lat": 28.6448474,
+    "lng": 77.24037729999999,
+    "geocodedAddress": "Daryaganj, Delhi, India",
+    "ward": "DARYAGANJ"
+  },
+  {
+    "state": "Delhi",
+    "city": "New Delhi",
+    "area": "Janakpuri",
+    "category": "D",
+    "unit": "per_sq_m",
+    "history": [
+      {
+        "year": 2011,
+        "rate": 43600,
+        "source": "https://revenue.delhi.gov.in/sites/default/files/revenue/nf/agvd/circle_rate_notification_4_2_11.pdf"
+      },
+      {
+        "year": 2014,
+        "rate": 127680,
+        "source": "https://revenue.delhi.gov.in/sites/default/files/revenue/revised_circle-rate-english0001.pdf"
+      }
+    ],
+    "notes": "Category D.",
+    "lat": 28.621899,
+    "lng": 77.08783849999999,
+    "geocodedAddress": "Janakpuri, New Delhi, Delhi, India",
+    "ward": "FATEH NAGAR"
+  },
+  {
+    "state": "Delhi",
+    "city": "New Delhi",
+    "area": "Mayur Vihar",
+    "category": "D",
+    "unit": "per_sq_m",
+    "history": [
+      {
+        "year": 2011,
+        "rate": 43600,
+        "source": "https://revenue.delhi.gov.in/sites/default/files/revenue/nf/agvd/circle_rate_notification_4_2_11.pdf"
+      },
+      {
+        "year": 2014,
+        "rate": 127680,
+        "source": "https://revenue.delhi.gov.in/sites/default/files/revenue/revised_circle-rate-english0001.pdf"
+      }
+    ],
+    "notes": "Category D.",
+    "lat": 28.6083697,
+    "lng": 77.293112,
+    "geocodedAddress": "Mayur Vihar, Delhi, 110091, India",
+    "ward": "PATPAR GANJ"
+  },
+  {
+    "state": "Delhi",
+    "city": "New Delhi",
+    "area": "Kirti Nagar",
+    "category": "D",
+    "unit": "per_sq_m",
+    "history": [
+      {
+        "year": 2011,
+        "rate": 43600,
+        "source": "https://revenue.delhi.gov.in/sites/default/files/revenue/nf/agvd/circle_rate_notification_4_2_11.pdf"
+      },
+      {
+        "year": 2014,
+        "rate": 127680,
+        "source": "https://revenue.delhi.gov.in/sites/default/files/revenue/revised_circle-rate-english0001.pdf"
+      }
+    ],
+    "notes": "Category D.",
+    "lat": 28.6493776,
+    "lng": 77.1436998,
+    "geocodedAddress": "Kirti Nagar, Delhi, India",
+    "ward": "MOTI NAGAR"
+  },
+  {
+    "state": "Delhi",
+    "city": "New Delhi",
+    "area": "Anand Vihar",
+    "category": "D",
+    "unit": "per_sq_m",
+    "history": [
+      {
+        "year": 2011,
+        "rate": 43600,
+        "source": "https://revenue.delhi.gov.in/sites/default/files/revenue/nf/agvd/circle_rate_notification_4_2_11.pdf"
+      },
+      {
+        "year": 2014,
+        "rate": 127680,
+        "source": "https://revenue.delhi.gov.in/sites/default/files/revenue/revised_circle-rate-english0001.pdf"
+      }
+    ],
+    "notes": "Category D.",
+    "lat": 28.498433,
+    "lng": 77.3295462,
+    "geocodedAddress": "Anand Vihar, Om Nagar, Molar Band, New Delhi, Delhi 110044, India",
+    "ward": "MEETHAPUR"
+  },
+  {
+    "state": "Delhi",
+    "city": "New Delhi",
+    "area": "Jasola Vihar",
+    "category": "D",
+    "unit": "per_sq_m",
+    "history": [
+      {
+        "year": 2011,
+        "rate": 43600,
+        "source": "https://revenue.delhi.gov.in/sites/default/files/revenue/nf/agvd/circle_rate_notification_4_2_11.pdf"
+      },
+      {
+        "year": 2014,
+        "rate": 127680,
+        "source": "https://revenue.delhi.gov.in/sites/default/files/revenue/revised_circle-rate-english0001.pdf"
+      }
+    ],
+    "notes": "Category D.",
+    "lat": 28.545246,
+    "lng": 77.2941132,
+    "geocodedAddress": "Jasola Vihar, New Delhi, Delhi, India",
+    "ward": "SARITA VIHAR"
+  },
+  {
+    "state": "Delhi",
+    "city": "New Delhi",
+    "area": "Jangpura A",
+    "category": "D",
+    "unit": "per_sq_m",
+    "history": [
+      {
+        "year": 2011,
+        "rate": 43600,
+        "source": "https://revenue.delhi.gov.in/sites/default/files/revenue/nf/agvd/circle_rate_notification_4_2_11.pdf"
+      },
+      {
+        "year": 2014,
+        "rate": 127680,
+        "source": "https://revenue.delhi.gov.in/sites/default/files/revenue/revised_circle-rate-english0001.pdf"
+      }
+    ],
+    "notes": "Category D.",
+    "lat": 28.5785597,
+    "lng": 77.2512917,
+    "geocodedAddress": "HPL Staff Colony, Jangpura A, Jangpura, New Delhi, Delhi, India",
+    "ward": "LAJPAT NAGAR"
+  },
+  {
+    "state": "Delhi",
+    "city": "New Delhi",
+    "area": "Chandni Chowk",
+    "category": "E",
+    "unit": "per_sq_m",
+    "history": [
+      {
+        "year": 2011,
+        "rate": 36800,
+        "source": "https://revenue.delhi.gov.in/sites/default/files/revenue/nf/agvd/circle_rate_notification_4_2_11.pdf"
+      },
+      {
+        "year": 2014,
+        "rate": 70080,
+        "source": "https://revenue.delhi.gov.in/sites/default/files/revenue/revised_circle-rate-english0001.pdf"
+      }
+    ],
+    "notes": "Category E.",
+    "lat": 28.6505331,
+    "lng": 77.23033699999999,
+    "geocodedAddress": "Chandni Chowk, Delhi, India",
+    "ward": "BALLIMARAN"
+  },
+  {
+    "state": "Delhi",
+    "city": "New Delhi",
+    "area": "Kashmere Gate",
+    "category": "E",
+    "unit": "per_sq_m",
+    "history": [
+      {
+        "year": 2011,
+        "rate": 36800,
+        "source": "https://revenue.delhi.gov.in/sites/default/files/revenue/nf/agvd/circle_rate_notification_4_2_11.pdf"
+      },
+      {
+        "year": 2014,
+        "rate": 70080,
+        "source": "https://revenue.delhi.gov.in/sites/default/files/revenue/revised_circle-rate-english0001.pdf"
+      }
+    ],
+    "notes": "Category E.",
+    "lat": 28.66747,
+    "lng": 77.22824,
+    "geocodedAddress": "Kashmere Gate, Lothiyan Marg, Inter State Bus Terminal, Kashmere Gate, New Delhi, Delhi, 110006, India",
+    "ward": null
+  },
+  {
+    "state": "Delhi",
+    "city": "New Delhi",
+    "area": "Pahar Ganj",
+    "category": "E",
+    "unit": "per_sq_m",
+    "history": [
+      {
+        "year": 2011,
+        "rate": 36800,
+        "source": "https://revenue.delhi.gov.in/sites/default/files/revenue/nf/agvd/circle_rate_notification_4_2_11.pdf"
+      },
+      {
+        "year": 2014,
+        "rate": 70080,
+        "source": "https://revenue.delhi.gov.in/sites/default/files/revenue/revised_circle-rate-english0001.pdf"
+      }
+    ],
+    "notes": "Category E.",
+    "lat": 28.6458541,
+    "lng": 77.2097221,
+    "geocodedAddress": "Paharganj, New Delhi, Delhi, India",
+    "ward": "PAHAR GANJ"
+  },
+  {
+    "state": "Delhi",
+    "city": "New Delhi",
+    "area": "Rohini",
+    "category": "E",
+    "unit": "per_sq_m",
+    "history": [
+      {
+        "year": 2011,
+        "rate": 36800,
+        "source": "https://revenue.delhi.gov.in/sites/default/files/revenue/nf/agvd/circle_rate_notification_4_2_11.pdf"
+      },
+      {
+        "year": 2014,
+        "rate": 70080,
+        "source": "https://revenue.delhi.gov.in/sites/default/files/revenue/revised_circle-rate-english0001.pdf"
+      }
+    ],
+    "notes": "Category E.",
+    "lat": 28.5593944,
+    "lng": 77.1851358,
+    "geocodedAddress": "Rohini, Sector 2, Rama Krishna Puram, New Delhi, Delhi 110022, India",
+    "ward": "MUNIRKA"
+  },
+  {
+    "state": "Delhi",
+    "city": "New Delhi",
+    "area": "Moti Nagar",
+    "category": "E",
+    "unit": "per_sq_m",
+    "history": [
+      {
+        "year": 2011,
+        "rate": 36800,
+        "source": "https://revenue.delhi.gov.in/sites/default/files/revenue/nf/agvd/circle_rate_notification_4_2_11.pdf"
+      },
+      {
+        "year": 2014,
+        "rate": 70080,
+        "source": "https://revenue.delhi.gov.in/sites/default/files/revenue/revised_circle-rate-english0001.pdf"
+      }
+    ],
+    "notes": "Category E.",
+    "lat": 28.658463,
+    "lng": 77.1438041,
+    "geocodedAddress": "Moti Nagar, DLE Industrial Area, Kirti Nagar, Delhi, 110015, India",
+    "ward": "MOTI NAGAR"
+  },
+  {
+    "state": "Delhi",
+    "city": "New Delhi",
+    "area": "Pandav Nagar",
+    "category": "E",
+    "unit": "per_sq_m",
+    "history": [
+      {
+        "year": 2011,
+        "rate": 36800,
+        "source": "https://revenue.delhi.gov.in/sites/default/files/revenue/nf/agvd/circle_rate_notification_4_2_11.pdf"
+      },
+      {
+        "year": 2014,
+        "rate": 70080,
+        "source": "https://revenue.delhi.gov.in/sites/default/files/revenue/revised_circle-rate-english0001.pdf"
+      }
+    ],
+    "notes": "Category E.",
+    "lat": 28.6172657,
+    "lng": 77.2852317,
+    "geocodedAddress": "Pandav Nagar, New Delhi, Delhi, India",
+    "ward": "PANDAV NAGAR"
+  },
+  {
+    "state": "Delhi",
+    "city": "New Delhi",
+    "area": "Uttam Nagar",
+    "category": "F",
+    "unit": "per_sq_m",
+    "history": [
+      {
+        "year": 2011,
+        "rate": 32200,
+        "source": "https://revenue.delhi.gov.in/sites/default/files/revenue/nf/agvd/circle_rate_notification_4_2_11.pdf"
+      },
+      {
+        "year": 2014,
+        "rate": 56640,
+        "source": "https://revenue.delhi.gov.in/sites/default/files/revenue/revised_circle-rate-english0001.pdf"
+      }
+    ],
+    "notes": "Category F.",
+    "lat": 28.6019146,
+    "lng": 77.1002752,
+    "geocodedAddress": "Uttam Nagar, Delhi, India",
+    "ward": "SAGARPUR"
+  },
+  {
+    "state": "Delhi",
+    "city": "New Delhi",
+    "area": "Dilshad Garden",
+    "category": "F",
+    "unit": "per_sq_m",
+    "history": [
+      {
+        "year": 2011,
+        "rate": 32200,
+        "source": "https://revenue.delhi.gov.in/sites/default/files/revenue/nf/agvd/circle_rate_notification_4_2_11.pdf"
+      },
+      {
+        "year": 2014,
+        "rate": 56640,
+        "source": "https://revenue.delhi.gov.in/sites/default/files/revenue/revised_circle-rate-english0001.pdf"
+      }
+    ],
+    "notes": "Category F.",
+    "lat": 28.6758978,
+    "lng": 77.3215165,
+    "geocodedAddress": "Dilshad Garden, Grand Trunk Rd, Jhilmil Industrial Area, Dilshad Garden, New Delhi, Delhi, 110095, India",
+    "ward": "JHILMIL"
+  },
+  {
+    "state": "Delhi",
+    "city": "New Delhi",
+    "area": "Govindpuri",
+    "category": "F",
+    "unit": "per_sq_m",
+    "history": [
+      {
+        "year": 2011,
+        "rate": 32200,
+        "source": "https://revenue.delhi.gov.in/sites/default/files/revenue/nf/agvd/circle_rate_notification_4_2_11.pdf"
+      },
+      {
+        "year": 2014,
+        "rate": 56640,
+        "source": "https://revenue.delhi.gov.in/sites/default/files/revenue/revised_circle-rate-english0001.pdf"
+      }
+    ],
+    "notes": "Category F.",
+    "lat": 28.5332552,
+    "lng": 77.2640784,
+    "geocodedAddress": "Govindpuri, Kalkaji, New Delhi, Delhi 110019, India",
+    "ward": null
+  },
+  {
+    "state": "Delhi",
+    "city": "New Delhi",
+    "area": "Hari Nagar",
+    "category": "F",
+    "unit": "per_sq_m",
+    "history": [
+      {
+        "year": 2011,
+        "rate": 32200,
+        "source": "https://revenue.delhi.gov.in/sites/default/files/revenue/nf/agvd/circle_rate_notification_4_2_11.pdf"
+      },
+      {
+        "year": 2014,
+        "rate": 56640,
+        "source": "https://revenue.delhi.gov.in/sites/default/files/revenue/revised_circle-rate-english0001.pdf"
+      }
+    ],
+    "notes": "Category F.",
+    "lat": 28.5736253,
+    "lng": 77.2559612,
+    "geocodedAddress": "Hari Nagar Ashram, New Delhi, Delhi, India",
+    "ward": "LAJPAT NAGAR"
+  },
+  {
+    "state": "Delhi",
+    "city": "New Delhi",
+    "area": "Zakir Nagar Okhla",
+    "category": "F",
+    "unit": "per_sq_m",
+    "history": [
+      {
+        "year": 2011,
+        "rate": 32200,
+        "source": "https://revenue.delhi.gov.in/sites/default/files/revenue/nf/agvd/circle_rate_notification_4_2_11.pdf"
+      },
+      {
+        "year": 2014,
+        "rate": 56640,
+        "source": "https://revenue.delhi.gov.in/sites/default/files/revenue/revised_circle-rate-english0001.pdf"
+      }
+    ],
+    "notes": "Category F.",
+    "lat": 28.5682138,
+    "lng": 77.2861119,
+    "geocodedAddress": "Okhla, New Delhi, Delhi, India",
+    "ward": "ZAKIR NAGAR"
+  },
+  {
+    "state": "Delhi",
+    "city": "New Delhi",
+    "area": "Dakshinpuri",
+    "category": "G",
+    "unit": "per_sq_m",
+    "history": [
+      {
+        "year": 2011,
+        "rate": 27400,
+        "source": "https://revenue.delhi.gov.in/sites/default/files/revenue/nf/agvd/circle_rate_notification_4_2_11.pdf"
+      },
+      {
+        "year": 2014,
+        "rate": 46200,
+        "source": "https://revenue.delhi.gov.in/sites/default/files/revenue/revised_circle-rate-english0001.pdf"
+      }
+    ],
+    "notes": "Category G.",
+    "lat": 28.5226518,
+    "lng": 77.23897,
+    "geocodedAddress": "Dakshinpuri, New Delhi, Delhi, India",
+    "ward": null
+  },
+  {
+    "state": "Delhi",
+    "city": "New Delhi",
+    "area": "Tagore Garden",
+    "category": "G",
+    "unit": "per_sq_m",
+    "history": [
+      {
+        "year": 2011,
+        "rate": 27400,
+        "source": "https://revenue.delhi.gov.in/sites/default/files/revenue/nf/agvd/circle_rate_notification_4_2_11.pdf"
+      },
+      {
+        "year": 2014,
+        "rate": 46200,
+        "source": "https://revenue.delhi.gov.in/sites/default/files/revenue/revised_circle-rate-english0001.pdf"
+      }
+    ],
+    "notes": "Category G.",
+    "lat": 28.643754,
+    "lng": 77.1128805,
+    "geocodedAddress": "Tagore Garden, Najafgarh Rd, Block BF, Rajouri Garden Extension, Rajouri Garden, New Delhi, Delhi, 110027, India",
+    "ward": null
+  },
+  {
+    "state": "Delhi",
+    "city": "New Delhi",
+    "area": "Vivek Vihar Phase I",
+    "category": "G",
+    "unit": "per_sq_m",
+    "history": [
+      {
+        "year": 2011,
+        "rate": 27400,
+        "source": "https://revenue.delhi.gov.in/sites/default/files/revenue/nf/agvd/circle_rate_notification_4_2_11.pdf"
+      },
+      {
+        "year": 2014,
+        "rate": 46200,
+        "source": "https://revenue.delhi.gov.in/sites/default/files/revenue/revised_circle-rate-english0001.pdf"
+      }
+    ],
+    "notes": "Category G.",
+    "lat": 28.6689154,
+    "lng": 77.31951959999999,
+    "geocodedAddress": "Vivek Vihar Phase I, Vivek Vihar, Delhi, 110095, India",
+    "ward": "JHILMIL"
+  },
+  {
+    "state": "Delhi",
+    "city": "New Delhi",
+    "area": "Sultanpur Majra",
+    "category": "H",
+    "unit": "per_sq_m",
+    "history": [
+      {
+        "year": 2011,
+        "rate": 13800,
+        "source": "https://revenue.delhi.gov.in/sites/default/files/revenue/nf/agvd/circle_rate_notification_4_2_11.pdf"
+      },
+      {
+        "year": 2014,
+        "rate": 23280,
+        "source": "https://revenue.delhi.gov.in/sites/default/files/revenue/revised_circle-rate-english0001.pdf"
+      }
+    ],
+    "notes": "Category H.",
+    "lat": 28.4967184,
+    "lng": 77.1633995,
+    "geocodedAddress": "Sultanpur, New Delhi, Delhi 110030, India",
+    "ward": "CHHATARPUR"
+  },
+  {
+    "state": "Maharashtra",
+    "city": "Mumbai",
+    "area": "Worli",
+    "category": null,
+    "unit": "per_sq_m",
+    "history": [
+      {
+        "year": 2018,
+        "rate": 400400,
+        "source": "https://www.ghar.tv/readyreckoner/2018/maharashtra/mumbai/worli/"
+      },
+      {
+        "year": 2020,
+        "rate": 413210,
+        "source": "https://www.ghar.tv/readyreckoner/2020/maharashtra/mumbai/worli/"
+      },
+      {
+        "year": 2022,
+        "rate": 410630,
+        "source": "https://www.ghar.tv/readyreckoner/2022/maharashtra/mumbai/worli/"
+      },
+      {
+        "year": 2024,
+        "rate": 410630,
+        "source": "https://www.ghar.tv/readyreckoner/2024/maharashtra/mumbai/worli/"
+      }
+    ],
+    "notes": "Zone 13/95 (Dr. Annie Besant Road), residential building, built-up rate. Secondary-sourced (ghar.tv) but mirrors official e-ASR zone numbering; 2022→2024 unchanged matches the official statewide freeze for those years.",
+    "lat": 18.9986406,
+    "lng": 72.8173599,
+    "geocodedAddress": "Worli, Mumbai, Maharashtra, India"
+  },
+  {
+    "state": "Maharashtra",
+    "city": "Mumbai",
+    "area": "Dadar-Naigaum",
+    "category": null,
+    "unit": "per_sq_m",
+    "history": [
+      {
+        "year": 2018,
+        "rate": 210200,
+        "source": "https://www.ghar.tv/readyreckoner/2018/maharashtra/mumbai/dadar-naigaum/"
+      },
+      {
+        "year": 2024,
+        "rate": 223070,
+        "source": "https://www.ghar.tv/readyreckoner/2024/maharashtra/mumbai/dadar-naigaum/"
+      }
+    ],
+    "notes": "Zone 14, sub-zone 14/102, residential building, built-up rate. Secondary-sourced (ghar.tv).",
+    "lat": 19.0095566,
+    "lng": 72.84530629999999,
+    "geocodedAddress": "w6w306qkll, Bhausaheb Todankar Marg, Police Colony, Babasaheb Ambedkar Nagar, Mumbai, Maharashtra 400014, India"
+  },
+  {
+    "state": "Maharashtra",
+    "city": "Mumbai",
+    "area": "Andheri West",
+    "category": null,
+    "unit": "per_sq_m",
+    "history": [
+      {
+        "year": 2024,
+        "rate": 186645,
+        "source": "https://www.ghar.tv/readyreckoner/2024/maharashtra/mumbai/andheri-west/"
+      }
+    ],
+    "notes": "Zone 39, representative midpoint of the residential range across 12 sub-zones (Rs 1,37,080–2,36,210/sq m) — only 2024 verified; no earlier year located. Secondary-sourced (ghar.tv).",
+    "lat": 19.1364016,
+    "lng": 72.8296252,
+    "geocodedAddress": "Andheri West, Mumbai, Maharashtra, India"
+  },
+  {
+    "state": "Maharashtra",
+    "city": "Pune",
+    "area": "Kothrud",
+    "category": null,
+    "unit": "per_sq_m",
+    "history": [
+      {
+        "year": 2018,
+        "rate": 114570,
+        "source": "https://www.ghar.tv/readyreckoner/2018/maharashtra/pune/haveli/kothrud/"
+      },
+      {
+        "year": 2024,
+        "rate": 125900,
+        "source": "https://www.ghar.tv/readyreckoner/2024/maharashtra/pune/haveli/kothrud/"
+      }
+    ],
+    "notes": "Village 21, sub-zone 21/360 (Karve Road), residential building. Secondary-sourced (ghar.tv).",
+    "lat": 18.5073514,
+    "lng": 73.8076543,
+    "geocodedAddress": "Kothrud, Pune, Maharashtra, India"
+  }
+]

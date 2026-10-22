@@ -11,6 +11,7 @@ const ADMIN_EMAILS = ['kdy20330@gmail.com', 'ykandoi20330@gmail.com'];
 const SITE_LINKS = [
   { href: '/buyer_map', label: 'Buy Land' },
   { href: '/search', label: 'Search Properties' },
+  { href: '/price-trends', label: 'Price Trends' },
   { href: '/post-requirement', label: 'Post a Requirement' },
   { href: '/list_property', label: 'Sell Your Land' },
   { href: '/brokers/register', label: 'Register as a Broker' },
@@ -152,6 +153,7 @@ export default function AuthNavIsland() {
 
             <a className="profile-dropdown-item" href="/dashboard"><Building size={16} /> My Lands</a>
             <a className="profile-dropdown-item" href="/interests"><MapPin size={16} /> My Interests</a>
+            <a className="profile-dropdown-item" href="/price-trends"><MapPin size={16} /> Price Trends</a>
             <a className="profile-dropdown-item" href="/broker-dashboard"><User size={16} /> Broker Dashboard</a>
             {isAdmin && (
               <a className="profile-dropdown-item" href="/admin" style={{ color: '#e11d48' }}><Shield size={16} /> Admin Panel</a>

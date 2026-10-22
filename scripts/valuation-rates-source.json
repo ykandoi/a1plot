@@ -1,0 +1,285 @@
+{
+  "_comment": "Real, sourced government property valuation rate data. Every 'history' entry must trace to a real source URL — no estimated/interpolated figures. Run scripts/geocode-valuation-rates.js to turn this into src/data/valuationRatesSeed.json with lat/lng filled in.",
+  "areas": [
+    { "state": "Delhi", "city": "New Delhi", "area": "Vasant Vihar", "category": "A", "unit": "per_sq_m", "history": [
+      { "year": 2011, "rate": 86000, "source": "https://revenue.delhi.gov.in/sites/default/files/revenue/nf/agvd/circle_rate_notification_4_2_11.pdf" },
+      { "year": 2014, "rate": 774000, "source": "https://revenue.delhi.gov.in/sites/default/files/revenue/revised_circle-rate-english0001.pdf" }
+    ], "notes": "Category A base land rate; colony assignment secondary-sourced (cross-verified against two independent portals matching the official category rate)." },
+    { "state": "Delhi", "city": "New Delhi", "area": "Golf Links", "category": "A", "unit": "per_sq_m", "history": [
+      { "year": 2011, "rate": 86000, "source": "https://revenue.delhi.gov.in/sites/default/files/revenue/nf/agvd/circle_rate_notification_4_2_11.pdf" },
+      { "year": 2014, "rate": 774000, "source": "https://revenue.delhi.gov.in/sites/default/files/revenue/revised_circle-rate-english0001.pdf" }
+    ], "notes": "Category A." },
+    { "state": "Delhi", "city": "New Delhi", "area": "Nehru Place", "category": "A", "unit": "per_sq_m", "history": [
+      { "year": 2011, "rate": 86000, "source": "https://revenue.delhi.gov.in/sites/default/files/revenue/nf/agvd/circle_rate_notification_4_2_11.pdf" },
+      { "year": 2014, "rate": 774000, "source": "https://revenue.delhi.gov.in/sites/default/files/revenue/revised_circle-rate-english0001.pdf" }
+    ], "notes": "Category A." },
+    { "state": "Delhi", "city": "New Delhi", "area": "New Friends Colony", "category": "A", "unit": "per_sq_m", "history": [
+      { "year": 2011, "rate": 86000, "source": "https://revenue.delhi.gov.in/sites/default/files/revenue/nf/agvd/circle_rate_notification_4_2_11.pdf" },
+      { "year": 2014, "rate": 774000, "source": "https://revenue.delhi.gov.in/sites/default/files/revenue/revised_circle-rate-english0001.pdf" }
+    ], "notes": "Category A." },
+    { "state": "Delhi", "city": "New Delhi", "area": "Friends Colony East", "category": "A", "unit": "per_sq_m", "history": [
+      { "year": 2011, "rate": 86000, "source": "https://revenue.delhi.gov.in/sites/default/files/revenue/nf/agvd/circle_rate_notification_4_2_11.pdf" },
+      { "year": 2014, "rate": 774000, "source": "https://revenue.delhi.gov.in/sites/default/files/revenue/revised_circle-rate-english0001.pdf" }
+    ], "notes": "Category A." },
+    { "state": "Delhi", "city": "New Delhi", "area": "Friends Colony West", "category": "A", "unit": "per_sq_m", "history": [
+      { "year": 2011, "rate": 86000, "source": "https://revenue.delhi.gov.in/sites/default/files/revenue/nf/agvd/circle_rate_notification_4_2_11.pdf" },
+      { "year": 2014, "rate": 774000, "source": "https://revenue.delhi.gov.in/sites/default/files/revenue/revised_circle-rate-english0001.pdf" }
+    ], "notes": "Category A." },
+    { "state": "Delhi", "city": "New Delhi", "area": "Maharani Bagh", "category": "A", "unit": "per_sq_m", "history": [
+      { "year": 2011, "rate": 86000, "source": "https://revenue.delhi.gov.in/sites/default/files/revenue/nf/agvd/circle_rate_notification_4_2_11.pdf" },
+      { "year": 2014, "rate": 774000, "source": "https://revenue.delhi.gov.in/sites/default/files/revenue/revised_circle-rate-english0001.pdf" }
+    ], "notes": "Category A." },
+    { "state": "Delhi", "city": "New Delhi", "area": "Panchshila Park", "category": "A", "unit": "per_sq_m", "history": [
+      { "year": 2011, "rate": 86000, "source": "https://revenue.delhi.gov.in/sites/default/files/revenue/nf/agvd/circle_rate_notification_4_2_11.pdf" },
+      { "year": 2014, "rate": 774000, "source": "https://revenue.delhi.gov.in/sites/default/files/revenue/revised_circle-rate-english0001.pdf" }
+    ], "notes": "Category A." },
+    { "state": "Delhi", "city": "New Delhi", "area": "Rajendra Place", "category": "A", "unit": "per_sq_m", "history": [
+      { "year": 2011, "rate": 86000, "source": "https://revenue.delhi.gov.in/sites/default/files/revenue/nf/agvd/circle_rate_notification_4_2_11.pdf" },
+      { "year": 2014, "rate": 774000, "source": "https://revenue.delhi.gov.in/sites/default/files/revenue/revised_circle-rate-english0001.pdf" }
+    ], "notes": "Category A." },
+    { "state": "Delhi", "city": "New Delhi", "area": "Shanti Niketan", "category": "A", "unit": "per_sq_m", "history": [
+      { "year": 2011, "rate": 86000, "source": "https://revenue.delhi.gov.in/sites/default/files/revenue/nf/agvd/circle_rate_notification_4_2_11.pdf" },
+      { "year": 2014, "rate": 774000, "source": "https://revenue.delhi.gov.in/sites/default/files/revenue/revised_circle-rate-english0001.pdf" }
+    ], "notes": "Category A." },
+    { "state": "Delhi", "city": "New Delhi", "area": "Sunder Nagar", "category": "A", "unit": "per_sq_m", "history": [
+      { "year": 2011, "rate": 86000, "source": "https://revenue.delhi.gov.in/sites/default/files/revenue/nf/agvd/circle_rate_notification_4_2_11.pdf" },
+      { "year": 2014, "rate": 774000, "source": "https://revenue.delhi.gov.in/sites/default/files/revenue/revised_circle-rate-english0001.pdf" }
+    ], "notes": "Category A." },
+    { "state": "Delhi", "city": "New Delhi", "area": "Anand Niketan", "category": "A", "unit": "per_sq_m", "history": [
+      { "year": 2011, "rate": 86000, "source": "https://revenue.delhi.gov.in/sites/default/files/revenue/nf/agvd/circle_rate_notification_4_2_11.pdf" },
+      { "year": 2014, "rate": 774000, "source": "https://revenue.delhi.gov.in/sites/default/files/revenue/revised_circle-rate-english0001.pdf" }
+    ], "notes": "Category A." },
+    { "state": "Delhi", "city": "New Delhi", "area": "Bhikaji Cama Place", "category": "A", "unit": "per_sq_m", "history": [
+      { "year": 2011, "rate": 86000, "source": "https://revenue.delhi.gov.in/sites/default/files/revenue/nf/agvd/circle_rate_notification_4_2_11.pdf" },
+      { "year": 2014, "rate": 774000, "source": "https://revenue.delhi.gov.in/sites/default/files/revenue/revised_circle-rate-english0001.pdf" }
+    ], "notes": "Category A." },
+    { "state": "Delhi", "city": "New Delhi", "area": "Kalindi Colony", "category": "A", "unit": "per_sq_m", "history": [
+      { "year": 2011, "rate": 86000, "source": "https://revenue.delhi.gov.in/sites/default/files/revenue/nf/agvd/circle_rate_notification_4_2_11.pdf" },
+      { "year": 2014, "rate": 774000, "source": "https://revenue.delhi.gov.in/sites/default/files/revenue/revised_circle-rate-english0001.pdf" }
+    ], "notes": "Category A." },
+
+    { "state": "Delhi", "city": "New Delhi", "area": "Defence Colony", "category": "B", "unit": "per_sq_m", "history": [
+      { "year": 2011, "rate": 68200, "source": "https://revenue.delhi.gov.in/sites/default/files/revenue/nf/agvd/circle_rate_notification_4_2_11.pdf" },
+      { "year": 2014, "rate": 245520, "source": "https://revenue.delhi.gov.in/sites/default/files/revenue/revised_circle-rate-english0001.pdf" }
+    ], "notes": "Category B." },
+    { "state": "Delhi", "city": "New Delhi", "area": "Greater Kailash I", "category": "B", "unit": "per_sq_m", "history": [
+      { "year": 2011, "rate": 68200, "source": "https://revenue.delhi.gov.in/sites/default/files/revenue/nf/agvd/circle_rate_notification_4_2_11.pdf" },
+      { "year": 2014, "rate": 245520, "source": "https://revenue.delhi.gov.in/sites/default/files/revenue/revised_circle-rate-english0001.pdf" }
+    ], "notes": "Category B." },
+    { "state": "Delhi", "city": "New Delhi", "area": "Greater Kailash II", "category": "B", "unit": "per_sq_m", "history": [
+      { "year": 2011, "rate": 68200, "source": "https://revenue.delhi.gov.in/sites/default/files/revenue/nf/agvd/circle_rate_notification_4_2_11.pdf" },
+      { "year": 2014, "rate": 245520, "source": "https://revenue.delhi.gov.in/sites/default/files/revenue/revised_circle-rate-english0001.pdf" }
+    ], "notes": "Category B." },
+    { "state": "Delhi", "city": "New Delhi", "area": "Green Park", "category": "B", "unit": "per_sq_m", "history": [
+      { "year": 2011, "rate": 68200, "source": "https://revenue.delhi.gov.in/sites/default/files/revenue/nf/agvd/circle_rate_notification_4_2_11.pdf" },
+      { "year": 2014, "rate": 245520, "source": "https://revenue.delhi.gov.in/sites/default/files/revenue/revised_circle-rate-english0001.pdf" }
+    ], "notes": "Category B." },
+    { "state": "Delhi", "city": "New Delhi", "area": "Hauz Khas", "category": "B", "unit": "per_sq_m", "history": [
+      { "year": 2011, "rate": 68200, "source": "https://revenue.delhi.gov.in/sites/default/files/revenue/nf/agvd/circle_rate_notification_4_2_11.pdf" },
+      { "year": 2014, "rate": 245520, "source": "https://revenue.delhi.gov.in/sites/default/files/revenue/revised_circle-rate-english0001.pdf" }
+    ], "notes": "Category B." },
+    { "state": "Delhi", "city": "New Delhi", "area": "Gulmohar Park", "category": "B", "unit": "per_sq_m", "history": [
+      { "year": 2011, "rate": 68200, "source": "https://revenue.delhi.gov.in/sites/default/files/revenue/nf/agvd/circle_rate_notification_4_2_11.pdf" },
+      { "year": 2014, "rate": 245520, "source": "https://revenue.delhi.gov.in/sites/default/files/revenue/revised_circle-rate-english0001.pdf" }
+    ], "notes": "Category B." },
+    { "state": "Delhi", "city": "New Delhi", "area": "Anand Lok", "category": "B", "unit": "per_sq_m", "history": [
+      { "year": 2011, "rate": 68200, "source": "https://revenue.delhi.gov.in/sites/default/files/revenue/nf/agvd/circle_rate_notification_4_2_11.pdf" },
+      { "year": 2014, "rate": 245520, "source": "https://revenue.delhi.gov.in/sites/default/files/revenue/revised_circle-rate-english0001.pdf" }
+    ], "notes": "Category B." },
+    { "state": "Delhi", "city": "New Delhi", "area": "Sarvapriya Vihar", "category": "B", "unit": "per_sq_m", "history": [
+      { "year": 2011, "rate": 68200, "source": "https://revenue.delhi.gov.in/sites/default/files/revenue/nf/agvd/circle_rate_notification_4_2_11.pdf" },
+      { "year": 2014, "rate": 245520, "source": "https://revenue.delhi.gov.in/sites/default/files/revenue/revised_circle-rate-english0001.pdf" }
+    ], "notes": "Category B." },
+    { "state": "Delhi", "city": "New Delhi", "area": "Neeti Bagh", "category": "B", "unit": "per_sq_m", "history": [
+      { "year": 2011, "rate": 68200, "source": "https://revenue.delhi.gov.in/sites/default/files/revenue/nf/agvd/circle_rate_notification_4_2_11.pdf" },
+      { "year": 2014, "rate": 245520, "source": "https://revenue.delhi.gov.in/sites/default/files/revenue/revised_circle-rate-english0001.pdf" }
+    ], "notes": "Category B." },
+    { "state": "Delhi", "city": "New Delhi", "area": "Panchsheel Park", "category": "B", "unit": "per_sq_m", "history": [
+      { "year": 2011, "rate": 68200, "source": "https://revenue.delhi.gov.in/sites/default/files/revenue/nf/agvd/circle_rate_notification_4_2_11.pdf" },
+      { "year": 2014, "rate": 245520, "source": "https://revenue.delhi.gov.in/sites/default/files/revenue/revised_circle-rate-english0001.pdf" }
+    ], "notes": "Category B." },
+    { "state": "Delhi", "city": "New Delhi", "area": "Safdarjung Enclave", "category": "B", "unit": "per_sq_m", "history": [
+      { "year": 2011, "rate": 68200, "source": "https://revenue.delhi.gov.in/sites/default/files/revenue/nf/agvd/circle_rate_notification_4_2_11.pdf" },
+      { "year": 2014, "rate": 245520, "source": "https://revenue.delhi.gov.in/sites/default/files/revenue/revised_circle-rate-english0001.pdf" }
+    ], "notes": "Category B." },
+    { "state": "Delhi", "city": "New Delhi", "area": "Nizamuddin East", "category": "B", "unit": "per_sq_m", "history": [
+      { "year": 2011, "rate": 68200, "source": "https://revenue.delhi.gov.in/sites/default/files/revenue/nf/agvd/circle_rate_notification_4_2_11.pdf" },
+      { "year": 2014, "rate": 245520, "source": "https://revenue.delhi.gov.in/sites/default/files/revenue/revised_circle-rate-english0001.pdf" }
+    ], "notes": "Category B." },
+
+    { "state": "Delhi", "city": "New Delhi", "area": "Civil Lines", "category": "C", "unit": "per_sq_m", "history": [
+      { "year": 2011, "rate": 54600, "source": "https://revenue.delhi.gov.in/sites/default/files/revenue/nf/agvd/circle_rate_notification_4_2_11.pdf" },
+      { "year": 2014, "rate": 159840, "source": "https://revenue.delhi.gov.in/sites/default/files/revenue/revised_circle-rate-english0001.pdf" }
+    ], "notes": "Category C." },
+    { "state": "Delhi", "city": "New Delhi", "area": "Alaknanda", "category": "C", "unit": "per_sq_m", "history": [
+      { "year": 2011, "rate": 54600, "source": "https://revenue.delhi.gov.in/sites/default/files/revenue/nf/agvd/circle_rate_notification_4_2_11.pdf" },
+      { "year": 2014, "rate": 159840, "source": "https://revenue.delhi.gov.in/sites/default/files/revenue/revised_circle-rate-english0001.pdf" }
+    ], "notes": "Category C." },
+    { "state": "Delhi", "city": "New Delhi", "area": "Chittaranjan Park", "category": "C", "unit": "per_sq_m", "history": [
+      { "year": 2011, "rate": 54600, "source": "https://revenue.delhi.gov.in/sites/default/files/revenue/nf/agvd/circle_rate_notification_4_2_11.pdf" },
+      { "year": 2014, "rate": 159840, "source": "https://revenue.delhi.gov.in/sites/default/files/revenue/revised_circle-rate-english0001.pdf" }
+    ], "notes": "Category C." },
+    { "state": "Delhi", "city": "New Delhi", "area": "East of Kailash", "category": "C", "unit": "per_sq_m", "history": [
+      { "year": 2011, "rate": 54600, "source": "https://revenue.delhi.gov.in/sites/default/files/revenue/nf/agvd/circle_rate_notification_4_2_11.pdf" },
+      { "year": 2014, "rate": 159840, "source": "https://revenue.delhi.gov.in/sites/default/files/revenue/revised_circle-rate-english0001.pdf" }
+    ], "notes": "Category C." },
+    { "state": "Delhi", "city": "New Delhi", "area": "Lajpat Nagar I", "category": "C", "unit": "per_sq_m", "history": [
+      { "year": 2011, "rate": 54600, "source": "https://revenue.delhi.gov.in/sites/default/files/revenue/nf/agvd/circle_rate_notification_4_2_11.pdf" },
+      { "year": 2014, "rate": 159840, "source": "https://revenue.delhi.gov.in/sites/default/files/revenue/revised_circle-rate-english0001.pdf" }
+    ], "notes": "Category C." },
+    { "state": "Delhi", "city": "New Delhi", "area": "Lajpat Nagar II", "category": "C", "unit": "per_sq_m", "history": [
+      { "year": 2011, "rate": 54600, "source": "https://revenue.delhi.gov.in/sites/default/files/revenue/nf/agvd/circle_rate_notification_4_2_11.pdf" },
+      { "year": 2014, "rate": 159840, "source": "https://revenue.delhi.gov.in/sites/default/files/revenue/revised_circle-rate-english0001.pdf" }
+    ], "notes": "Category C." },
+    { "state": "Delhi", "city": "New Delhi", "area": "Malviya Nagar", "category": "C", "unit": "per_sq_m", "history": [
+      { "year": 2011, "rate": 54600, "source": "https://revenue.delhi.gov.in/sites/default/files/revenue/nf/agvd/circle_rate_notification_4_2_11.pdf" },
+      { "year": 2014, "rate": 159840, "source": "https://revenue.delhi.gov.in/sites/default/files/revenue/revised_circle-rate-english0001.pdf" }
+    ], "notes": "Category C." },
+    { "state": "Delhi", "city": "New Delhi", "area": "Kalkaji", "category": "C", "unit": "per_sq_m", "history": [
+      { "year": 2011, "rate": 54600, "source": "https://revenue.delhi.gov.in/sites/default/files/revenue/nf/agvd/circle_rate_notification_4_2_11.pdf" },
+      { "year": 2014, "rate": 159840, "source": "https://revenue.delhi.gov.in/sites/default/files/revenue/revised_circle-rate-english0001.pdf" }
+    ], "notes": "Category C." },
+    { "state": "Delhi", "city": "New Delhi", "area": "Punjabi Bagh", "category": "C", "unit": "per_sq_m", "history": [
+      { "year": 2011, "rate": 54600, "source": "https://revenue.delhi.gov.in/sites/default/files/revenue/nf/agvd/circle_rate_notification_4_2_11.pdf" },
+      { "year": 2014, "rate": 159840, "source": "https://revenue.delhi.gov.in/sites/default/files/revenue/revised_circle-rate-english0001.pdf" }
+    ], "notes": "Category C." },
+    { "state": "Delhi", "city": "New Delhi", "area": "Vasant Kunj", "category": "C", "unit": "per_sq_m", "history": [
+      { "year": 2011, "rate": 54600, "source": "https://revenue.delhi.gov.in/sites/default/files/revenue/nf/agvd/circle_rate_notification_4_2_11.pdf" },
+      { "year": 2014, "rate": 159840, "source": "https://revenue.delhi.gov.in/sites/default/files/revenue/revised_circle-rate-english0001.pdf" }
+    ], "notes": "Category C." },
+    { "state": "Delhi", "city": "New Delhi", "area": "Munirka", "category": "C", "unit": "per_sq_m", "history": [
+      { "year": 2011, "rate": 54600, "source": "https://revenue.delhi.gov.in/sites/default/files/revenue/nf/agvd/circle_rate_notification_4_2_11.pdf" },
+      { "year": 2014, "rate": 159840, "source": "https://revenue.delhi.gov.in/sites/default/files/revenue/revised_circle-rate-english0001.pdf" }
+    ], "notes": "Category C." },
+    { "state": "Delhi", "city": "New Delhi", "area": "Nizamuddin West", "category": "C", "unit": "per_sq_m", "history": [
+      { "year": 2011, "rate": 54600, "source": "https://revenue.delhi.gov.in/sites/default/files/revenue/nf/agvd/circle_rate_notification_4_2_11.pdf" },
+      { "year": 2014, "rate": 159840, "source": "https://revenue.delhi.gov.in/sites/default/files/revenue/revised_circle-rate-english0001.pdf" }
+    ], "notes": "Category C." },
+
+    { "state": "Delhi", "city": "New Delhi", "area": "Karol Bagh", "category": "D", "unit": "per_sq_m", "history": [
+      { "year": 2011, "rate": 43600, "source": "https://revenue.delhi.gov.in/sites/default/files/revenue/nf/agvd/circle_rate_notification_4_2_11.pdf" },
+      { "year": 2014, "rate": 127680, "source": "https://revenue.delhi.gov.in/sites/default/files/revenue/revised_circle-rate-english0001.pdf" }
+    ], "notes": "Category D." },
+    { "state": "Delhi", "city": "New Delhi", "area": "Rajouri Garden", "category": "D", "unit": "per_sq_m", "history": [
+      { "year": 2011, "rate": 43600, "source": "https://revenue.delhi.gov.in/sites/default/files/revenue/nf/agvd/circle_rate_notification_4_2_11.pdf" },
+      { "year": 2014, "rate": 127680, "source": "https://revenue.delhi.gov.in/sites/default/files/revenue/revised_circle-rate-english0001.pdf" }
+    ], "notes": "Category D." },
+    { "state": "Delhi", "city": "New Delhi", "area": "Dwarka", "category": "D", "unit": "per_sq_m", "history": [
+      { "year": 2011, "rate": 43600, "source": "https://revenue.delhi.gov.in/sites/default/files/revenue/nf/agvd/circle_rate_notification_4_2_11.pdf" },
+      { "year": 2014, "rate": 127680, "source": "https://revenue.delhi.gov.in/sites/default/files/revenue/revised_circle-rate-english0001.pdf" }
+    ], "notes": "Category D." },
+    { "state": "Delhi", "city": "New Delhi", "area": "Daryaganj", "category": "D", "unit": "per_sq_m", "history": [
+      { "year": 2011, "rate": 43600, "source": "https://revenue.delhi.gov.in/sites/default/files/revenue/nf/agvd/circle_rate_notification_4_2_11.pdf" },
+      { "year": 2014, "rate": 127680, "source": "https://revenue.delhi.gov.in/sites/default/files/revenue/revised_circle-rate-english0001.pdf" }
+    ], "notes": "Category D." },
+    { "state": "Delhi", "city": "New Delhi", "area": "Janakpuri", "category": "D", "unit": "per_sq_m", "history": [
+      { "year": 2011, "rate": 43600, "source": "https://revenue.delhi.gov.in/sites/default/files/revenue/nf/agvd/circle_rate_notification_4_2_11.pdf" },
+      { "year": 2014, "rate": 127680, "source": "https://revenue.delhi.gov.in/sites/default/files/revenue/revised_circle-rate-english0001.pdf" }
+    ], "notes": "Category D." },
+    { "state": "Delhi", "city": "New Delhi", "area": "Mayur Vihar", "category": "D", "unit": "per_sq_m", "history": [
+      { "year": 2011, "rate": 43600, "source": "https://revenue.delhi.gov.in/sites/default/files/revenue/nf/agvd/circle_rate_notification_4_2_11.pdf" },
+      { "year": 2014, "rate": 127680, "source": "https://revenue.delhi.gov.in/sites/default/files/revenue/revised_circle-rate-english0001.pdf" }
+    ], "notes": "Category D." },
+    { "state": "Delhi", "city": "New Delhi", "area": "Kirti Nagar", "category": "D", "unit": "per_sq_m", "history": [
+      { "year": 2011, "rate": 43600, "source": "https://revenue.delhi.gov.in/sites/default/files/revenue/nf/agvd/circle_rate_notification_4_2_11.pdf" },
+      { "year": 2014, "rate": 127680, "source": "https://revenue.delhi.gov.in/sites/default/files/revenue/revised_circle-rate-english0001.pdf" }
+    ], "notes": "Category D." },
+    { "state": "Delhi", "city": "New Delhi", "area": "Anand Vihar", "category": "D", "unit": "per_sq_m", "history": [
+      { "year": 2011, "rate": 43600, "source": "https://revenue.delhi.gov.in/sites/default/files/revenue/nf/agvd/circle_rate_notification_4_2_11.pdf" },
+      { "year": 2014, "rate": 127680, "source": "https://revenue.delhi.gov.in/sites/default/files/revenue/revised_circle-rate-english0001.pdf" }
+    ], "notes": "Category D." },
+    { "state": "Delhi", "city": "New Delhi", "area": "Jasola Vihar", "category": "D", "unit": "per_sq_m", "history": [
+      { "year": 2011, "rate": 43600, "source": "https://revenue.delhi.gov.in/sites/default/files/revenue/nf/agvd/circle_rate_notification_4_2_11.pdf" },
+      { "year": 2014, "rate": 127680, "source": "https://revenue.delhi.gov.in/sites/default/files/revenue/revised_circle-rate-english0001.pdf" }
+    ], "notes": "Category D." },
+    { "state": "Delhi", "city": "New Delhi", "area": "Jangpura A", "category": "D", "unit": "per_sq_m", "history": [
+      { "year": 2011, "rate": 43600, "source": "https://revenue.delhi.gov.in/sites/default/files/revenue/nf/agvd/circle_rate_notification_4_2_11.pdf" },
+      { "year": 2014, "rate": 127680, "source": "https://revenue.delhi.gov.in/sites/default/files/revenue/revised_circle-rate-english0001.pdf" }
+    ], "notes": "Category D." },
+
+    { "state": "Delhi", "city": "New Delhi", "area": "Chandni Chowk", "category": "E", "unit": "per_sq_m", "history": [
+      { "year": 2011, "rate": 36800, "source": "https://revenue.delhi.gov.in/sites/default/files/revenue/nf/agvd/circle_rate_notification_4_2_11.pdf" },
+      { "year": 2014, "rate": 70080, "source": "https://revenue.delhi.gov.in/sites/default/files/revenue/revised_circle-rate-english0001.pdf" }
+    ], "notes": "Category E." },
+    { "state": "Delhi", "city": "New Delhi", "area": "Kashmere Gate", "category": "E", "unit": "per_sq_m", "history": [
+      { "year": 2011, "rate": 36800, "source": "https://revenue.delhi.gov.in/sites/default/files/revenue/nf/agvd/circle_rate_notification_4_2_11.pdf" },
+      { "year": 2014, "rate": 70080, "source": "https://revenue.delhi.gov.in/sites/default/files/revenue/revised_circle-rate-english0001.pdf" }
+    ], "notes": "Category E." },
+    { "state": "Delhi", "city": "New Delhi", "area": "Pahar Ganj", "category": "E", "unit": "per_sq_m", "history": [
+      { "year": 2011, "rate": 36800, "source": "https://revenue.delhi.gov.in/sites/default/files/revenue/nf/agvd/circle_rate_notification_4_2_11.pdf" },
+      { "year": 2014, "rate": 70080, "source": "https://revenue.delhi.gov.in/sites/default/files/revenue/revised_circle-rate-english0001.pdf" }
+    ], "notes": "Category E." },
+    { "state": "Delhi", "city": "New Delhi", "area": "Rohini", "category": "E", "unit": "per_sq_m", "history": [
+      { "year": 2011, "rate": 36800, "source": "https://revenue.delhi.gov.in/sites/default/files/revenue/nf/agvd/circle_rate_notification_4_2_11.pdf" },
+      { "year": 2014, "rate": 70080, "source": "https://revenue.delhi.gov.in/sites/default/files/revenue/revised_circle-rate-english0001.pdf" }
+    ], "notes": "Category E." },
+    { "state": "Delhi", "city": "New Delhi", "area": "Moti Nagar", "category": "E", "unit": "per_sq_m", "history": [
+      { "year": 2011, "rate": 36800, "source": "https://revenue.delhi.gov.in/sites/default/files/revenue/nf/agvd/circle_rate_notification_4_2_11.pdf" },
+      { "year": 2014, "rate": 70080, "source": "https://revenue.delhi.gov.in/sites/default/files/revenue/revised_circle-rate-english0001.pdf" }
+    ], "notes": "Category E." },
+    { "state": "Delhi", "city": "New Delhi", "area": "Pandav Nagar", "category": "E", "unit": "per_sq_m", "history": [
+      { "year": 2011, "rate": 36800, "source": "https://revenue.delhi.gov.in/sites/default/files/revenue/nf/agvd/circle_rate_notification_4_2_11.pdf" },
+      { "year": 2014, "rate": 70080, "source": "https://revenue.delhi.gov.in/sites/default/files/revenue/revised_circle-rate-english0001.pdf" }
+    ], "notes": "Category E." },
+
+    { "state": "Delhi", "city": "New Delhi", "area": "Uttam Nagar", "category": "F", "unit": "per_sq_m", "history": [
+      { "year": 2011, "rate": 32200, "source": "https://revenue.delhi.gov.in/sites/default/files/revenue/nf/agvd/circle_rate_notification_4_2_11.pdf" },
+      { "year": 2014, "rate": 56640, "source": "https://revenue.delhi.gov.in/sites/default/files/revenue/revised_circle-rate-english0001.pdf" }
+    ], "notes": "Category F." },
+    { "state": "Delhi", "city": "New Delhi", "area": "Dilshad Garden", "category": "F", "unit": "per_sq_m", "history": [
+      { "year": 2011, "rate": 32200, "source": "https://revenue.delhi.gov.in/sites/default/files/revenue/nf/agvd/circle_rate_notification_4_2_11.pdf" },
+      { "year": 2014, "rate": 56640, "source": "https://revenue.delhi.gov.in/sites/default/files/revenue/revised_circle-rate-english0001.pdf" }
+    ], "notes": "Category F." },
+    { "state": "Delhi", "city": "New Delhi", "area": "Govindpuri", "category": "F", "unit": "per_sq_m", "history": [
+      { "year": 2011, "rate": 32200, "source": "https://revenue.delhi.gov.in/sites/default/files/revenue/nf/agvd/circle_rate_notification_4_2_11.pdf" },
+      { "year": 2014, "rate": 56640, "source": "https://revenue.delhi.gov.in/sites/default/files/revenue/revised_circle-rate-english0001.pdf" }
+    ], "notes": "Category F." },
+    { "state": "Delhi", "city": "New Delhi", "area": "Hari Nagar", "category": "F", "unit": "per_sq_m", "history": [
+      { "year": 2011, "rate": 32200, "source": "https://revenue.delhi.gov.in/sites/default/files/revenue/nf/agvd/circle_rate_notification_4_2_11.pdf" },
+      { "year": 2014, "rate": 56640, "source": "https://revenue.delhi.gov.in/sites/default/files/revenue/revised_circle-rate-english0001.pdf" }
+    ], "notes": "Category F." },
+    { "state": "Delhi", "city": "New Delhi", "area": "Zakir Nagar Okhla", "category": "F", "unit": "per_sq_m", "history": [
+      { "year": 2011, "rate": 32200, "source": "https://revenue.delhi.gov.in/sites/default/files/revenue/nf/agvd/circle_rate_notification_4_2_11.pdf" },
+      { "year": 2014, "rate": 56640, "source": "https://revenue.delhi.gov.in/sites/default/files/revenue/revised_circle-rate-english0001.pdf" }
+    ], "notes": "Category F." },
+
+    { "state": "Delhi", "city": "New Delhi", "area": "Dakshinpuri", "category": "G", "unit": "per_sq_m", "history": [
+      { "year": 2011, "rate": 27400, "source": "https://revenue.delhi.gov.in/sites/default/files/revenue/nf/agvd/circle_rate_notification_4_2_11.pdf" },
+      { "year": 2014, "rate": 46200, "source": "https://revenue.delhi.gov.in/sites/default/files/revenue/revised_circle-rate-english0001.pdf" }
+    ], "notes": "Category G." },
+    { "state": "Delhi", "city": "New Delhi", "area": "Tagore Garden", "category": "G", "unit": "per_sq_m", "history": [
+      { "year": 2011, "rate": 27400, "source": "https://revenue.delhi.gov.in/sites/default/files/revenue/nf/agvd/circle_rate_notification_4_2_11.pdf" },
+      { "year": 2014, "rate": 46200, "source": "https://revenue.delhi.gov.in/sites/default/files/revenue/revised_circle-rate-english0001.pdf" }
+    ], "notes": "Category G." },
+    { "state": "Delhi", "city": "New Delhi", "area": "Vivek Vihar Phase I", "category": "G", "unit": "per_sq_m", "history": [
+      { "year": 2011, "rate": 27400, "source": "https://revenue.delhi.gov.in/sites/default/files/revenue/nf/agvd/circle_rate_notification_4_2_11.pdf" },
+      { "year": 2014, "rate": 46200, "source": "https://revenue.delhi.gov.in/sites/default/files/revenue/revised_circle-rate-english0001.pdf" }
+    ], "notes": "Category G." },
+
+    { "state": "Delhi", "city": "New Delhi", "area": "Sultanpur Majra", "category": "H", "unit": "per_sq_m", "history": [
+      { "year": 2011, "rate": 13800, "source": "https://revenue.delhi.gov.in/sites/default/files/revenue/nf/agvd/circle_rate_notification_4_2_11.pdf" },
+      { "year": 2014, "rate": 23280, "source": "https://revenue.delhi.gov.in/sites/default/files/revenue/revised_circle-rate-english0001.pdf" }
+    ], "notes": "Category H." },
+
+    { "state": "Maharashtra", "city": "Mumbai", "area": "Worli", "category": null, "unit": "per_sq_m", "history": [
+      { "year": 2018, "rate": 400400, "source": "https://www.ghar.tv/readyreckoner/2018/maharashtra/mumbai/worli/" },
+      { "year": 2020, "rate": 413210, "source": "https://www.ghar.tv/readyreckoner/2020/maharashtra/mumbai/worli/" },
+      { "year": 2022, "rate": 410630, "source": "https://www.ghar.tv/readyreckoner/2022/maharashtra/mumbai/worli/" },
+      { "year": 2024, "rate": 410630, "source": "https://www.ghar.tv/readyreckoner/2024/maharashtra/mumbai/worli/" }
+    ], "notes": "Zone 13/95 (Dr. Annie Besant Road), residential building, built-up rate. Secondary-sourced (ghar.tv) but mirrors official e-ASR zone numbering; 2022→2024 unchanged matches the official statewide freeze for those years." },
+
+    { "state": "Maharashtra", "city": "Mumbai", "area": "Dadar-Naigaum", "category": null, "unit": "per_sq_m", "history": [
+      { "year": 2018, "rate": 210200, "source": "https://www.ghar.tv/readyreckoner/2018/maharashtra/mumbai/dadar-naigaum/" },
+      { "year": 2024, "rate": 223070, "source": "https://www.ghar.tv/readyreckoner/2024/maharashtra/mumbai/dadar-naigaum/" }
+    ], "notes": "Zone 14, sub-zone 14/102, residential building, built-up rate. Secondary-sourced (ghar.tv)." },
+
+    { "state": "Maharashtra", "city": "Mumbai", "area": "Andheri West", "category": null, "unit": "per_sq_m", "history": [
+      { "year": 2024, "rate": 186645, "source": "https://www.ghar.tv/readyreckoner/2024/maharashtra/mumbai/andheri-west/" }
+    ], "notes": "Zone 39, representative midpoint of the residential range across 12 sub-zones (Rs 1,37,080–2,36,210/sq m) — only 2024 verified; no earlier year located. Secondary-sourced (ghar.tv)." },
+
+    { "state": "Maharashtra", "city": "Pune", "area": "Kothrud", "category": null, "unit": "per_sq_m", "history": [
+      { "year": 2018, "rate": 114570, "source": "https://www.ghar.tv/readyreckoner/2018/maharashtra/pune/haveli/kothrud/" },
+      { "year": 2024, "rate": 125900, "source": "https://www.ghar.tv/readyreckoner/2024/maharashtra/pune/haveli/kothrud/" }
+    ], "notes": "Village 21, sub-zone 21/360 (Karve Road), residential building. Secondary-sourced (ghar.tv)." }
+  ]
+}

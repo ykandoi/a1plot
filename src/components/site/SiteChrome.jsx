@@ -25,6 +25,9 @@ const SellIcon = () => (
 const BrokerIcon = () => (
   <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" /><circle cx="9" cy="7" r="4" /><polyline points="16 11 18 13 22 9" /></svg>
 );
+const TrendIcon = () => (
+  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><polyline points="22 7 13.5 15.5 8.5 10.5 2 17" /><polyline points="16 7 22 7 22 13" /></svg>
+);
 
 // Location links for the footer, derived from live inventory so a city appears
 // the moment its first plot is published and vanishes with its last.
@@ -66,6 +69,7 @@ export default async function SiteChrome({ active, searchDefault = '', hideFoote
           <div className="sc-text-links">
             <a href="/buyer_map" className={`nav-link ${active === '/buyer_map' ? 'active' : ''}`} title="Buy or Rent Land"><BuyIcon /> Buy</a>
             <a href="/list_property" className="nav-link" title="Sell Your Land"><SellIcon /> Sell</a>
+            <a href="/price-trends" className={`nav-link ${active === '/price-trends' ? 'active' : ''}`} title="Government Property Valuation Rates by Area"><TrendIcon /> Price Trends</a>
             <BrokerNavLinkMount className="nav-link" icon={<BrokerIcon />} />
           </div>
 
@@ -97,6 +101,7 @@ export default async function SiteChrome({ active, searchDefault = '', hideFoote
               <ul>
                 <li><a href="/buyer_map">Browse Plots</a></li>
                 <li><a href="/search">Search Properties</a></li>
+                <li><a href="/price-trends">Price Trends</a></li>
                 <li><a href="/post-requirement">Post a Requirement</a></li>
                 <li><a href="/brokers/register">Register as a Broker</a></li>
                 <li><a href="/broker-dashboard">Broker Dashboard</a></li>

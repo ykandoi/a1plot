@@ -37,6 +37,9 @@ import { useRequirements } from './hooks/useRequirements';
 import { useUsers } from './hooks/useUsers';
 import { useCatalogs } from './hooks/useCatalogs';
 import { useInstallPrompt } from './hooks/useInstallPrompt';
+import { useValuationRates } from './hooks/useValuationRates';
+import { findContainingWard } from './lib/geo';
+import delhiWardBoundaries from './data/delhiWardBoundaries.json';
 import PhoneField, { isValidPhone } from './components/PhoneField';
 
 const GOOGLE_MAPS_API_KEY = (typeof process !== 'undefined' && process.env && process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY) ? process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY : '';
@@ -444,6 +447,17 @@ export default function App({ hideChrome = false } = {}) {
   const [bulkError, setBulkError] = useState('');
   const [bulkDrafts, setBulkDrafts] = useState([]); // [{ _id, included, ...fields, sourceText }]
   const [bulkSubmitting, setBulkSubmitting] = useState(false);
+
+  // Price Trends admin — add/edit/delete real government valuation rate
+  // entries (DLC rate / circle rate / ready reckoner rate). lat/lng is
+  // geocoded client-side on submit (same Geocoder already loaded for the
+  // seller form), so adding an area needs no separate script to run.
+  const EMPTY_RATE_FORM = { state: '', city: '', area: '', category: '', unit: 'per_sq_m', notes: '', history: [{ year: '', rate: '', source: '' }] };
+  const [showRateManager, setShowRateManager] = useState(false);
+  const [rateForm, setRateForm] = useState(EMPTY_RATE_FORM);
+  const [editingRateId, setEditingRateId] = useState(null);
+  const [rateFormError, setRateFormError] = useState('');
+  const [rateSubmitting, setRateSubmitting] = useState(false);
   const [plotLocation, setPlotLocation] = useState({ lat: 20.5937, lng: 78.9629 }); // India center
   const [buyerMapCenter, setBuyerMapCenter] = useState(defaultCenter);
   const [userLocation, setUserLocation] = useState(null);
@@ -465,6 +479,7 @@ export default function App({ hideChrome = false } = {}) {
   const NEEDS_PLOTS_VIEWS = ['home', 'buyer-map', 'seller-dashboard', 'seller-edit', 'admin', 'admin-edit', 'admin-map', 'property-detail', 'search', 'broker-dashboard'];
   const needsPlotsList = NEEDS_PLOTS_VIEWS.includes(view);
   const { plots, loading: plotsLoading, addPlot, updatePlot, deletePlot } = usePlots(INITIAL_PLOTS, needsPlotsList);
+  const { rates: valuationRates, addRate, updateRate, deleteRate } = useValuationRates();
   // "Install App" menu item — hidden entirely on desktop/laptop via the
   // existing CSS on the two containers it's placed in (.sc-mobile-menu-wrapper
   // and .profile-dropdown-mobile-links are both display:none above 860px), so
@@ -1520,6 +1535,111 @@ export default function App({ hideChrome = false } = {}) {
       setBulkError('Some listings failed to save. Please try again.');
     } finally {
       setBulkSubmitting(false);
+    }
+  };
+
+  const handleRateHistoryChange = (index, field, value) => {
+    setRateForm(prev => {
+      const history = [...prev.history];
+      history[index] = { ...history[index], [field]: value };
+      return { ...prev, history };
+    });
+  };
+  const addRateHistoryRow = () => setRateForm(prev => ({ ...prev, history: [...prev.history, { year: '', rate: '', source: '' }] }));
+  const removeRateHistoryRow = (index) => setRateForm(prev => ({ ...prev, history: prev.history.filter((_, i) => i !== index) }));
+
+  const handleEditRateClick = (rate) => {
+    setEditingRateId(rate.id);
+    setRateForm({
+      state: rate.state || '', city: rate.city || '', area: rate.area || '',
+      category: rate.category || '', unit: rate.unit || 'per_sq_m', notes: rate.notes || '',
+      history: rate.history && rate.history.length > 0 ? rate.history.map(h => ({ year: String(h.year), rate: String(h.rate), source: h.source || '' })) : [{ year: '', rate: '', source: '' }],
+    });
+    setRateFormError('');
+  };
+
+  const handleCancelRateEdit = () => {
+    setEditingRateId(null);
+    setRateForm(EMPTY_RATE_FORM);
+    setRateFormError('');
+  };
+
+  const handleDeleteRateClick = async (rate) => {
+    if (!window.confirm(`Delete "${rate.area}" permanently?`)) return;
+    try {
+      await deleteRate(rate.id);
+      showToast('Rate entry deleted.');
+      if (editingRateId === rate.id) handleCancelRateEdit();
+    } catch (e) {
+      showToast('Failed to delete. Please try again.');
+    }
+  };
+
+  // Geocodes area+city+state on submit (rather than requiring a separate
+  // script run) so adding or correcting a government rate is a single admin
+  // action. Every history row needs year/rate/source — a rate without a real
+  // source URL doesn't get saved, since this is exactly the data integrity
+  // this feature depends on.
+  const handleRateFormSubmit = async (e) => {
+    e.preventDefault();
+    setRateFormError('');
+    const cleanHistory = rateForm.history
+      .filter(h => h.year && h.rate)
+      .map(h => ({ year: Number(h.year), rate: Number(h.rate), source: h.source || '' }));
+    if (!rateForm.state || !rateForm.city || !rateForm.area) {
+      setRateFormError('State, city and area are required.');
+      return;
+    }
+    if (cleanHistory.length === 0) {
+      setRateFormError('Add at least one year + rate.');
+      return;
+    }
+    if (cleanHistory.some(h => !h.source)) {
+      setRateFormError('Every rate needs a source URL — this feature only shows numbers that can be traced back to where they came from.');
+      return;
+    }
+    setRateSubmitting(true);
+    try {
+      let lat = editingRateId ? valuationRates.find(r => r.id === editingRateId)?.lat : null;
+      let lng = editingRateId ? valuationRates.find(r => r.id === editingRateId)?.lng : null;
+      const geocodeQuery = `${rateForm.area}, ${rateForm.city}, ${rateForm.state}, India`;
+      if (!editingRateId || !lat || !lng) {
+        if (!window.google?.maps?.Geocoder) throw new Error('Map is still loading — please try again in a moment.');
+        const geocoder = new window.google.maps.Geocoder();
+        const result = await new Promise((resolve, reject) => {
+          geocoder.geocode({ address: geocodeQuery }, (results, status) => {
+            if (status === 'OK' && results?.[0]) resolve(results[0]);
+            else reject(new Error(`Could not locate "${geocodeQuery}" on the map (${status}). Check the spelling, or the location may be too small/new for Google's geocoder.`));
+          });
+        });
+        lat = typeof result.geometry.location.lat === 'function' ? result.geometry.location.lat() : result.geometry.location.lat;
+        lng = typeof result.geometry.location.lng === 'function' ? result.geometry.location.lng() : result.geometry.location.lng;
+      }
+      // Delhi entries get matched against the real ward polygon that
+      // actually contains this point — same point-in-polygon match the seed
+      // data went through — so a colony added here shows as a real shaded
+      // ward on the map too, not just a marker because it's "new".
+      const ward = rateForm.state.trim().toLowerCase() === 'delhi'
+        ? findContainingWard({ lat, lng }, delhiWardBoundaries)?.ward || null
+        : null;
+      const payload = {
+        state: rateForm.state, city: rateForm.city, area: rateForm.area,
+        category: rateForm.category || null, unit: rateForm.unit, notes: rateForm.notes || '',
+        history: cleanHistory, lat, lng, ward,
+      };
+      if (editingRateId) {
+        await updateRate(editingRateId, payload);
+        showToast('Rate entry updated.');
+      } else {
+        await addRate(payload);
+        showToast('Rate entry added.');
+      }
+      handleCancelRateEdit();
+    } catch (err) {
+      console.error('Rate form submit error:', err);
+      setRateFormError(err.message || 'Something went wrong. Please try again.');
+    } finally {
+      setRateSubmitting(false);
     }
   };
 
@@ -4626,6 +4746,14 @@ export default function App({ hideChrome = false } = {}) {
                 ✨ {showBulkImport ? 'Hide Bulk Import' : 'Bulk Import from Text'}
               </button>
               <button
+                className="btn btn-outline"
+                style={{display: 'flex', alignItems: 'center', gap: '0.5rem'}}
+                onClick={() => setShowRateManager(v => !v)}
+              >
+                <TrendingUp size={18} />
+                {showRateManager ? 'Hide Price Trends Data' : 'Manage Price Trends Data'}
+              </button>
+              <button
                 className="btn btn-primary"
                 style={{display: 'flex', alignItems: 'center', gap: '0.5rem'}}
                 onClick={() => navigate('admin-map')}
@@ -4649,6 +4777,108 @@ export default function App({ hideChrome = false } = {}) {
               </div>
             </div>
           </div>
+
+          {showRateManager && (
+            <div style={{padding: '1.5rem', marginBottom: '2rem', background: '#fff', border: '1px solid #e2e8f0', borderRadius: 8}}>
+              <h3 style={{marginTop: 0}}>Price Trends Data</h3>
+              <p className="text-muted" style={{fontSize: '0.9rem'}}>
+                Government-published valuation rates (DLC rate / circle rate / ready reckoner rate) shown on the public
+                Price Trends map. Every entry needs a real source URL for each rate — this is the one data source on
+                the site that must never contain a guessed or estimated number.
+              </p>
+
+              <form onSubmit={handleRateFormSubmit} style={{marginTop: '1rem'}}>
+                <div style={{display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: '0.75rem'}}>
+                  <div className="form-group mb-0">
+                    <label style={{fontSize: '0.78rem'}}>State</label>
+                    <input className="form-input" value={rateForm.state} onChange={e => setRateForm({...rateForm, state: e.target.value})} placeholder="e.g. Rajasthan" />
+                  </div>
+                  <div className="form-group mb-0">
+                    <label style={{fontSize: '0.78rem'}}>City</label>
+                    <input className="form-input" value={rateForm.city} onChange={e => setRateForm({...rateForm, city: e.target.value})} placeholder="e.g. Jaipur" />
+                  </div>
+                  <div className="form-group mb-0">
+                    <label style={{fontSize: '0.78rem'}}>Area / Colony Name</label>
+                    <input className="form-input" value={rateForm.area} onChange={e => setRateForm({...rateForm, area: e.target.value})} placeholder="e.g. Vaishali Nagar" />
+                  </div>
+                  <div className="form-group mb-0">
+                    <label style={{fontSize: '0.78rem'}}>Category (optional)</label>
+                    <input className="form-input" value={rateForm.category} onChange={e => setRateForm({...rateForm, category: e.target.value})} placeholder="e.g. A (Delhi-style only)" />
+                  </div>
+                  <div className="form-group mb-0">
+                    <label style={{fontSize: '0.78rem'}}>Unit</label>
+                    <select className="form-input" value={rateForm.unit} onChange={e => setRateForm({...rateForm, unit: e.target.value})}>
+                      <option value="per_sq_m">Per sq. metre</option>
+                      <option value="per_sq_ft">Per sq. ft</option>
+                    </select>
+                  </div>
+                </div>
+
+                <div style={{marginTop: '1rem'}}>
+                  <label style={{fontSize: '0.78rem', fontWeight: 600}}>Rate History</label>
+                  {rateForm.history.map((h, i) => (
+                    <div key={i} style={{display: 'grid', gridTemplateColumns: '90px 140px 1fr auto', gap: '0.5rem', marginTop: '0.4rem', alignItems: 'center'}}>
+                      <input className="form-input" type="number" placeholder="Year" value={h.year} onChange={e => handleRateHistoryChange(i, 'year', e.target.value)} />
+                      <input className="form-input" type="number" placeholder="Rate (₹)" value={h.rate} onChange={e => handleRateHistoryChange(i, 'rate', e.target.value)} />
+                      <input className="form-input" placeholder="Source URL" value={h.source} onChange={e => handleRateHistoryChange(i, 'source', e.target.value)} />
+                      <button type="button" className="admin-btn" style={{backgroundColor: '#fee2e2', color: '#991b1b', border: '1px solid #fecaca'}} onClick={() => removeRateHistoryRow(i)} disabled={rateForm.history.length === 1}>
+                        <Trash2 size={14} />
+                      </button>
+                    </div>
+                  ))}
+                  <button type="button" className="btn btn-outline" style={{marginTop: '0.5rem', padding: '0.35rem 0.75rem', fontSize: '0.8rem'}} onClick={addRateHistoryRow}>
+                    + Add another year
+                  </button>
+                </div>
+
+                <div className="form-group mb-0" style={{marginTop: '1rem'}}>
+                  <label style={{fontSize: '0.78rem'}}>Notes (optional)</label>
+                  <textarea className="form-input" rows={2} value={rateForm.notes} onChange={e => setRateForm({...rateForm, notes: e.target.value})} placeholder="e.g. secondary-sourced, cross-verified against official category rate" />
+                </div>
+
+                {rateFormError && <p style={{color: 'var(--accent-red)', fontSize: '0.85rem', marginTop: '0.5rem'}}>{rateFormError}</p>}
+
+                <div className="flex items-center gap-4" style={{marginTop: '1rem'}}>
+                  <button type="submit" className="btn btn-primary" disabled={rateSubmitting}>
+                    {rateSubmitting ? 'Saving…' : (editingRateId ? 'Update Entry' : 'Add Entry')}
+                  </button>
+                  {editingRateId && (
+                    <button type="button" className="btn btn-outline" onClick={handleCancelRateEdit}>Cancel</button>
+                  )}
+                </div>
+              </form>
+
+              {valuationRates.length > 0 && (
+                <div style={{marginTop: '2rem'}}>
+                  <AdminTable
+                    caption="rate entries"
+                    rows={valuationRates}
+                    getRowKey={(r) => r.id}
+                    emptyMessage="No rate entries yet."
+                    defaultSort={(a, b) => String(a.state).localeCompare(String(b.state)) || String(a.area).localeCompare(String(b.area))}
+                    columns={[
+                      { key: 'state', label: 'State', width: '14%', filter: 'select' },
+                      { key: 'city', label: 'City', width: '14%', filter: 'text' },
+                      { key: 'area', label: 'Area', width: '20%', filter: 'text' },
+                      { key: 'category', label: 'Category', width: '10%', value: (r) => r.category || '—' },
+                      { key: 'latest', label: 'Latest Rate', width: '16%', value: (r) => { const h = [...(r.history || [])].sort((a,b) => b.year - a.year)[0]; return h ? `₹${Number(h.rate).toLocaleString('en-IN')} (${h.year})` : '—'; } },
+                      { key: 'points', label: 'Years on Record', width: '12%', value: (r) => (r.history || []).length },
+                    ]}
+                    renderRowActions={(rate) => (
+                      <>
+                        <button className="admin-btn" style={{ backgroundColor: '#e2e8f0', color: '#1e293b', border: '1px solid #cbd5e1' }} onClick={() => handleEditRateClick(rate)}>
+                          <Edit3 size={14} /> Edit
+                        </button>
+                        <button className="admin-btn" style={{ backgroundColor: '#fee2e2', color: '#991b1b', border: '1px solid #fecaca' }} onClick={() => handleDeleteRateClick(rate)}>
+                          <Trash2 size={14} /> Delete
+                        </button>
+                      </>
+                    )}
+                  />
+                </div>
+              )}
+            </div>
+          )}
 
           {showBulkImport && (
             <div style={{padding: '1.5rem', marginBottom: '2rem', background: '#fff', border: '1px solid #e2e8f0', borderRadius: 8}}>
